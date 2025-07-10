@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Mengambil URL database dari file .env
+}
+
+// MODEL UNTUK PESERTA MAGANG
+model User {
+  id                Int      @id @default(autoincrement()) // ID unik, dibuat otomatis oleh DB
+  name              String
+  email             String   @unique // Email harus unik
+  password          String   // Password yang sudah di-hash
+  division          String
+  internshipPeriod  String
+  bankName          String?  // Tanda tanya (?) berarti opsional
+  accountNumber     String?
+  profilePicUrl     String?
+  joinDate          DateTime @default(now()) // Tanggal user dibuat
+
+  // Relasi: Satu User punya banyak data Absensi
+  attendances       Attendance[]
+}
+
+// MODEL UNTUK RIWAYAT ABSENSI
+model Attendance {
+  id          Int      @id @default(autoincrement())
+  type        String   // 'Hadir', 'Pulang', atau 'Izin'
+  timestamp   DateTime @default(now()) // Waktu saat data dibuat
+  description String   // Untuk jam (misal: "08:05 WITA") atau alasan izin
+  photoUrl    String?
+  latitude    Float?
+  longitude   Float?
+  isLate      Boolean  @default(false)
+
+  // Kunci penghubung ke tabel User
+  userId      Int
+  // Definisi relasi: Absensi ini milik satu User
+  user        User     @relation(fields: [userId], references: [id])
+}
