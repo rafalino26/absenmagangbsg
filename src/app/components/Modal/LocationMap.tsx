@@ -27,8 +27,8 @@ export default function LocationMap({ position }: LocationMapProps) {
     <MapContainer center={position} zoom={16} style={{ height: '100%', width: '100%' }}>
       <TileLayer
         // Ganti URL dan Atribusi ke Stadia OSM Bright
-        url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
       <Marker position={position} icon={customMarkerIcon}>
         <Popup>Lokasi absen Anda di sini.</Popup>
