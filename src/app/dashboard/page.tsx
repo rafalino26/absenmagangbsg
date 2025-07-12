@@ -11,6 +11,7 @@ import HadirButton from '../components/Button/HadirButton';
 import PulangButton from '../components/Button/PulangButton';
 import LeaveRequestButton from '../components/Button/IzinButton';
 import BankAccountModal from '../components/Modal/BankAccountModal';
+import DashboardSkeleton from '../components/loading/DashboardSkeleton';
 
 interface HistoryItem {
   id: number;
@@ -259,11 +260,26 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
     // Nanti di sini kita akan kirim data ke backend untuk disimpan permanen
   };
 
-    if (isLoadingUser) {
+  if (isLoadingUser) {
+    // Ganti bagian ini
     return (
-      <div className="flex h-screen items-center justify-center">
-        <p className="text-lg text-gray-500">Memuat data dashboard...</p>
-      </div>
+      <>
+         <header className="bg-red-600 shadow-sm">
+          <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-shrink-0">
+                <div className="w-[50px] aspect-square rounded-full overflow-hidden shadow-lg">
+                  <Image src="/logobsg.jpg" width={800} height={500} alt="Logo" className="w-full h-full object-cover"/>
+                </div>
+              </div>
+              <div><h1 className="text-xl font-bold text-white">Absen Magang</h1></div>
+            </div>
+          </div>
+        </header>
+        <main>
+          <DashboardSkeleton />
+        </main>
+      </>
     );
   }
 
