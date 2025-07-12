@@ -23,6 +23,13 @@ interface HistoryItem {
   photoUrl?: string;
 }
 
+interface UserProfile {
+  name: string;
+  division: string;
+  internshipPeriod: string;
+  // Nanti kita akan tambahkan profilePicUrl dan bankAccount di sini
+}
+
 interface LocationState {
   latitude: number;
   longitude: number;
@@ -31,12 +38,6 @@ interface LocationState {
 const LocationMap = dynamic(() => import('../components/Modal/LocationMap'), {
   ssr: false, 
 });
-
-const mockUserData = {
-  name: 'Rafael Lalujan',
-  division: 'Human Capital',
-  internshipPeriod: '1 Juli 2025 - 30 September 2025',
-};
 
 const isLate = (timeString: string): boolean => {
   try {
@@ -58,7 +59,8 @@ const isLate = (timeString: string): boolean => {
 };
 
 export default function DashboardPage() {
-  const user = mockUserData;
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [hasClockedIn, setHasClockedIn] = useState(false);
   const [hasClockedOut, setHasClockedOut] = useState(false); 
   const [loading, setLoading] = useState(false); 
@@ -73,6 +75,37 @@ export default function DashboardPage() {
   const [history, setHistory] = useState<HistoryItem[]>([])
   const [bankAccount, setBankAccount] = useState<{ bank: string; number: string } | null>(null);
   const [isBankAccountModalOpen, setBankAccountModalOpen] = useState(false);
+
+    useEffect(() => {
+    const fetchInitialData = async () => {
+      setIsLoadingUser(true);
+      try {
+        // Ambil data user
+        const userResponse = await fetch('/api/users/me');
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUser(userData);
+        } else {
+          console.error("Gagal mengambil data user");
+          // Di sini bisa ditambahkan logika redirect ke login jika user tidak terautentikasi
+        }
+
+        // Ambil data riwayat
+        const historyResponse = await fetch('/api/attendances/history');
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json();
+          setHistory(historyData);
+        }
+
+      } catch (error) {
+        console.error("Error mengambil data awal:", error);
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
 
   const fetchHistory = useCallback(async () => {
     // Kita tidak perlu setLoading di sini agar tidak mengganggu UI utama
@@ -226,6 +259,14 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
     // Nanti di sini kita akan kirim data ke backend untuk disimpan permanen
   };
 
+    if (isLoadingUser) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="text-lg text-gray-500">Memuat data dashboard...</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="bg-gray-50 min-h-screen">
@@ -263,8 +304,8 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
                 </button>
               </div>
               <div className="flex-grow pt-2">
-              <h1 className="text-lg md:text-3xl font-bold text-gray-900">Halo, {user.name}!</h1>
-              <p className="mt-1 text-sm md:text-base text-gray-600">{user.division} | Periode: {user.internshipPeriod}</p>              
+              <h1 className="text-lg md:text-3xl font-bold text-gray-900">Halo, {user?.name}!</h1>
+              <p className="mt-1 text-sm md:text-base text-gray-600">{user?.division} | Periode: {user?.internshipPeriod}</p>              
               <div className="mt-2 flex items-center gap-2">
                 <p className="text-xs md:text-sm text-gray-600">
                   No. Rekening: 
