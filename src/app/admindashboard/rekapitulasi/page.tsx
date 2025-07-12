@@ -1,41 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { FiFilter, FiDownload, FiEye, FiPlus } from 'react-icons/fi';
 import Image from 'next/image';
 import AdminDetailModal from '../../components/Modal/AdminDetailModal';
 import CustomDropdown from '../../components/Modal/CustomDropdown';
 import AddInternModal, { NewInternData } from '@/app/components/Modal/AddInternModal';
 import { CSVLink } from 'react-csv';
-
-// 1. Tambahkan properti 'terlambat' pada tipe data
-interface InternSummary {
-  id: number;
-  name: string;
-  internCode: string;
-  division: string;
-  hadir: number;
-  izin: number;
-  absen: number;
-  terlambat: number; // <-- Kolom baru
-  totalUangMakan: number;
-  bankAccount: { bank: string; number: string; } | null; // <-- Tambah info rekening
-  joinDate: Date;
-}
-
-interface DailyLogItem { 
-    date: string; 
-    status: 'Hadir' | 'Hadir (Terlambat)' | 'Izin' | 'Tidak Hadir'; 
-    description: string; 
-    photoUrl?: string | null; 
-}
-
-// 2. Tambahkan data 'terlambat' pada mock data
-const initialSummaryData: InternSummary[] = [
-  { id: 1, name: 'Rafael Lalujan', internCode: '001', division: 'Human Capital', hadir: 18, izin: 1, absen: 1, terlambat: 5, totalUangMakan: 270000, bankAccount: { bank: 'BSG', number: '123456789' }, joinDate: new Date('2025-07-01') },
-  { id: 2, name: 'Budi Santoso', internCode: '002', division: 'IT Support', hadir: 20, izin: 0, absen: 0, terlambat: 1, totalUangMakan: 300000, bankAccount: { bank: 'BSG', number: '987654321' }, joinDate: new Date('2025-07-02') },
-  { id: 3, name: 'Siti Rahayu', internCode: '003', division: 'Marketing', hadir: 19, izin: 0, absen: 1, terlambat: 0, totalUangMakan: 285000, bankAccount: null, joinDate: new Date('2025-07-05') },
-];
+import { InternSummary, DailyLogItem } from '@/app/types';
 
 const mockDailyLog: DailyLogItem[] = [
     { date: 'Senin, 7 Juli 2025', status: 'Hadir (Terlambat)', description: 'Masuk: 08:15 WITA', photoUrl: 'https://i.pravatar.cc/300?img=1' },
@@ -53,42 +25,66 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
+const formatInternCode = (id: number): string => {
+  // Mengubah angka menjadi string dan menambah '0' di depan sampai panjangnya 3 karakter
+  return String(id).padStart(3, '0');
+};
+
 export default function AdminDashboardPage() {
-  const [summaryData, setSummaryData] = useState<InternSummary[]>(initialSummaryData);
+  const [summaryData, setSummaryData] = useState<InternSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState('Juli 2025');
-  const [monthFilter, setMonthFilter] = useState('Juli 2025');
+  const [monthFilter, setMonthFilter] = useState('Semua Bulan');
   const [sortBy, setSortBy] = useState('Terbaru');
-    // 2. Tambahkan state untuk mengontrol modal detail
   const [isDetailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedIntern, setSelectedIntern] = useState<InternSummary | null>(null);
   const [isAddInternModalOpen, setAddInternModalOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  
+  const fetchInterns = useCallback(async (month: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/interns?month=${encodeURIComponent(month)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setSummaryData(data);
+      } else {
+        console.error("Gagal mengambil data dari server");
+        setSummaryData([]);
+      }
+    } catch (error) {
+      console.error("Terjadi kesalahan:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+    useEffect(() => {
+    fetchInterns(monthFilter);
+  }, [monthFilter, fetchInterns])
 
     useEffect(() => {
     setIsClient(true);
   }, []);
+
+ const monthOptions = ['Semua Bulan', 'Juli 2025', 'Juni 2025', 'Mei 2025'];;
   
-  const displayedData = useMemo(() => {
+const displayedData = useMemo(() => {
     let data = [...summaryData];
-
-    // Nanti logika filter bulan akan ada di sini
-    // data = data.filter(intern => ...);
-
-    // Logika sorting
     switch (sortBy) {
       case 'Terbaru':
-        data.sort((a, b) => b.joinDate.getTime() - a.joinDate.getTime());
+        data.sort((a, b) => new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime());
         break;
       case 'Abjad':
         data.sort((a, b) => a.name.localeCompare(b.name));
         break;
+      // 'Periode Magang' bisa disamakan dengan 'Terbaru' untuk sementara
       case 'Periode Magang':
-        // Asumsi periode sama dengan tanggal masuk untuk sementara
-        data.sort((a, b) => a.joinDate.getTime() - b.joinDate.getTime());
+         data.sort((a, b) => new Date(a.joinDate).getTime() - new Date(b.joinDate).getTime());
         break;
     }
     return data;
-  }, [summaryData, monthFilter, sortBy]);
+  }, [summaryData, sortBy]);
 
       const csvHeaders = [
     { label: "No", key: "no" },
@@ -109,7 +105,7 @@ export default function AdminDashboardPage() {
     hadir: intern.hadir,
     absenDates: '10, 11 Juli 2025', // Placeholder, nanti data ini diambil dari detail log
     totalUangMakan: intern.totalUangMakan,
-    keterangan: `Periode Magang ${intern.joinDate.toLocaleDateString('id-ID')}`, // Contoh keterangan
+    keterangan: `Periode Magang ${new Date(intern.joinDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`,
   }));
 
   // 3. Buat fungsi untuk membuka modal dan memilih intern
@@ -119,9 +115,26 @@ export default function AdminDashboardPage() {
     // Di aplikasi nyata, di sini kita akan fetch 'mockDailyLog' dari API
   };
 
-  const handleAddInternSubmit = (data: NewInternData) => {
-    console.log("Data intern baru:", data);
-    alert(`Peserta baru ${data.name} berhasil ditambahkan (simulasi).`);
+  const handleAddInternSubmit = async (data: NewInternData) => {
+    try {
+      const response = await fetch('/api/interns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const newIntern = await response.json();
+        alert(`Peserta baru ${newIntern.name} berhasil ditambahkan! Kode Magangnya adalah: ${formatInternCode(newIntern.id)}`);
+        fetchInterns(monthFilter); // Refresh data sesuai filter aktif
+      } else {
+        const errorData = await response.json();
+        alert(`Gagal menambahkan peserta: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Terjadi kesalahan:", error);
+      alert("Tidak dapat terhubung ke server.");
+    }
   };
 
   return (
@@ -142,11 +155,11 @@ export default function AdminDashboardPage() {
             >
               <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-6">
                 <CustomDropdown
-                  label="Bulan"
-                  options={['Juli 2025', 'Juni 2025', 'Mei 2025']}
-                  selectedValue={monthFilter}
-                  onSelect={setMonthFilter}
-                />
+            label="Bulan"
+            options={monthOptions} // <-- Gunakan opsi dinamis
+            selectedValue={monthFilter}
+            onSelect={setMonthFilter}
+        />
                 <CustomDropdown
                   label="Urutkan"
                   options={['Terbaru', 'Abjad', 'Periode Magang']}
@@ -194,11 +207,17 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {displayedData.map((intern) => (
+                {isLoading ? (
+              // 6. Tampilkan pesan loading
+              <tr>
+                <td colSpan={7} className="text-center p-8 text-gray-500">Memuat data...</td>
+              </tr>
+            ) : (
+                displayedData.map((intern) => (
                   <tr key={intern.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">{intern.name}</div>
-                      <div className="text-sm text-gray-500">Kode: {intern.internCode} | {intern.division}</div>
+                      <div className="text-sm text-gray-500">Kode: {formatInternCode(intern.id)}| {intern.division}</div>
                       <div className="text-xs text-gray-500 mt-1">
                           Rek: {intern.bankAccount ? `${intern.bankAccount.bank} - ${intern.bankAccount.number}` : '-'}
                         </div>
@@ -219,9 +238,10 @@ export default function AdminDashboardPage() {
                         </button>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+              ))
+            )}
+          </tbody>
+          </table>
           </div>
         </div>
       </main>

@@ -8,14 +8,35 @@ export default function LoginPage() {
   const [internCode, setInternCode] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Login dengan data:', { internCode, password });
+    setIsLoading(true);
+    setError(null);
 
-    router.push('/dashboard');
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ internCode, password }),
+      });
+
+      if (response.ok) {
+        // Jika berhasil, arahkan ke dashboard user
+        router.push('/dashboard');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Login gagal.');
+      }
+    } catch (e) {
+      setError('Tidak dapat terhubung ke server.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,7 +67,8 @@ export default function LoginPage() {
                 id="internCode"
                 name="internCode"
                 type="text"
-                required  
+                autoComplete="username" // <-- Ditambahkan di sini
+                required
                 className="mt-1 block w-full text-black border-0 border-b-2 border-gray-200 bg-transparent p-2 focus:border-red-500 focus:ring-0"
                 value={internCode}
                 onChange={(e) => setInternCode(e.target.value)}
@@ -66,6 +88,7 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password" // <-- Ditambahkan di sini
                   required
                   className="block w-full text-black border-0 border-b-2 border-gray-200 bg-transparent p-2 pr-10 focus:border-red-500 focus:ring-0"
                   value={password}

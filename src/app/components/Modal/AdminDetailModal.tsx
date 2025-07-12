@@ -2,10 +2,7 @@
 
 import { useState, useEffect, useRef  } from 'react';
 import { FiX, FiChevronDown } from 'react-icons/fi';
-
-// Tipe data (tetap sama)
-interface DailyLogItem { date: string; status: 'Hadir' | 'Hadir (Terlambat)' | 'Izin' | 'Tidak Hadir'; description: string; photoUrl?: string | null; }
-interface InternSummary { name: string; internCode: string; }
+import { InternSummary, DailyLogItem  } from '@/app/types';
 
 interface AdminDetailModalProps {
   isOpen: boolean;

@@ -8,14 +8,16 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL") // Mengambil URL database dari file .env
+  directUrl = env("DIRECT_URL")
 }
 
 // MODEL UNTUK PESERTA MAGANG
 model User {
   id                Int      @id @default(autoincrement()) // ID unik, dibuat otomatis oleh DB
   name              String
-  email             String   @unique // Email harus unik
+  email             String?  @unique // Email harus unik
   password          String   // Password yang sudah di-hash
+  role              String   @default("INTERN")
   division          String
   internshipPeriod  String
   bankName          String?  // Tanda tanya (?) berarti opsional

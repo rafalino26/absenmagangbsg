@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiCreditCard } from 'react-icons/fi';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -38,11 +38,6 @@ const mockUserData = {
   internshipPeriod: '1 Juli 2025 - 30 September 2025',
 };
 
-const initialHistoryData: HistoryItem[] = [
-    { id: 1, type: 'Hadir', title: 'Absen Masuk', date: 'Kamis, 3 Juli 2025', description: '08:00 WITA', lat: 1.4748, lon: 124.8421 },
-    { id: 2, type: 'Hadir', title: 'Absen Masuk', date: 'Jumat, 4 Juli 2025', description: '08:05 WITA', lat: 1.4748, lon: 124.8421 },
-];
-
 const isLate = (timeString: string): boolean => {
   try {
     const timePart = timeString.split(' ')[0];
@@ -75,9 +70,28 @@ export default function DashboardPage() {
   const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
   const [profilePic, setProfilePic] = useState('/ridel.jpg'); 
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
-  const [history, setHistory] = useState<HistoryItem[]>(initialHistoryData);
+  const [history, setHistory] = useState<HistoryItem[]>([])
   const [bankAccount, setBankAccount] = useState<{ bank: string; number: string } | null>(null);
   const [isBankAccountModalOpen, setBankAccountModalOpen] = useState(false);
+
+  const fetchHistory = useCallback(async () => {
+    // Kita tidak perlu setLoading di sini agar tidak mengganggu UI utama
+    try {
+      const response = await fetch('/api/attendances/history');
+      if (response.ok) {
+        const data = await response.json();
+        setHistory(data);
+      } else {
+        console.error("Gagal mengambil riwayat absensi");
+      }
+    } catch (error) {
+      console.error("Error fetching history:", error);
+    }
+  }, []);
+
+    useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   useEffect(() => {
     const checkTodaysAttendance = () => {
@@ -104,45 +118,67 @@ export default function DashboardPage() {
     setAttendanceModalOpen(true);
   };
 
-  const handleConfirmAttendance = async (photoFile: File) => {
-    setAttendanceModalOpen(false); 
-    setLoading(true); 
-    setError(null);
-    console.log("Uploading file:", photoFile.name);
-    const photoUrl = URL.createObjectURL(photoFile); 
-    try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
-      
-      const { latitude, longitude } = position.coords;
-      const now = new Date();
-      
-      const newHistoryItem: HistoryItem = {
-        id: now.getTime(),
-        type: attendanceType,
-        title: attendanceType === 'Hadir' ? 'Absen Masuk' : 'Absen Pulang',
-        date: now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
-        description: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WITA',
-        lat: latitude,
-        lon: longitude,
-        photoUrl: photoUrl
-      };
-      
-      setHistory(prev => [newHistoryItem, ...prev]);
-      if (attendanceType === 'Hadir') setHasClockedIn(true);
-      else setHasClockedOut(true);
-      
-      alert(`Berhasil Absen ${attendanceType}!`);
+ const handleConfirmAttendance = async (photoFile: File) => {
+  setAttendanceModalOpen(false);
+  setLoading(true);
+  setError(null);
 
-    } catch (err: any) {
-      let message = "Gagal mendapatkan lokasi.";
-      if (err.code === 1) message = "Anda menolak izin lokasi.";
-      setError(message);
-    } finally {
+  try {
+    // 1. Minta lokasi dengan akurasi tinggi
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      };
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+
+    const { latitude, longitude, accuracy } = position.coords;
+
+    // 2. Validasi akurasi
+    if (accuracy > 50) {
+      setError(`Akurasi lokasi terlalu rendah (${accuracy.toFixed(0)}m).`);
       setLoading(false);
+      return;
     }
-  };
+
+    // 3. Siapkan data untuk dikirim
+    const now = new Date();
+    const clockInTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const isLate = now.getHours() > 8 || (now.getHours() === 8 && now.getMinutes() > 0);
+
+    const formData = new FormData();
+    formData.append('photo', photoFile);
+    formData.append('type', attendanceType);
+    formData.append('latitude', String(latitude));
+    formData.append('longitude', String(longitude));
+    formData.append('description', `${clockInTime} WITA`);
+    formData.append('isLate', String(isLate));
+    
+    // 4. Kirim data ke API backend
+    const response = await fetch('/api/attendances', {
+      method: 'POST',
+      body: formData, // Kirim sebagai FormData, bukan JSON
+    });
+
+    if (response.ok) {
+      alert(`Berhasil Absen ${attendanceType}!`);
+      fetchHistory()
+    } else {
+      const errorData = await response.json();
+      setError(errorData.error || `Gagal melakukan absen ${attendanceType}.`);
+    }
+
+  } catch (err: any) {
+    let message = "Gagal mendapatkan lokasi.";
+    if (err.code === 1) message = "Anda menolak izin lokasi.";
+    if (err.code === 3) message = "Waktu permintaan lokasi habis.";
+    setError(message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleLeaveRequest = () => {
     setLeaveModalOpen(true);
@@ -295,13 +331,22 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
                                 )}
                             </div>
                         </div>
-                        {item.lat && item.lon && (
-                          <button onClick={() => handleViewMap(item.lat!, item.lon!)} 
-                          className="text-sm bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors">
+                        {/* Ganti bagian ini di dalam .map() riwayat absensi */}
+                      {item.lat && item.lon && (
+                        <div className="flex flex-col items-center gap-1">
+                          <button 
+                            onClick={() => handleViewMap(item.lat!, item.lon!)} 
+                            className="text-sm bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+                          >
                             Lihat Peta
                           </button>
-                        )}
-                      </li>
+                          <p className="text-xs text-gray-400">
+                            {/* Tampilkan koordinat dengan 4 angka di belakang koma */}
+                            {item.lat.toFixed(4)}, {item.lon.toFixed(4)}
+                          </p>
+                        </div>
+                      )}
+                   </li>
                     ))
                   )}
                 </ul>

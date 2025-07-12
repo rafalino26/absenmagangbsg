@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Impor ikon mata
 import { FiX } from 'react-icons/fi';
 
-// Nanti tipe data ini akan kita sesuaikan dengan skema Prisma
-// Tambahkan 'export' di depan interface
+// 1. Tambahkan properti 'password' di interface
 export interface NewInternData {
   name: string;
   division: string;
   period: string;
+  password: string; 
 }
 
 interface AddInternModalProps {
@@ -21,10 +22,14 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
   const [name, setName] = useState('');
   const [division, setDivision] = useState('');
   const [period, setPeriod] = useState('');
+  // 2. Tambahkan state untuk password
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = () => {
-    if (name && division && period) {
-      onSubmit({ name, division, period});
+    // 4. Perbarui validasi dan data yang dikirim
+    if (name && division && period && password) {
+      onSubmit({ name, division, period, password });
       onClose();
     } else {
       alert("Semua field wajib diisi.");
@@ -54,6 +59,29 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
             <label htmlFor="period" className="block text-sm font-medium text-gray-700">Periode Magang</label>
             <input type="text" id="period" value={period} onChange={(e) => setPeriod(e.target.value)} className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md" placeholder="Contoh: 1 Agu 2025 - 31 Okt 2025"/>
           </div>
+
+          {/* 3. Tambahkan input untuk password di sini */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password Awal</label>
+            <div className="relative mt-1">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="block w-full text-black p-2 pr-10 border border-gray-300 rounded-md"
+                placeholder="Buat password untuk peserta"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <FaEye /> : <FaEyeSlash />}
+              </button>
+            </div>
+          </div>
+
         </div>
 
         <div className="p-4 bg-gray-50 border-t flex justify-end">
