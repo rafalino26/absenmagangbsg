@@ -9,13 +9,10 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      // NANTI, saat sudah pakai Supabase, tambahkan konfigurasinya di sini
-      // {
-      //   protocol: 'https',
-      //   hostname: 'xyzabc.supabase.co', // Ganti dengan URL Supabase Storage kamu
-      //   port: '',
-      //   pathname: '/**',
-      // }
+      {
+        protocol: 'https',
+        hostname: 'modypesdyaocdnijnwtn.supabase.co', // Ganti dengan hostname Supabase-mu
+      },
     ],
   },
 };

@@ -28,7 +28,6 @@ interface UserProfile {
   name: string;
   division: string;
   internshipPeriod: string;
-  // Nanti kita akan tambahkan profilePicUrl dan bankAccount di sini
 }
 
 interface LocationState {
@@ -61,92 +60,71 @@ const isLate = (timeString: string): boolean => {
 
 export default function DashboardPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [hasClockedIn, setHasClockedIn] = useState(false);
-  const [hasClockedOut, setHasClockedOut] = useState(false); 
-  const [loading, setLoading] = useState(false); 
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [profilePic, setProfilePic] = useState('/avatar-default.png');
+  const [bankAccount, setBankAccount] = useState<{ bank: string; number: string; } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isMapModalOpen, setMapModalOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
+  const [hasClockedIn, setHasClockedIn] = useState(false);
+  const [hasClockedOut, setHasClockedOut] = useState(false);
   const [isAttendanceModalOpen, setAttendanceModalOpen] = useState(false);
   const [attendanceType, setAttendanceType] = useState<'Hadir' | 'Pulang'>('Hadir');
   const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
-  const [profilePic, setProfilePic] = useState('/ridel.jpg'); 
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
-  const [history, setHistory] = useState<HistoryItem[]>([])
-  const [bankAccount, setBankAccount] = useState<{ bank: string; number: string } | null>(null);
   const [isBankAccountModalOpen, setBankAccountModalOpen] = useState(false);
+  const [isMapModalOpen, setMapModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
 
-    useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoadingUser(true);
-      try {
-        // Ambil data user
-        const userResponse = await fetch('/api/users/me');
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-          setUser(userData);
-        } else {
-          console.error("Gagal mengambil data user");
-          // Di sini bisa ditambahkan logika redirect ke login jika user tidak terautentikasi
-        }
-
-        // Ambil data riwayat
-        const historyResponse = await fetch('/api/attendances/history');
-        if (historyResponse.ok) {
-          const historyData = await historyResponse.json();
-          setHistory(historyData);
-        }
-
-      } catch (error) {
-        console.error("Error mengambil data awal:", error);
-      } finally {
-        setIsLoadingUser(false);
-      }
-    };
-
-    fetchInitialData();
-  }, []);
-
-  const fetchHistory = useCallback(async () => {
-    // Kita tidak perlu setLoading di sini agar tidak mengganggu UI utama
+   const fetchData = useCallback(async () => {
     try {
-      const response = await fetch('/api/attendances/history');
-      if (response.ok) {
-        const data = await response.json();
-        setHistory(data);
-      } else {
-        console.error("Gagal mengambil riwayat absensi");
+      const [userRes, historyRes] = await Promise.all([
+        fetch('/api/users/me'),
+        fetch('/api/attendances/history')
+      ]);
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        setUser(userData);
+        if (userData.bankName && userData.accountNumber) {
+          setBankAccount({ bank: userData.bankName, number: userData.accountNumber });
+        } else {
+          setBankAccount(null); 
+        }
+        
+        if (userData.profilePicUrl) {
+          setProfilePic(userData.profilePicUrl);
+        } else {
+          setProfilePic('/avatar-default.png');
+        }
+        
+      } else { 
+        console.error("Gagal mengambil data user");
       }
-    } catch (error) {
-      console.error("Error fetching history:", error);
+
+      if (historyRes.ok) {
+        const historyData = await historyRes.json();
+        setHistory(historyData);
+      }
+    } catch (e) {
+      console.error("Error mengambil data:", e);
+      setError("Gagal memuat data.");
     }
   }, []);
 
-    useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+  useEffect(() => {
+    setIsLoading(true);
+    fetchData().finally(() => setIsLoading(false));
+  }, [fetchData]);
 
   useEffect(() => {
-    const checkTodaysAttendance = () => {
-      const todayString = new Date().toLocaleDateString('id-ID', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-      });
-
+    if (!isLoading && history) {
+      const todayString = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
       const clockedInToday = history.some(item => item.type === 'Hadir' && item.date === todayString);
-      if (clockedInToday) {
-        setHasClockedIn(true);
-      }
-
       const clockedOutToday = history.some(item => item.type === 'Pulang' && item.date === todayString);
-      if (clockedOutToday) {
-        setHasClockedOut(true);
-      }
-    };
-
-    checkTodaysAttendance();
-  }, [history]);
-
+      setHasClockedIn(clockedInToday);
+      setHasClockedOut(clockedOutToday);
+    }
+  }, [history, isLoading]);
     const openAttendanceModal = (type: 'Hadir' | 'Pulang') => {
     setAttendanceType(type);
     setAttendanceModalOpen(true);
@@ -154,30 +132,20 @@ export default function DashboardPage() {
 
  const handleConfirmAttendance = async (photoFile: File) => {
   setAttendanceModalOpen(false);
-  setLoading(true);
+  setIsSubmitting(true);
   setError(null);
 
   try {
-    // 1. Minta lokasi dengan akurasi tinggi
     const position = await new Promise<GeolocationPosition>((resolve, reject) => {
       const options = {
         enableHighAccuracy: true,
-        timeout: 15000,
+        timeout: 10000,
         maximumAge: 0,
       };
       navigator.geolocation.getCurrentPosition(resolve, reject, options);
     });
 
-    const { latitude, longitude, accuracy } = position.coords;
-
-    // 2. Validasi akurasi
-    if (accuracy > 50) {
-      setError(`Akurasi lokasi terlalu rendah (${accuracy.toFixed(0)}m).`);
-      setLoading(false);
-      return;
-    }
-
-    // 3. Siapkan data untuk dikirim
+    const { latitude, longitude } = position.coords;
     const now = new Date();
     const clockInTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     const isLate = now.getHours() > 8 || (now.getHours() === 8 && now.getMinutes() > 0);
@@ -190,31 +158,27 @@ export default function DashboardPage() {
     formData.append('description', `${clockInTime} WITA`);
     formData.append('isLate', String(isLate));
     
-    // 4. Kirim data ke API backend
     const response = await fetch('/api/attendances', {
       method: 'POST',
-      body: formData, // Kirim sebagai FormData, bukan JSON
+      body: formData,
     });
-
-    if (response.ok) {
-      alert(`Berhasil Absen ${attendanceType}!`);
-      fetchHistory()
-    } else {
+    if (!response.ok) {
       const errorData = await response.json();
-      setError(errorData.error || `Gagal melakukan absen ${attendanceType}.`);
+      throw new Error(errorData.error || `Gagal melakukan absen ${attendanceType}.`);
     }
-
+    alert(`Berhasil Absen ${attendanceType}!`);
+    await fetchData(); 
   } catch (err: any) {
-    let message = "Gagal mendapatkan lokasi.";
+    let message = err.message || "Gagal mendapatkan lokasi.";
     if (err.code === 1) message = "Anda menolak izin lokasi.";
-    if (err.code === 3) message = "Waktu permintaan lokasi habis.";
+    if (err.code === 3) message = "Waktu permintaan lokasi habis, sinyal mungkin lemah.";
     setError(message);
   } finally {
-    setLoading(false);
+    setIsSubmitting(false);
   }
 };
-
-  const handleLeaveRequest = () => {
+  
+const handleLeaveRequest = () => {
     setLeaveModalOpen(true);
   };
 
@@ -245,23 +209,72 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
     setMapModalOpen(true);
   };
 
-  const handleProfilePicSubmit = (newPhotoFile: File) => {
-    const newPhotoUrl = URL.createObjectURL(newPhotoFile);
-    setProfilePic(newPhotoUrl);
-    
-    console.log("Foto profil akan diupdate dengan file:", newPhotoFile.name);
-    alert("Foto profil berhasil diperbarui!");
-    setProfileModalOpen(false);
-  };
+const handleProfilePicSubmit = async (newPhotoFile: File) => {
+  setProfileModalOpen(false);
+  setIsSubmitting(true);
+  setError(null);
 
-  const handleBankAccountSubmit = (data: { bank: string; number: string }) => {
-    setBankAccount(data);
-    alert('Informasi rekening berhasil disimpan!');
-    // Nanti di sini kita akan kirim data ke backend untuk disimpan permanen
-  };
+  const formData = new FormData();
+  formData.append('photo', newPhotoFile);
 
-  if (isLoadingUser) {
-    // Ganti bagian ini
+  try {
+    const response = await fetch('/api/users/profile', {
+      method: 'PATCH',
+      body: formData,
+    });
+
+    if (response.ok) {
+      const updatedUserData = await response.json();
+      setUser(updatedUserData); 
+      if (updatedUserData.profilePicUrl) {
+        setProfilePic(updatedUserData.profilePicUrl);
+      }
+      alert("Foto profil berhasil diperbarui!");
+    } else {
+      const errorData = await response.json();
+      setError(errorData.error || "Gagal memperbarui foto profil.");
+    }
+  } catch (e: any) {
+    setError("Gagal terhubung ke server.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+  
+const handleBankAccountSubmit = async (data: { bank: string; number: string }) => {
+  setBankAccountModalOpen(false);
+  setIsSubmitting(true);
+  setError(null);
+
+  const formData = new FormData();
+  formData.append('bankName', data.bank);
+  formData.append('accountNumber', data.number);
+
+  try {
+    const response = await fetch('/api/users/profile', {
+      method: 'PATCH',
+      body: formData,
+    });
+
+    if (response.ok) {
+      const updatedUserData = await response.json();
+      setUser(updatedUserData);
+      if (updatedUserData.bankName && updatedUserData.accountNumber) {
+        setBankAccount({ bank: updatedUserData.bankName, number: updatedUserData.accountNumber });
+      }
+      alert('Informasi rekening berhasil disimpan!');
+    } else {
+      const errorData = await response.json();
+      setError(errorData.error || "Gagal menyimpan info rekening.");
+    }
+  } catch (e: any) {
+    setError("Gagal terhubung ke server.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  if (isLoading) {
     return (
       <>
          <header className="bg-red-600 shadow-sm">
@@ -305,7 +318,6 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
                 <button 
                   onClick={() => setProfileModalOpen(true)}
                   className="relative group"
-                  aria-label="Ganti foto profil"
                 >
                   <Image
                     src={profilePic}
@@ -315,7 +327,7 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
                     className="w-24 h-24 md:w-24 md:h-24 rounded-full object-cover shadow-md"
                   />
                   <div className="absolute inset-0 rounded-full transition-all flex items-center justify-center">
-                    <FiCamera className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+                    <FiCamera className="text-black opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
                   </div>
                 </button>
               </div>
@@ -340,7 +352,7 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
                 </button>
               </div>
               <div className="mt-2 text-sm min-h-[20px]">
-                {loading && <p className="text-blue-600">Memproses...</p>}
+                {isSubmitting && <p className="text-blue-600">Memproses...</p>}
                 {error && <p className="text-red-600 font-semibold">Error: {error}</p>}
               </div>
             </div>
@@ -349,17 +361,17 @@ const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment
               <HadirButton
                 onClick={() => openAttendanceModal('Hadir')}
                 hasClockedIn={hasClockedIn}
-                loading={loading}
+                loading={isSubmitting}
               />
                <PulangButton
                 onClick={() => openAttendanceModal('Pulang')}
                 hasClockedIn={hasClockedIn}
                 hasClockedOut={hasClockedOut}
-                loading={loading}
+                loading={isSubmitting}
               />
               <LeaveRequestButton
                 onClick={handleLeaveRequest}
-                loading={loading}
+                loading={isSubmitting}
               />
             </div>
             <div className="mt-10">
