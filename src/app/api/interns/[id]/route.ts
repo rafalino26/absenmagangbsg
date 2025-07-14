@@ -5,12 +5,10 @@ import { hash } from 'bcrypt';
 const prisma = new PrismaClient();
 
 // FUNGSI UNTUK MENGEDIT DATA (PATCH)
-export async function PATCH(
-  req: NextRequest, 
-  context: { params: { id: string } }
-) {
+// PERBAIKAN: Gunakan 'any' untuk argumen kedua
+export async function PATCH(req: NextRequest, context: any) {
   try {
-    const { id } = context.params;
+    const id = parseInt(context.params.id);
     const body = await req.json();
     const { name, division, internshipPeriod, password } = body;
 
@@ -21,7 +19,7 @@ export async function PATCH(
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: dataToUpdate,
     });
 
@@ -32,15 +30,13 @@ export async function PATCH(
 }
 
 // FUNGSI UNTUK MENGHAPUS DATA (DELETE)
-export async function DELETE(
-  req: NextRequest, 
-  context: { params: { id: string } }
-) {
+// PERBAIKAN: Gunakan 'any' untuk argumen kedua
+export async function DELETE(req: NextRequest, context: any) {
   try {
-    const { id } = context.params;
+    const id = parseInt(context.params.id);
 
     await prisma.user.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: { isActive: false }, // Soft delete
     });
 
