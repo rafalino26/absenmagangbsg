@@ -7,23 +7,24 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // Mengambil URL database dari file .env
+  url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 // MODEL UNTUK PESERTA MAGANG
 model User {
-  id                Int      @id @default(autoincrement()) // ID unik, dibuat otomatis oleh DB
+  id                Int      @id @default(autoincrement())
   name              String
-  email             String?  @unique // Email harus unik
-  password          String   // Password yang sudah di-hash
+  email             String?  @unique 
+  password          String   
   role              String   @default("INTERN")
   division          String
   internshipPeriod  String
-  bankName          String?  // Tanda tanya (?) berarti opsional
+  bankName          String?  
   accountNumber     String?
   profilePicUrl     String?
-  joinDate          DateTime @default(now()) // Tanggal user dibuat
+  joinDate          DateTime @default(now())
+  isActive          Boolean  @default(true)
 
   // Relasi: Satu User punya banyak data Absensi
   attendances       Attendance[]

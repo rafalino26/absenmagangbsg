@@ -23,61 +23,70 @@ function getMonthDateRange(monthString: string) {
   return { startDate, endDate };
 }
 
-
-// --- FUNGSI GET (MENGAMBIL DATA) ---
 export async function GET(req: Request) {
   try {
-    // 1. Ambil parameter dari URL yang dikirim frontend
     const { searchParams } = new URL(req.url);
-    const month = searchParams.get('month'); // Contoh: 'Juli 2025'
+    const month = searchParams.get('month');
 
-        let whereClause: any = {
-      // TAMBAHKAN KONDISI INI:
-      // Hanya ambil user yang rolenya adalah INTERN
-      role: 'INTERN', 
-    };
-
-    // 2. Jika ada filter bulan (dan bukan "Semua Bulan"), buat kondisinya
+    // Tentukan rentang tanggal untuk filter
+    let dateFilter = {};
     if (month && month !== 'Semua Bulan') {
       const dateRange = getMonthDateRange(month);
       if (dateRange) {
-        whereClause = {
-          joinDate: {
-            gte: dateRange.startDate, // gte: greater than or equal (lebih besar atau sama dengan tgl 1)
-            lt: dateRange.endDate,    // lt: less than (lebih kecil dari tgl 1 bulan berikutnya)
+        dateFilter = {
+          timestamp: {
+            gte: dateRange.startDate,
+            lt: dateRange.endDate,
           }
         };
       }
     }
 
-    // 3. Ambil data user dari database dengan menerapkan filter
+    // Ambil semua user intern yang aktif
     const interns = await prisma.user.findMany({
-      where: whereClause, // Terapkan filter di sini
-      orderBy: { joinDate: 'desc' },
+      where: {
+        role: 'INTERN',
+        isActive: true,
+        attendances: month && month !== 'Semua Bulan' ? { 
+          some: dateFilter 
+        } : undefined,
+      },
     });
 
-    // 4. Simulasi penambahan data rekapitulasi (tetap sama seperti sebelumnya)
-    const summaryData = interns.map(intern => {
-      const hadir = 20;
-      const izin = 1;
-      const terlambat = 2;
-      const absen = Math.max(0, 22 - hadir - izin);
+    // Hitung rekapitulasi untuk setiap intern
+    const summaryData = await Promise.all(
+      interns.map(async (intern) => {
+        const commonWhere = { userId: intern.id, ...dateFilter };
 
-      return {
-        ...intern,
-        hadir,
-        izin,
-        absen,
-        terlambat,
-        totalUangMakan: hadir * 15000,
-        joinDate: intern.joinDate.toISOString(),
-      };
-    });
+        // Hitung semua statistik menggunakan Prisma
+        const hadir = await prisma.attendance.count({ where: { ...commonWhere, type: 'Hadir' } });
+        const izin = await prisma.attendance.count({ where: { ...commonWhere, type: 'Izin' } });
+        const terlambat = await prisma.attendance.count({ where: { ...commonWhere, isLate: true } });
+        const absen = 0; // Placeholder
+
+        return {
+          id: intern.id,
+          name: intern.name,
+          division: intern.division,
+          internshipPeriod: intern.internshipPeriod,
+          joinDate: intern.joinDate.toISOString(),
+          bankAccount: intern.bankName && intern.accountNumber
+            ? { bank: intern.bankName, number: intern.accountNumber }
+            : null,
+          // Data hasil perhitungan asli
+          hadir,
+          izin,
+          terlambat,
+          absen,
+          totalUangMakan: hadir * 15000,
+        };
+      })
+    );
 
     return NextResponse.json(summaryData);
 
   } catch (error) {
-    console.error("Error saat mengambil data peserta:", error);
+    console.error("Error saat mengambil data rekapitulasi:", error);
     return NextResponse.json({ error: 'Gagal mengambil data' }, { status: 500 });
   }
 }

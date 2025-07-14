@@ -1,13 +1,28 @@
-// Tipe untuk riwayat live feed (bisa kita hapus jika tidak dipakai lagi)
-export interface LiveHistoryItem {
-  id: number;
+// Tipe untuk data profil user
+export interface UserProfile {
   name: string;
+  division: string;
+  internshipPeriod: string;
+  profilePicUrl?: string;
+  bankName?: string;
+  accountNumber?: string;
+}
+
+// SATU-SATUNYA TIPE DATA UNTUK SEMUA JENIS RIWAYAT ABSENSI
+export interface AttendanceRecord {
+  id: number;
   type: 'Hadir' | 'Pulang' | 'Izin';
   title: string;
-  description: string;
+  date: string;
+  description: string; // Bisa berisi jam atau alasan izin
+  status?: string;    // Untuk 'Hadir (Terlambat)'
+  
+  // Properti di bawah ini bersifat opsional
+  name?: string;      // Untuk tampilan di admin
   isLate?: boolean;
+  lat?: number;
+  lon?: number;
   photoUrl?: string | null;
-  location?: { lat: number; lon: number; } | null;
 }
 
 // Tipe untuk rekapitulasi data intern
@@ -15,6 +30,7 @@ export interface InternSummary {
   id: number;
   name: string;
   division: string;
+  internshipPeriod: string;
   hadir: number;
   izin: number;
   absen: number;
@@ -24,10 +40,11 @@ export interface InternSummary {
   joinDate: string; 
 }
 
-// TAMBAHKAN TIPE INI
-export interface DailyLogItem { 
-  date: string; 
-  status: 'Hadir' | 'Hadir (Terlambat)' | 'Izin' | 'Tidak Hadir'; 
-  description: string; 
-  photoUrl?: string | null; 
+export type NotificationType = 'success' | 'error' | 'confirm';
+export interface NotificationState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  type: NotificationType;
+  onConfirm?: () => void;
 }

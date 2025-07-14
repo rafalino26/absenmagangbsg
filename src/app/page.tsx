@@ -54,6 +54,11 @@ export default function LoginPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-6 rounded-lg bg-white p-8 shadow-sm border border-gray-200">
+          {error && (
+            <div className="p-3 text-center bg-red-100 border border-red-400 text-red-700 rounded-md">
+              <p className="text-sm font-medium">{error}</p>
+            </div>
+          )}
           <div className="space-y-4">
             {/* Input Kode Magang */}
             <div>

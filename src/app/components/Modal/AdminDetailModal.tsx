@@ -1,56 +1,67 @@
 'use client';
 
 import { useState, useEffect, useRef  } from 'react';
-import { FiX, FiChevronDown } from 'react-icons/fi';
-import { InternSummary, DailyLogItem  } from '@/app/types';
+import { FiX, FiChevronDown, FiEye } from 'react-icons/fi';
+import { InternSummary, AttendanceRecord  } from '@/app/types';
 
 interface AdminDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   intern: InternSummary | null;
-  dailyLog: DailyLogItem[];
+  dailyLog: AttendanceRecord[];
+  onViewDayDetail: (record: AttendanceRecord) => void;
   month: string;
 }
 
-// Tipe untuk filter
 type FilterStatus = 'Semua' | 'Hadir' | 'Terlambat' | 'Izin' | 'Tidak Hadir';
 
-const getStatusColor = (status: string) => {
-  if (status.includes('Terlambat')) return 'text-yellow-600';
-  if (status === 'Hadir') return 'text-green-600';
-  if (status === 'Izin') return 'text-blue-600';
-  return 'text-red-600'; // Tidak Hadir
+const getStatusText = (log: AttendanceRecord): string => {
+  if (log.type === 'Hadir' && log.isLate) return 'Hadir (Terlambat)';
+  if (log.type === 'Hadir') return 'Hadir';
+  if (log.type === 'Izin') return 'Izin';
+  return 'Tidak Hadir'; 
 };
 
-export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, month }: AdminDetailModalProps) {
+const getStatusColor = (statusText: string) => {
+  if (statusText.includes('Terlambat')) return 'text-yellow-600';
+  if (statusText === 'Hadir') return 'text-green-600';
+  if (statusText === 'Izin') return 'text-blue-600';
+  return 'text-red-600'; 
+};
+
+export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, onViewDayDetail, month }: AdminDetailModalProps) {
   // 1. State untuk filter aktif dan log yang akan ditampilkan
   const [activeFilter, setActiveFilter] = useState<FilterStatus>('Semua');
-  const [filteredLog, setFilteredLog] = useState<DailyLogItem[]>(dailyLog);
+  const [filteredLog, setFilteredLog] = useState<AttendanceRecord[]>(dailyLog);
 
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 2. useEffect untuk menjalankan logika filter setiap kali filter atau data utama berubah
   useEffect(() => {
-    // Pastikan data log di-reset jika data prop berubah (misal, user lain dipilih)
     if (!isOpen) return;
 
     if (activeFilter === 'Semua') {
       setFilteredLog(dailyLog);
     } else {
       const newFilteredLog = dailyLog.filter(log => {
-        if (activeFilter === 'Terlambat') {
-          return log.status.includes('Terlambat');
+        // PERBAIKAN LOGIKA FILTER DI SINI
+        switch (activeFilter) {
+          case 'Hadir':
+            return log.type === 'Hadir' && !log.isLate;
+          case 'Terlambat':
+            return log.type === 'Hadir' && log.isLate;
+          case 'Izin':
+            return log.type === 'Izin';
+          // Untuk 'Tidak Hadir', kita perlu data eksplisit. Untuk sekarang, kita asumsikan tidak ada.
+          // Jika ingin menampilkan 'Tidak Hadir', backend harus mengirim data ini.
+          default:
+            return false;
         }
-        // Ini akan cocok dengan 'Hadir' tapi tidak 'Hadir (Terlambat)'
-        if (activeFilter === 'Hadir') {
-            return log.status === 'Hadir';
-        }
-        return log.status === activeFilter;
       });
       setFilteredLog(newFilteredLog);
     }
-  }, [activeFilter, dailyLog, isOpen]);
+  }, [activeFilter, dailyLog, isOpen]); 
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -75,13 +86,19 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, mo
   const filterButtons: FilterStatus[] = ['Semua', 'Hadir', 'Terlambat', 'Izin', 'Tidak Hadir'];
 
   return (
-    <div className="fixed inset-0 backdrop-blur flex justify-center items-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center p-4 border-b">
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">Detail Absensi: {intern.name}</h3>
-            <p className="text-sm text-gray-500">Rekapitulasi untuk bulan {month}</p>
-          </div>
+         <div>
+          <h3 className="text-lg font-bold text-gray-800">Detail Absensi: {intern.name}</h3>
+          {/* Tambahkan kondisi di sini */}
+          <p className="text-sm text-gray-500">
+            {month === 'Semua Bulan' 
+              ? 'Rekapitulasi untuk semua bulan' 
+              : `Rekapitulasi untuk bulan ${month}`
+            }
+          </p>
+        </div>
           <button onClick={handleClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
         </div>
         
@@ -122,19 +139,30 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, mo
 
         <div className="p-4 overflow-y-auto">
           <ul className="space-y-3">
-            {/* 4. Render daftar berdasarkan state 'filteredLog' */}
             {filteredLog.length > 0 ? (
-              filteredLog.map((log, index) => (
-                  <li key={index} className="p-3 bg-gray-50 rounded-lg flex items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-800">{log.date}</p>
-                    <p className={`text-sm font-bold ${getStatusColor(log.status)}`}>
-                      {log.status}
-                    </p>
-                    <p className="text-sm text-gray-500">{log.description}</p>
-                  </div>
-                </li>
-              ))
+              filteredLog.map((log) => {
+                const statusText = getStatusText(log); // Dapatkan teks status
+                return (
+                  <li key={log.id} className="p-3 bg-gray-50 rounded-lg flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-800">{log.date}</p>
+                      <p className={`text-sm font-bold ${getStatusColor(statusText)}`}>
+                        {statusText}
+                      </p>
+                      <p className="text-sm text-gray-500">{log.description}</p>
+                    </div>
+                    {(log.photoUrl || (log.lat && log.lon)) && (
+                      <button 
+                        onClick={() => onViewDayDetail(log)}
+                        className="flex items-center gap-1 text-sm bg-gray-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-700"
+                      >
+                        <FiEye size={14}/>
+                        <span>Bukti</span>
+                      </button>
+                    )}
+                  </li>
+                );
+              })
             ) : (
               <p className="text-center text-gray-500 py-8">Tidak ada data untuk filter "{activeFilter}".</p>
             )}

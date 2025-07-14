@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Sidebar from '../components/Sidebar';
+import { useRouter } from 'next/navigation';
+import Sidebar from '../../components/Sidebar';
 import Image from "next/image";
-import { FiMenu } from 'react-icons/fi'; // Impor ikon hamburger
+import { FiMenu, FiLogOut } from 'react-icons/fi'; // Impor ikon hamburger
+import NotificationModal from '@/app/components/Modal/NotificationModal';
+import { NotificationState } from '@/app/types';
 
 export default function AdminLayout({
   children,
@@ -12,6 +15,23 @@ export default function AdminLayout({
 }) {
   // 1. Tambah state untuk mengontrol buka/tutup sidebar di mobile
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [notification, setNotification] = useState<NotificationState | null>(null);
+  const router = useRouter();
+
+  const handleLogout = () => {
+    setNotification({
+      isOpen: true,
+      title: 'Konfirmasi Logout',
+      message: 'Anda yakin ingin keluar dari sesi ini?',
+      type: 'confirm',
+      onConfirm: performLogout,
+    });
+  };
+
+   const performLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/admin'); // Arahkan ke halaman login admin
+  };
 
   return (
     <div className="h-screen flex flex-col">
@@ -31,6 +51,13 @@ export default function AdminLayout({
           </div>
           <h1 className="text-xl font-bold text-white tracking-wide">Admin Panel</h1>
         </div>
+         <button 
+          onClick={handleLogout}
+          className="p-2 text-white rounded-full hover:bg-red-700"
+          title="Logout"
+        >
+          <FiLogOut size={22} />
+        </button>
       </header>
       
       <div className="flex flex-1 overflow-hidden">
@@ -42,6 +69,12 @@ export default function AdminLayout({
           </div>
         </main>
       </div>
+      {notification && (
+        <NotificationModal
+          onClose={() => setNotification(null)}
+          {...notification}
+        />
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ interface SidebarProps {
 const navLinks = [
   { name: 'Rekapitulasi', href: '/admindashboard/rekapitulasi', icon: FiGrid },
   { name: 'Riwayat Absensi', href: '/admindashboard/riwayat', icon: FiClock },
+  { name: 'Arsip Magang', href: '/admindashboard/arsip', icon: FiClock },
 ];
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {

@@ -4,21 +4,33 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { FiX, FiImage, FiMapPin } from 'react-icons/fi';
-import { AttendanceRecord } from '@/app/types';
 
+// 1. Hapus impor dari @/types
+
+// 2. Buat interface lokal yang sesuai dengan data dari DashboardPage
+interface HistoryItem {
+  id: number;
+  type: 'Hadir' | 'Pulang' | 'Izin';
+  title: string;
+  date: string;
+  description: string;
+  lat?: number;
+  lon?: number;
+  photoUrl?: string | null;
+}
+
+// 3. Gunakan interface lokal ini untuk props
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  record: AttendanceRecord | null;
+  record: HistoryItem | null;
 }
 
-// Impor peta secara dinamis
-const LocationMap = dynamic(() => import('../Modal/LocationMap'), { ssr: false });
+const LocationMap = dynamic(() => import('./LocationMap'), { ssr: false });
 
-export default function AdminLiveDetailModal({ isOpen, onClose, record }: ModalProps) {
+export default function UserDetailModal({ isOpen, onClose, record }: ModalProps) {
   const [activeTab, setActiveTab] = useState<'bukti' | 'peta'>('bukti');
 
-  // Reset tab ke 'bukti' setiap kali record baru dipilih
   useEffect(() => {
     if (record) {
       setActiveTab('bukti');
@@ -27,15 +39,15 @@ export default function AdminLiveDetailModal({ isOpen, onClose, record }: ModalP
   
   if (!isOpen || !record) return null;
 
-  const hasLocation = record.lat != null && record.lon != null;
+  const hasLocation = record.lat && record.lon;
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center p-4 border-b">
           <div>
-            <h3 className="text-lg font-bold text-gray-800">Detail: {record.title || record.type}</h3>
-            <p className="text-sm text-gray-500">{record.name}</p>
+            <h3 className="text-lg font-bold text-gray-800">Detail: {record.title}</h3>
+            <p className="text-sm text-gray-500">{record.date}</p>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
         </div>
@@ -61,20 +73,12 @@ export default function AdminLiveDetailModal({ isOpen, onClose, record }: ModalP
         <div className="p-6 overflow-y-auto">
           {activeTab === 'bukti' && (
             <div>
-              {record.type === 'Izin' ? (
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-gray-700">Alasan Izin:</h4>
-                  <p className="p-3 bg-gray-100 rounded-md text-gray-800">{record.description}</p>
-                  {record.photoUrl && (
-                    <>
-                      <h4 className="font-semibold text-gray-700 mt-4">Lampiran:</h4>
-                      <Image src={record.photoUrl} alt="Lampiran Izin" width={500} height={500} className="rounded-lg w-full h-auto" />
-                    </>
-                  )}
-                </div>
+              {record.photoUrl ? (
+                <Image src={record.photoUrl} alt={`Bukti ${record.title}`} width={500} height={500} className="rounded-lg w-full h-auto" />
               ) : (
-                <Image src={record.photoUrl!} alt={`Bukti ${record.type}`} width={500} height={500} className="rounded-lg w-full h-auto" />
+                <p className="text-center text-gray-500">Tidak ada bukti visual untuk entri ini.</p>
               )}
+              {record.type === 'Izin' && <p className="mt-4 p-3 bg-gray-100 rounded-md"><b>Alasan:</b> {record.description}</p>}
             </div>
           )}
 

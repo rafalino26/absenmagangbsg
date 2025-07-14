@@ -40,20 +40,21 @@ export default function LeaveRequestModal({ isOpen, onClose, onSubmit }: LeaveRe
   };
 
   const handleSubmit = () => {
-    if (reason.trim()) {
+    // 1. Perbarui validasi, pastikan alasan dan lampiran ada
+    if (reason.trim() && attachment) {
       onSubmit({ reason, attachment });
       setReason('');
       setAttachment(null);
       onClose();
     } else {
-      alert("Alasan tidak boleh kosong.");
+      alert("Alasan dan bukti lampiran wajib diisi.");
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 backdrop-blur flex justify-center items-center p-4">
+    <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md flex flex-col">
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-bold text-gray-800">Formulir Pengajuan Izin</h3>
@@ -62,7 +63,8 @@ export default function LeaveRequestModal({ isOpen, onClose, onSubmit }: LeaveRe
         
         <div className="p-6 flex-grow space-y-4">
           <div>
-            <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">Alasan Izin</label>
+            {/* 3. (Opsional) Tambah tanda bintang untuk menandakan wajib diisi */}
+            <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">Alasan Izin <span className="text-red-500">*</span></label>
             <textarea
               id="reason"
               rows={4}
@@ -74,7 +76,7 @@ export default function LeaveRequestModal({ isOpen, onClose, onSubmit }: LeaveRe
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Lampiran</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Bukti Lampiran <span className="text-red-500">*</span></label>
             {!attachment ? (
               <button
                 type="button"
@@ -82,7 +84,7 @@ export default function LeaveRequestModal({ isOpen, onClose, onSubmit }: LeaveRe
                 className="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-md text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-colors"
               >
                 <FiPaperclip />
-                <span>Upload Bukti (Surat Dokter atau lainnya)</span>
+                <span>Upload Surat Dokter / Bukti Lainnya</span>
               </button>
             ) : (
               <div className="flex items-center justify-between p-2 border border-gray-200 rounded-md bg-gray-50">
@@ -98,7 +100,15 @@ export default function LeaveRequestModal({ isOpen, onClose, onSubmit }: LeaveRe
 
         <div className="p-4 bg-gray-50 border-t flex justify-end gap-3">
            <button type="button" onClick={onClose} className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</button>
-           <button type="button" onClick={handleSubmit} disabled={!reason.trim()} className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300">Kirim Pengajuan</button>
+           {/* 2. Perbarui kondisi 'disabled' pada tombol */}
+           <button 
+              type="button" 
+              onClick={handleSubmit} 
+              disabled={!reason.trim() || !attachment} 
+              className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300"
+            >
+              Kirim Pengajuan
+            </button>
         </div>
       </div>
     </div>

@@ -84,7 +84,7 @@ export default function AttendanceModal({ isOpen, onClose, onSubmit, attendanceT
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 backdrop-blur flex justify-center items-center p-4">
+    <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md flex flex-col">
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-bold text-gray-800">Bukti Foto Absen {attendanceType}</h3>
@@ -107,7 +107,13 @@ export default function AttendanceModal({ isOpen, onClose, onSubmit, attendanceT
                   className="rounded-lg w-full"
                   videoConstraints={{ facingMode: "user" }}
                 />
-              <button onClick={capturePhoto} className="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600">Ambil Gambar</button>
+               <button 
+                onClick={capturePhoto} 
+                className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center border-2 border-black hover:bg-gray-300 transition-colors"
+                aria-label="Ambil Gambar"
+              >
+                <FiCamera size={24} className="text-black" />
+              </button>
             </div>
           ) : (
             <div className="flex flex-col gap-4">

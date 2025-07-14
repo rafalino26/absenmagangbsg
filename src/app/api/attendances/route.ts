@@ -5,72 +5,59 @@ import { verify } from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
-
-// Inisialisasi Supabase Client untuk berinteraksi dengan Storage
-// Ambil URL dan KEY dari file .env yang sudah ada di proyek NestJS temanmu, atau dari dashboard Supabase > API
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY! // Gunakan SERVICE_KEY untuk akses di backend
+  process.env.SUPABASE_SERVICE_KEY!
 );
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verifikasi Pengguna dari Cookie
+    // 1. Verifikasi Pengguna dari Cookie (tetap sama)
     const token = req.cookies.get('authToken')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
     }
-
-    // Decode token untuk mendapatkan userId
     const decodedToken = verify(token, JWT_SECRET) as { userId: number };
     const userId = decodedToken.userId;
 
-    // 2. Ambil data dari FormData (karena kita mengirim file)
+    // 2. Ambil data dari FormData
     const formData = await req.formData();
-    const photoFile = formData.get('photo') as File | null;
     const type = formData.get('type') as string;
-    const latitude = parseFloat(formData.get('latitude') as string);
-    const longitude = parseFloat(formData.get('longitude') as string);
-    const description = formData.get('description') as string; // Untuk jam atau alasan izin
-    const isLate = formData.get('isLate') === 'true';
+    const description = formData.get('description') as string;
+    const photoFile = formData.get('photo') as File | null;
 
-    if (!type || !photoFile) {
-      return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
+    if (!type || !description) {
+      return NextResponse.json({ error: 'Tipe dan keterangan wajib diisi.' }, { status: 400 });
     }
+    
+    let dataToSave: any = { userId, type, description };
+    
+    // 3. Jika ada file foto/lampiran, upload ke Supabase
+    if (photoFile) {
+      const fileName = `proofs/${userId}-${Date.now()}-${photoFile.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('attendance-proofs')
+        .upload(fileName, photoFile);
 
-    // 3. Upload Foto ke Supabase Storage
-    const fileName = `${userId}-${Date.now()}-${photoFile.name}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('attendance-proofs') // Nama bucket yang tadi kita buat
-      .upload(fileName, photoFile);
-
-    if (uploadError) {
-      console.error('Supabase Upload Error:', uploadError);
-      throw new Error('Gagal mengupload foto.');
+      if (uploadError) throw new Error('Gagal mengupload bukti.');
+      
+      const { data: urlData } = supabase.storage.from('attendance-proofs').getPublicUrl(fileName);
+      dataToSave.photoUrl = urlData.publicUrl;
     }
-
-    // Dapatkan URL publik dari foto yang baru di-upload
-    const { data: publicUrlData } = supabase.storage
-      .from('attendance-proofs')
-      .getPublicUrl(fileName);
-
-    // 4. Simpan semua informasi ke database PostgreSQL via Prisma
-    const newAttendance = await prisma.attendance.create({
-      data: {
-        userId,
-        type,
-        description,
-        isLate,
-        photoUrl: publicUrlData.publicUrl,
-        latitude,
-        longitude,
-      }
-    });
+    
+    // 4. Tambahkan data lokasi HANYA jika tipenya bukan 'Izin'
+    if (type === 'Hadir' || type === 'Pulang') {
+      dataToSave.latitude = parseFloat(formData.get('latitude') as string);
+      dataToSave.longitude = parseFloat(formData.get('longitude') as string);
+      dataToSave.isLate = formData.get('isLate') === 'true';
+    }
+    
+    // 5. Simpan ke database
+    const newAttendance = await prisma.attendance.create({ data: dataToSave });
 
     return NextResponse.json(newAttendance, { status: 201 });
 
   } catch (error) {
-    // Tangani error, termasuk jika token tidak valid
     if (error instanceof Error && error.name === 'JsonWebTokenError') {
       return NextResponse.json({ error: 'Token tidak valid' }, { status: 401 });
     }

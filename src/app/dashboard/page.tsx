@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiCreditCard } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import AttendanceModal from '../components/Modal/AttendanceModal';
@@ -12,6 +13,10 @@ import PulangButton from '../components/Button/PulangButton';
 import LeaveRequestButton from '../components/Button/IzinButton';
 import BankAccountModal from '../components/Modal/BankAccountModal';
 import DashboardSkeleton from '../components/loading/DashboardSkeleton';
+import UserDetailModal from '../components/Modal/UserDetailModal';
+import NotificationModal from '../components/Modal/NotificationModal';
+import SpinnerOverlay from '../components/loading/SpinnerOverlay';
+import { NotificationState } from '../types';
 
 interface HistoryItem {
   id: number;
@@ -73,8 +78,11 @@ export default function DashboardPage() {
   const [isLeaveModalOpen, setLeaveModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isBankAccountModalOpen, setBankAccountModalOpen] = useState(false);
-  const [isMapModalOpen, setMapModalOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<[number, number] | null>(null);
+  const [isDetailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
+  const [notification, setNotification] = useState<NotificationState | null>(null);
+  const closeNotification = () => setNotification(null);
+  const router = useRouter();
 
    const fetchData = useCallback(async () => {
     try {
@@ -166,7 +174,12 @@ export default function DashboardPage() {
       const errorData = await response.json();
       throw new Error(errorData.error || `Gagal melakukan absen ${attendanceType}.`);
     }
-    alert(`Berhasil Absen ${attendanceType}!`);
+     setNotification({
+    isOpen: true,
+    title: 'Berhasil',
+    message: `Absen ${attendanceType} telah berhasil dicatat.`,
+    type: 'success',
+  });
     await fetchData(); 
   } catch (err: any) {
     let message = err.message || "Gagal mendapatkan lokasi.";
@@ -182,31 +195,48 @@ const handleLeaveRequest = () => {
     setLeaveModalOpen(true);
   };
 
-const handleConfirmLeave = ({ reason, attachment }: { reason: string, attachment: File | null }) => {
-  const now = new Date();
-  
-  let photoUrl: string | undefined = undefined;
-  if (attachment) {
-    console.log("Uploading attachment:", attachment.name);
-    photoUrl = URL.createObjectURL(attachment);
+const handleConfirmLeave = async ({ reason, attachment }: { reason: string, attachment: File | null }) => {
+  setLeaveModalOpen(false);
+  setIsSubmitting(true);
+  setError(null);
+
+  try {
+    const formData = new FormData();
+    formData.append('type', 'Izin');
+    formData.append('description', reason);
+
+    // Jika ada lampiran, tambahkan ke form data dengan nama 'photo'
+    if (attachment) {
+      formData.append('photo', attachment);
+    }
+    
+    const response = await fetch('/api/attendances', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Gagal mengajukan izin.');
+    }
+
+   setNotification({
+    isOpen: true,
+    title: 'Berhasil',
+    message: 'Pengajuan izin Anda telah berhasil dicatat.',
+    type: 'success',
+  });
+    await fetchData();
+  } catch (err: any) {
+    setError(err.message || 'Terjadi kesalahan.');
+  } finally {
+    setIsSubmitting(false);
   }
-
-  const newHistoryItem: HistoryItem = {
-    id: now.getTime(),
-    type: 'Izin',
-    title: 'Pengajuan Izin',
-    date: now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
-    description: reason,
-    photoUrl: photoUrl,
-  };
-
-  setHistory(prevHistory => [newHistoryItem, ...prevHistory]);
-  alert("Pengajuan izin berhasil dicatat.");
 };
 
-  const handleViewMap = (lat: number, lon: number) => {
-    setSelectedLocation([lat, lon]);
-    setMapModalOpen(true);
+  const handleViewDetails = (item: HistoryItem) => {
+    setSelectedHistoryItem(item);
+    setDetailModalOpen(true);
   };
 
 const handleProfilePicSubmit = async (newPhotoFile: File) => {
@@ -229,7 +259,12 @@ const handleProfilePicSubmit = async (newPhotoFile: File) => {
       if (updatedUserData.profilePicUrl) {
         setProfilePic(updatedUserData.profilePicUrl);
       }
-      alert("Foto profil berhasil diperbarui!");
+     setNotification({
+      isOpen: true,
+      title: 'Berhasil',
+      message: 'Foto profil Anda telah berhasil diperbarui.',
+      type: 'success',
+    });
     } else {
       const errorData = await response.json();
       setError(errorData.error || "Gagal memperbarui foto profil.");
@@ -262,7 +297,12 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
       if (updatedUserData.bankName && updatedUserData.accountNumber) {
         setBankAccount({ bank: updatedUserData.bankName, number: updatedUserData.accountNumber });
       }
-      alert('Informasi rekening berhasil disimpan!');
+      setNotification({
+      isOpen: true,
+      title: 'Berhasil',
+      message: 'Informasi rekening berhasil disimpan.',
+      type: 'success',
+    });
     } else {
       const errorData = await response.json();
       setError(errorData.error || "Gagal menyimpan info rekening.");
@@ -273,6 +313,22 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
     setIsSubmitting(false);
   }
 };
+
+  const handleLogout = () => {
+    setNotification({
+      isOpen: true,
+      title: 'Konfirmasi Logout',
+      message: 'Anda yakin ingin keluar dari sesi ini?',
+      type: 'confirm',
+      onConfirm: performLogout,
+    });
+  };
+
+  // Fungsi untuk menjalankan proses logout
+  const performLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/admin'); // Arahkan ke halaman login admin
+  };
 
   if (isLoading) {
     return (
@@ -298,19 +354,33 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
 
   return (
     <>
+    {isSubmitting && <SpinnerOverlay />}
       <div className="bg-gray-50 min-h-screen">
-        <header className="bg-red-600 shadow-sm">
-          <div className="max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
-            <div className="flex items-center gap-2">
-              <div className="flex-shrink-0">
-                <div className="w-[50px] aspect-square rounded-full overflow-hidden shadow-lg">
-                  <Image src="/logobsg.jpg" width={800} height={500} alt="Logo" className="w-full h-full object-cover"/>
-                </div>
-              </div>
-              <div><h1 className="text-xl font-bold text-white">Absen Magang</h1></div>
-            </div>
-          </div>
-        </header>
+<header className="bg-red-600 shadow-sm">
+  {/* 1. Jadikan container ini sebagai flexbox */}
+  <div className=" px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+    
+    {/* Grup Kiri: Logo & Judul */}
+    <div className="flex items-center gap-2">
+      <div className="flex-shrink-0">
+        <div className="w-[50px] aspect-square rounded-full overflow-hidden shadow-lg">
+          <Image src="/logobsg.jpg" width={800} height={500} alt="Logo" className="w-full h-full object-cover"/>
+        </div>
+      </div>
+      <div><h1 className="text-xl font-bold text-white">Absen Magang</h1></div>
+    </div>
+
+    {/* 2. Pindahkan Tombol Logout ke sini */}
+    <button 
+      onClick={handleLogout}
+      className="p-2 text-white rounded-full hover:bg-red-700"
+      title="Logout"
+    >
+      <FiLogOut size={22} />
+    </button>
+    
+  </div>
+</header>
         <main className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4 md:gap-6 mb-8">
@@ -351,10 +421,9 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
                   <FiEdit size={16} />
                 </button>
               </div>
-              <div className="mt-2 text-sm min-h-[20px]">
-                {isSubmitting && <p className="text-blue-600">Memproses...</p>}
-                {error && <p className="text-red-600 font-semibold">Error: {error}</p>}
-              </div>
+              <div className="mt-2 text-lg min-h-[20px]">
+              {error && <p className="text-red-600 font-semibold">Error: {error}</p>}
+            </div>
             </div>
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -378,47 +447,50 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
               <h2 className="text-xl font-bold text-gray-800 mb-4">Riwayat Absensi Terkini</h2>
               <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
                 <ul className="divide-y divide-gray-200">
-                  {history.length === 0 ? (
-                    <li className="p-4 text-center text-gray-500">Belum ada riwayat absensi.</li>
-                  ) : (
-                    history.map((item) => (
-                      <li key={item.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                        <div className="flex items-center gap-4">
-                            <span className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-white 
-                              ${item.type === 'Hadir' ? 'bg-green-500' : item.type === 'Pulang' ? 'bg-orange-500' : 'bg-blue-500'}`}>
-                                {item.type === 'Hadir' && <FiClock size={20}/>}
-                                {item.type === 'Pulang' && <FiLogOut size={20}/>}
-                                {item.type === 'Izin' && <FiEdit3 size={20}/>}
-                            </span>
-                            <div>
-                                <p className="font-semibold text-gray-800">{item.title}</p>
-                                <p className="text-sm text-gray-600">{item.date}</p>
-                                 {item.type === 'Hadir' && isLate(item.description) ? (
-                                  <p className="text-sm text-red-600 font-bold">{item.description} (Terlambat)</p>
-                                ) : (
-                                  <p className="text-sm text-gray-500">{item.description}</p>
-                                )}
-                            </div>
-                        </div>
-                        {/* Ganti bagian ini di dalam .map() riwayat absensi */}
-                      {item.lat && item.lon && (
-                        <div className="flex flex-col items-center gap-1">
-                          <button 
-                            onClick={() => handleViewMap(item.lat!, item.lon!)} 
-                            className="text-sm bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
-                          >
-                            Lihat Peta
-                          </button>
-                          <p className="text-xs text-gray-400">
-                            {/* Tampilkan koordinat dengan 4 angka di belakang koma */}
-                            {item.lat.toFixed(4)}, {item.lon.toFixed(4)}
-                          </p>
-                        </div>
-                      )}
-                   </li>
-                    ))
-                  )}
-                </ul>
+  {history.length === 0 ? (
+    <li className="p-4 text-center text-gray-500">Belum ada riwayat absensi.</li>
+  ) : (
+    history.map((item) => (
+      // 1. Ganti dari 'flex' menjadi 'grid' dan definisikan 3 kolom
+      <li key={item.id} className="p-4 grid grid-cols-[auto_1fr_auto] items-center gap-4 hover:bg-gray-50">
+        
+        {/* Kolom 1: Ikon Status */}
+        <span className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-white 
+          ${item.type === 'Hadir' ? 'bg-green-500' : item.type === 'Pulang' ? 'bg-orange-500' : 'bg-blue-500'}`}>
+          {item.type === 'Hadir' && <FiClock size={20}/>}
+          {item.type === 'Pulang' && <FiLogOut size={20}/>}
+          {item.type === 'Izin' && <FiEdit3 size={20}/>}
+        </span>
+        
+        {/* Kolom 2: Info Teks (mengisi sisa ruang) */}
+        <div>
+          <p className="font-semibold text-gray-800">{item.title}</p>
+          <p className="text-sm text-gray-600">{item.date}</p>
+          {item.type === 'Hadir' && isLate(item.description) ? (
+            <p className="text-sm text-red-600 font-bold">{item.description} (Terlambat)</p>
+          ) : (
+            <p className="text-sm text-gray-500">{item.description}</p>
+          )}
+        </div>
+        
+        {/* Kolom 3: Tombol Aksi */}
+        {item.lat && item.lon && (
+          <div className="flex flex-col items-center gap-1">
+            <button 
+              onClick={() => handleViewDetails(item)} 
+              className="text-sm bg-gray-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Lihat Detail
+            </button>
+            <p className="text-xs text-gray-400">
+              {item.lat.toFixed(4)}, {item.lon.toFixed(4)}
+            </p>
+          </div>
+        )}
+      </li>
+    ))
+  )}
+</ul>
               </div>
             </div>
           </div>
@@ -447,17 +519,20 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
         onSubmit={handleBankAccountSubmit}
         currentAccount={bankAccount}
       />
-      {isMapModalOpen && selectedLocation && (
-        <div className="fixed inset-0 backdrop-blur flex justify-center items-center p-4">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl h-full max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg text-black font-bold">Peta Lokasi Absen</h3>
-              <button onClick={() => setMapModalOpen(false)} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
-            </div>
-            <div className="flex-grow p-1"><LocationMap position={selectedLocation}/></div>
-          </div>
-        </div>
-      )}
+        <UserDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        record={selectedHistoryItem}
+      />
+       <NotificationModal
+      isOpen={!!notification}
+      onClose={closeNotification}
+      title={notification?.title || ''}
+      message={notification?.message || ''}
+      type={notification?.type || 'success'}
+      onConfirm={notification?.onConfirm}
+    />
+    
     </>
   );
 }

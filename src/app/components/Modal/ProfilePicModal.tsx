@@ -58,7 +58,7 @@ export default function ProfilePicModal({ isOpen, onClose, onSubmit, currentImag
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 backdrop-blur flex justify-center items-center p-4 z-50">
+    <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm flex flex-col">
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-bold text-gray-800">Foto Profil</h3>

@@ -16,7 +16,10 @@ export async function POST(req: Request) {
     }
     
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(internCode) },
+      where: { 
+        id: parseInt(internCode),
+        isActive: true,
+       }, 
     });
 
     if (!user) {
@@ -41,7 +44,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      // maxAge dihapus agar cookie hilang saat browser ditutup
+      maxAge: 60 * 60 * 1,
       path: '/',
     });
 
