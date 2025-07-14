@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -13,7 +13,7 @@ function getMonthDateRange(monthString: string) {
   return { startDate, endDate };
 }
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: { id: string } }) {
   try {
     const { id } = context.params; 
     const userId = parseInt(id);
