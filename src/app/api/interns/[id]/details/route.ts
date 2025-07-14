@@ -1,11 +1,14 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Fungsi helper untuk mengubah string "Bulan Tahun" menjadi rentang tanggal
 function getMonthDateRange(monthString: string) {
-  const monthMap: { [key: string]: number } = { 'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5, 'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11 };
+  const monthMap: { [key: string]: number } = {
+    'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3,
+    'Mei': 4, 'Juni': 5, 'Juli': 6, 'Agustus': 7,
+    'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11
+  };
   const [monthName, year] = monthString.split(' ');
   const monthIndex = monthMap[monthName];
   if (monthIndex === undefined || !year) return null;
@@ -14,15 +17,13 @@ function getMonthDateRange(monthString: string) {
   return { startDate, endDate };
 }
 
-// Gunakan signature yang paling eksplisit dan standar
-export async function GET(
-  request: NextRequest, 
-  context: { params: { id: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const { id } = context.params;
+    const url = new URL(req.url);
+    const searchParams = url.searchParams;
+    const id = url.pathname.split('/').slice(-2)[0]; // ambil ID dari URL
     const userId = parseInt(id);
-    const month = request.nextUrl.searchParams.get('month');
+    const month = searchParams.get('month');
 
     let dateFilter = {};
     if (month && month !== 'Semua Bulan') {
@@ -31,21 +32,17 @@ export async function GET(
         dateFilter = { timestamp: { gte: dateRange.startDate, lt: dateRange.endDate } };
       }
     }
-    
+
     const attendanceRecords = await prisma.attendance.findMany({
       where: { userId, ...dateFilter },
       orderBy: { timestamp: 'desc' },
-      include: {
-        user: {
-          select: { name: true }
-        }
-      }
     });
 
     const dailyLog = attendanceRecords.map(record => ({
       id: record.id,
-      name: record.user.name,
-      date: new Date(record.timestamp).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      date: new Date(record.timestamp).toLocaleDateString('id-ID', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      }),
       status: record.isLate ? 'Hadir (Terlambat)' : record.type,
       description: record.description,
       photoUrl: record.photoUrl,
