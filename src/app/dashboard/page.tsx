@@ -96,7 +96,7 @@ export default function DashboardPage() {
         if (userData.bankName && userData.accountNumber) {
           setBankAccount({ bank: userData.bankName, number: userData.accountNumber });
         } else {
-          setBankAccount(null); 
+          setBankAccount(null);   
         }
         
         if (userData.profilePicUrl) {
@@ -205,7 +205,6 @@ const handleConfirmLeave = async ({ reason, attachment }: { reason: string, atta
     formData.append('type', 'Izin');
     formData.append('description', reason);
 
-    // Jika ada lampiran, tambahkan ke form data dengan nama 'photo'
     if (attachment) {
       formData.append('photo', attachment);
     }
@@ -324,10 +323,9 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
     });
   };
 
-  // Fungsi untuk menjalankan proses logout
   const performLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/admin'); // Arahkan ke halaman login admin
+    router.push('/admin'); 
   };
 
   if (isLoading) {
@@ -357,10 +355,8 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
     {isSubmitting && <SpinnerOverlay />}
       <div className="bg-gray-50 min-h-screen">
 <header className="bg-red-600 shadow-sm">
-  {/* 1. Jadikan container ini sebagai flexbox */}
-  <div className=" px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
-    
-    {/* Grup Kiri: Logo & Judul */}
+  <div className="   px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+  
     <div className="flex items-center gap-2">
       <div className="flex-shrink-0">
         <div className="w-[50px] aspect-square rounded-full overflow-hidden shadow-lg">
@@ -369,8 +365,6 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
       </div>
       <div><h1 className="text-xl font-bold text-white">Absen Magang</h1></div>
     </div>
-
-    {/* 2. Pindahkan Tombol Logout ke sini */}
     <button 
       onClick={handleLogout}
       className="p-2 text-white rounded-full hover:bg-red-700"
@@ -378,7 +372,6 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
     >
       <FiLogOut size={22} />
     </button>
-    
   </div>
 </header>
         <main className="p-4 sm:p-6 lg:p-8">

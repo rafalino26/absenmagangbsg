@@ -91,7 +91,6 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, on
         <div className="flex justify-between items-center p-4 border-b">
          <div>
           <h3 className="text-lg font-bold text-gray-800">Detail Absensi: {intern.name}</h3>
-          {/* Tambahkan kondisi di sini */}
           <p className="text-sm text-gray-500">
             {month === 'Semua Bulan' 
               ? 'Rekapitulasi untuk semua bulan' 
@@ -101,12 +100,9 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, on
         </div>
           <button onClick={handleClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
         </div>
-        
-        {/* 3. Tampilkan tombol-tombol filter di sini */}
          <div className="p-4 border-b flex items-center gap-3">
           <span className="text-sm font-medium text-gray-700">Filter Status:</span>
           <div className="relative" ref={dropdownRef}>
-            {/* Tombol utama dropdown */}
             <button 
               onClick={() => setDropdownOpen(!isDropdownOpen)}
               className="flex items-center justify-between w-48 bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -114,8 +110,6 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, on
               <span>{activeFilter}</span>
               <FiChevronDown className={`ml-2 h-5 w-5 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
-            
-            {/* Menu dropdown yang muncul */}
             {isDropdownOpen && (
               <div className="absolute z-10 mt-1 w-48 bg-white rounded-md shadow-lg border">
                 <div className="py-1">

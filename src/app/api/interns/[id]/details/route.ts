@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Fungsi helper untuk mengubah string "Bulan Tahun" menjadi rentang tanggal
 function getMonthDateRange(monthString: string) {
   const monthMap: { [key: string]: number } = { 'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5, 'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11 };
   const [monthName, year] = monthString.split(' ');
@@ -14,9 +13,10 @@ function getMonthDateRange(monthString: string) {
   return { startDate, endDate };
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
   try {
-    const userId = parseInt(params.id);
+    const { id } = context.params; 
+    const userId = parseInt(id);
     const { searchParams } = new URL(req.url);
     const month = searchParams.get('month');
 
@@ -33,11 +33,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       orderBy: { timestamp: 'desc' },
     });
 
-    // Format data agar sesuai dengan tipe di frontend
     const dailyLog = attendanceRecords.map(record => ({
-      id: record.id, // <-- TAMBAHKAN BARIS INI
+      id: record.id,
       date: new Date(record.timestamp).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
-      status: record.isLate ? 'Hadir (Terlambat)' : record.type as any,
+      status: record.isLate ? 'Hadir (Terlambat)' : record.type,
       description: record.description,
       photoUrl: record.photoUrl,
       lat: record.latitude,
