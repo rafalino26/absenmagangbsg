@@ -1,14 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 function getMonthDateRange(monthString: string) {
-  const monthMap: { [key: string]: number } = {
-    'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3,
-    'Mei': 4, 'Juni': 5, 'Juli': 6, 'Agustus': 7,
-    'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11
-  };
+  const monthMap: { [key: string]: number } = { 'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5, 'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11 };
   const [monthName, year] = monthString.split(' ');
   const monthIndex = monthMap[monthName];
   if (monthIndex === undefined || !year) return null;
@@ -17,14 +13,18 @@ function getMonthDateRange(monthString: string) {
   return { startDate, endDate };
 }
 
-export async function GET(req: Request) {
+// Fungsi GET sekarang tidak punya argumen kedua
+export async function GET(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const searchParams = url.searchParams;
-    const id = url.pathname.split('/').slice(-2)[0]; // ambil ID dari URL
-    const userId = parseInt(id);
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id'); // Ambil id dari query parameter
     const month = searchParams.get('month');
 
+    if (!id) {
+      return NextResponse.json({ error: 'ID peserta wajib diisi' }, { status: 400 });
+    }
+
+    const userId = parseInt(id);
     let dateFilter = {};
     if (month && month !== 'Semua Bulan') {
       const dateRange = getMonthDateRange(month);
@@ -32,18 +32,17 @@ export async function GET(req: Request) {
         dateFilter = { timestamp: { gte: dateRange.startDate, lt: dateRange.endDate } };
       }
     }
-
+    
     const attendanceRecords = await prisma.attendance.findMany({
       where: { userId, ...dateFilter },
       orderBy: { timestamp: 'desc' },
+      include: { user: { select: { name: true } } }
     });
 
     const dailyLog = attendanceRecords.map(record => ({
-      id: record.id,
-      date: new Date(record.timestamp).toLocaleDateString('id-ID', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-      }),
-      status: record.isLate ? 'Hadir (Terlambat)' : record.type,
+      id: record.id, // <-- TAMBAHKAN BARIS INI
+      date: new Date(record.timestamp).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      status: record.isLate ? 'Hadir (Terlambat)' : record.type as any,
       description: record.description,
       photoUrl: record.photoUrl,
       lat: record.latitude,

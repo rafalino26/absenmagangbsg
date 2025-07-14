@@ -147,23 +147,25 @@ const displayedData = useMemo(() => {
   }, [menuRef]);
 
    const handleViewDetails = async (intern: InternSummary) => {
-    setSelectedIntern(intern);
-    setIsFetchingDetails(true); // <-- Gunakan state loading yang baru
-    try {
-      const response = await fetch(`/api/interns/${intern.id}/details?month=${monthFilter}`);
-      if (response.ok) {
-        const data = await response.json();
-        setDailyLogData(data);
-        setDetailModalOpen(true);
-      } else {
-        setDailyLogData([]);
-      }
-    } catch (error) {
-      console.error("Error fetching daily log:", error);
-    } finally {
-      setIsFetchingDetails(false); // <-- Gunakan state loading yang baru
+  setSelectedIntern(intern);
+  setIsFetchingDetails(true);
+  try {
+    // Ubah URL fetch ke path yang baru
+    const response = await fetch(`/api/interns/details?id=${intern.id}&month=${monthFilter}`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      setDailyLogData(data);
+      setDetailModalOpen(true);
+    } else {
+      setDailyLogData([]);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching daily log:", error);
+  } finally {
+    setIsFetchingDetails(false);
+  }
+};
 
   const handleViewDayDetail = (record: AttendanceRecord) => {
     setSelectedRecord(record);
