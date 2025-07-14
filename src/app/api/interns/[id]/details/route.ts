@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -13,12 +13,13 @@ function getMonthDateRange(monthString: string) {
   return { startDate, endDate };
 }
 
-export async function GET(req: Request, context: { params: { id: string } }) {
+// Gunakan signature ini, yang paling umum di dokumentasi Next.js 13+
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = context.params; 
-    const userId = parseInt(id);
-    const { searchParams } = new URL(req.url);
-    const month = searchParams.get('month');
+    const userId = parseInt(params.id);
+    
+    // Ambil parameter 'month' dengan cara yang lebih modern dari 'req.nextUrl'
+    const month = req.nextUrl.searchParams.get('month');
 
     let dateFilter = {};
     if (month && month !== 'Semua Bulan') {
@@ -31,10 +32,14 @@ export async function GET(req: Request, context: { params: { id: string } }) {
     const attendanceRecords = await prisma.attendance.findMany({
       where: { userId, ...dateFilter },
       orderBy: { timestamp: 'desc' },
+      include: {
+        user: { select: { name: true } }
+      }
     });
 
     const dailyLog = attendanceRecords.map(record => ({
       id: record.id,
+      name: record.user.name,
       date: new Date(record.timestamp).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
       status: record.isLate ? 'Hadir (Terlambat)' : record.type,
       description: record.description,
