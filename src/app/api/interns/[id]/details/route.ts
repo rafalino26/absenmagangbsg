@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Fungsi helper untuk mengubah string "Bulan Tahun" menjadi rentang tanggal
 function getMonthDateRange(monthString: string) {
   const monthMap: { [key: string]: number } = { 'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5, 'Juli': 6, 'Agustus': 7, 'September': 8, 'Oktober': 9, 'November': 10, 'Desember': 11 };
   const [monthName, year] = monthString.split(' ');
@@ -13,13 +14,15 @@ function getMonthDateRange(monthString: string) {
   return { startDate, endDate };
 }
 
-// Gunakan signature ini, yang paling umum di dokumentasi Next.js 13+
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+// Gunakan signature yang paling eksplisit dan standar
+export async function GET(
+  request: NextRequest, 
+  context: { params: { id: string } }
+) {
   try {
-    const userId = parseInt(params.id);
-    
-    // Ambil parameter 'month' dengan cara yang lebih modern dari 'req.nextUrl'
-    const month = req.nextUrl.searchParams.get('month');
+    const { id } = context.params;
+    const userId = parseInt(id);
+    const month = request.nextUrl.searchParams.get('month');
 
     let dateFilter = {};
     if (month && month !== 'Semua Bulan') {
@@ -33,7 +36,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       where: { userId, ...dateFilter },
       orderBy: { timestamp: 'desc' },
       include: {
-        user: { select: { name: true } }
+        user: {
+          select: { name: true }
+        }
       }
     });
 
