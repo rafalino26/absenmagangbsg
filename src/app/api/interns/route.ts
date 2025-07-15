@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcrypt';
 
@@ -23,62 +23,49 @@ function getMonthDateRange(monthString: string) {
   return { startDate, endDate };
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const month = searchParams.get('month');
-
-    // Tentukan rentang tanggal untuk filter
     let dateFilter = {};
+
     if (month && month !== 'Semua Bulan') {
       const dateRange = getMonthDateRange(month);
       if (dateRange) {
-        dateFilter = {
-          timestamp: {
-            gte: dateRange.startDate,
-            lt: dateRange.endDate,
-          }
-        };
+        dateFilter = { timestamp: { gte: dateRange.startDate, lt: dateRange.endDate } };
       }
     }
-
-    // Ambil semua user intern yang aktif
+    
     const interns = await prisma.user.findMany({
       where: {
         role: 'INTERN',
         isActive: true,
-        attendances: month && month !== 'Semua Bulan' ? { 
-          some: dateFilter 
-        } : undefined,
+        attendances: month && month !== 'Semua Bulan' ? { some: dateFilter } : undefined,
       },
     });
 
-    // Hitung rekapitulasi untuk setiap intern
     const summaryData = await Promise.all(
       interns.map(async (intern) => {
         const commonWhere = { userId: intern.id, ...dateFilter };
-
-        // Hitung semua statistik menggunakan Prisma
+        
         const hadir = await prisma.attendance.count({ where: { ...commonWhere, type: 'Hadir' } });
         const izin = await prisma.attendance.count({ where: { ...commonWhere, type: 'Izin' } });
         const terlambat = await prisma.attendance.count({ where: { ...commonWhere, isLate: true } });
-        const absen = 0; // Placeholder
+        const absen = 0; // Kembali ke placeholder
 
         return {
           id: intern.id,
           name: intern.name,
           division: intern.division,
-          internshipPeriod: intern.internshipPeriod,
+          internshipPeriod: intern.internshipPeriod, // <-- Data ini tetap kita kirim
           joinDate: intern.joinDate.toISOString(),
-          bankAccount: intern.bankName && intern.accountNumber
-            ? { bank: intern.bankName, number: intern.accountNumber }
-            : null,
-          // Data hasil perhitungan asli
+          bankAccount: intern.bankName && intern.accountNumber ? { bank: intern.bankName, number: intern.accountNumber } : null,
           hadir,
           izin,
           terlambat,
           absen,
           totalUangMakan: hadir * 15000,
+          absenDates: '-', // Kembali ke placeholder
         };
       })
     );

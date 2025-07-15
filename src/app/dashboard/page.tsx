@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiCreditCard } from 'react-icons/fi';
+import { useState, useEffect, useCallback, MouseEvent  } from 'react';
+import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiChevronDown, FiDownload } from 'react-icons/fi';
+import { CSVLink } from 'react-csv';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -81,8 +82,14 @@ export default function DashboardPage() {
   const [isDetailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState<HistoryItem | null>(null);
   const [notification, setNotification] = useState<NotificationState | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const closeNotification = () => setNotification(null);
   const router = useRouter();
+
+    useEffect(() => {
+      setIsClient(true);
+    }, []);
 
    const fetchData = useCallback(async () => {
     try {
@@ -137,6 +144,41 @@ export default function DashboardPage() {
     setAttendanceType(type);
     setAttendanceModalOpen(true);
   };
+
+// Di dalam komponen DashboardPage
+
+// 1. Siapkan header kolom yang baru untuk CSV
+const csvHeaders = [
+  { label: "Tanggal", key: "date" },
+  { label: "Status", key: "title" },
+  { label: "Keterangan", key: "description" },
+  { label: "Hadir", key: "kehadiran" }, // <-- Kolom baru
+];
+
+// 2. Siapkan data dengan logika yang sudah diperbarui
+const csvData = history
+  // Filter untuk membuang "Absen Pulang"
+  .filter(item => item.type !== 'Pulang')
+  // Map untuk memformat setiap baris
+  .map(item => {
+    let description = item.description;
+
+    // Tambahkan "(Terlambat)" jika user terlambat
+    if (item.type === 'Hadir' && isLate(item.description)) {
+      description = `(Terlambat) ${item.description} `;
+    }
+
+    return {
+      date: item.date,
+      title: item.title,
+      description: description,
+      // Kolom "Hadir" akan berisi 1 jika status Hadir, dan 0 jika Izin/Tidak Hadir
+      kehadiran: item.type === 'Hadir' ? 1 : 0,
+    };
+  });
+
+// ... (sisa kode komponen tidak berubah)
+
 
  const handleConfirmAttendance = async (photoFile: File) => {
   setAttendanceModalOpen(false);
@@ -437,53 +479,85 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
               />
             </div>
             <div className="mt-10">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Riwayat Absensi Terkini</h2>
+               <div 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+              >
+                <h2 className="text-xl font-bold text-gray-800">Riwayat Absensi Terkini</h2>
+              <div className="flex items-center gap-4">
+                {isClient && (
+                  // 1. Bungkus CSVLink dengan <span> dan pindahkan onClick ke sini
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <CSVLink
+                      data={csvData}
+                      headers={csvHeaders}
+                      separator={";"}
+                      filename={`Riwayat_Absen_${user?.name}.csv`}
+                      className="flex items-center gap-2 text-sm bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800"
+                    >
+                      <FiDownload size={16} />
+                      <span>Download</span>
+                    </CSVLink>
+                  </span>
+                )}
+                <FiChevronDown 
+                  className={`text-gray-500 transition-transform duration-300 ${isHistoryOpen ? 'rotate-180' : ''}`} 
+                  size={24} 
+                />
+              </div>
+              </div>
+               <div 
+              className={`transition-all duration-500 ease-in-out overflow-hidden 
+                ${isHistoryOpen ? 'max-h-screen mt-4' : 'max-h-0'}`
+              }
+            >
               <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
                 <ul className="divide-y divide-gray-200">
-  {history.length === 0 ? (
-    <li className="p-4 text-center text-gray-500">Belum ada riwayat absensi.</li>
-  ) : (
-    history.map((item) => (
-      // 1. Ganti dari 'flex' menjadi 'grid' dan definisikan 3 kolom
-      <li key={item.id} className="p-4 grid grid-cols-[auto_1fr_auto] items-center gap-4 hover:bg-gray-50">
-        
-        {/* Kolom 1: Ikon Status */}
-        <span className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-white 
-          ${item.type === 'Hadir' ? 'bg-green-500' : item.type === 'Pulang' ? 'bg-orange-500' : 'bg-blue-500'}`}>
-          {item.type === 'Hadir' && <FiClock size={20}/>}
-          {item.type === 'Pulang' && <FiLogOut size={20}/>}
-          {item.type === 'Izin' && <FiEdit3 size={20}/>}
-        </span>
-        
-        {/* Kolom 2: Info Teks (mengisi sisa ruang) */}
-        <div>
-          <p className="font-semibold text-gray-800">{item.title}</p>
-          <p className="text-sm text-gray-600">{item.date}</p>
-          {item.type === 'Hadir' && isLate(item.description) ? (
-            <p className="text-sm text-red-600 font-bold">{item.description} (Terlambat)</p>
-          ) : (
-            <p className="text-sm text-gray-500">{item.description}</p>
-          )}
-        </div>
-        
-        {/* Kolom 3: Tombol Aksi */}
-        {item.lat && item.lon && (
-          <div className="flex flex-col items-center gap-1">
-            <button 
-              onClick={() => handleViewDetails(item)} 
-              className="text-sm bg-gray-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              Lihat Detail
-            </button>
-            <p className="text-xs text-gray-400">
-              {item.lat.toFixed(4)}, {item.lon.toFixed(4)}
-            </p>
-          </div>
-        )}
-      </li>
-    ))
-  )}
-</ul>
+                  {history.length === 0 ? (
+                    <li className="p-4 text-center text-gray-500">Belum ada riwayat absensi.</li>
+                  ) : (
+                    history.map((item) => (
+                      // 1. Ganti dari 'flex' menjadi 'grid' dan definisikan 3 kolom
+                      <li key={item.id} className="p-4 grid grid-cols-[auto_1fr_auto] items-center gap-4 hover:bg-gray-50">
+                        
+                        {/* Kolom 1: Ikon Status */}
+                        <span className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-white 
+                          ${item.type === 'Hadir' ? 'bg-green-500' : item.type === 'Pulang' ? 'bg-orange-500' : 'bg-blue-500'}`}>
+                          {item.type === 'Hadir' && <FiClock size={20}/>}
+                          {item.type === 'Pulang' && <FiLogOut size={20}/>}
+                          {item.type === 'Izin' && <FiEdit3 size={20}/>}
+                        </span>
+                        
+                        {/* Kolom 2: Info Teks (mengisi sisa ruang) */}
+                        <div>
+                          <p className="font-semibold text-gray-800">{item.title}</p>
+                          <p className="text-sm text-gray-600">{item.date}</p>
+                          {item.type === 'Hadir' && isLate(item.description) ? (
+                            <p className="text-sm text-red-600 font-bold">{item.description} (Terlambat)</p>
+                          ) : (
+                            <p className="text-sm text-gray-500">{item.description}</p>
+                          )}
+                        </div>
+                        
+                        {/* Kolom 3: Tombol Aksi */}
+                        {item.lat && item.lon && (
+                          <div className="flex flex-col items-center gap-1">
+                            <button 
+                              onClick={() => handleViewDetails(item)} 
+                              className="text-sm bg-gray-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 transition-colors"
+                            >
+                              Lihat Detail
+                            </button>
+                            <p className="text-xs text-gray-400">
+                              {item.lat.toFixed(4)}, {item.lon.toFixed(4)}
+                            </p>
+                          </div>
+                        )}
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
               </div>
             </div>
           </div>

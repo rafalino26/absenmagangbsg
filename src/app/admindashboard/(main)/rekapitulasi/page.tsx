@@ -124,15 +124,15 @@ const displayedData = useMemo(() => {
   ];
 
      const csvData = displayedData.map((intern, index) => ({
-    no: index + 1,
-    name: intern.name,
-    division: intern.division,
-    accountNumber: intern.bankAccount ? `${intern.bankAccount.bank} - ${intern.bankAccount.number}` : '-',
-    hadir: intern.hadir,
-    absenDates: '10, 11 Juli 2025',
-    totalUangMakan: intern.totalUangMakan,
-    keterangan: `Periode Magang ${new Date(intern.joinDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`,
-  }));
+  no: index + 1,
+  name: intern.name,
+  division: intern.division,
+  accountNumber: intern.bankAccount ? `${intern.bankAccount.bank} - ${intern.bankAccount.number}` : '-',
+  hadir: intern.hadir,
+  absenDates: intern.absenDates, // Akan berisi placeholder '-' dari backend
+  totalUangMakan: `Rp${new Intl.NumberFormat('id-ID').format(intern.totalUangMakan)}`,
+  keterangan: intern.internshipPeriod, // Menggunakan data periode yang benar
+}));
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -346,7 +346,7 @@ const displayedData = useMemo(() => {
         headers={csvHeaders}
         separator={";"}
         filename={`Laporan_Absensi_${monthFilter.replace(' ', '_')}.csv`}
-        className="flex w-full items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-green-700 transition-colors"
+        className="flex w-full items-center justify-center gap-2 bg-black text-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 transition-colors"
       >
         <FiDownload />
         <span className="lg:inline">Download</span>

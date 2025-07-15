@@ -38,6 +38,7 @@ export interface InternSummary {
   totalUangMakan: number;
   bankAccount: { bank: string; number: string; } | null;
   joinDate: string; 
+  absenDates: string;
 }
 
 export type NotificationType = 'success' | 'error' | 'confirm';
