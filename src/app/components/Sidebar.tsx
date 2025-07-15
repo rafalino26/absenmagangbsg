@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiGrid, FiClock, FiX } from 'react-icons/fi';
+import { FiGrid, FiClock, FiX, FiMessageSquare } from 'react-icons/fi';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ const navLinks = [
   { name: 'Rekapitulasi', href: '/admindashboard/rekapitulasi', icon: FiGrid },
   { name: 'Riwayat Absensi', href: '/admindashboard/riwayat', icon: FiClock },
   { name: 'Arsip Magang', href: '/admindashboard/arsip', icon: FiClock },
+  { name: 'Helpdesk', href: '/admindashboard/helpdesk', icon: FiMessageSquare }, 
 ];
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {

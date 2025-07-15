@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, MouseEvent  } from 'react';
-import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiChevronDown, FiDownload } from 'react-icons/fi';
+import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiChevronDown, FiDownload, FiHeadphones } from 'react-icons/fi';
 import { CSVLink } from 'react-csv';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -18,6 +18,7 @@ import UserDetailModal from '../components/Modal/UserDetailModal';
 import NotificationModal from '../components/Modal/NotificationModal';
 import SpinnerOverlay from '../components/loading/SpinnerOverlay';
 import PhoneModal from '../components/Modal/PhoneModal';
+import HelpdeskModal from '../components/Modal/HelpdeskModal';
 import { NotificationState } from '../types';
 
 interface HistoryItem {
@@ -87,6 +88,7 @@ export default function DashboardPage() {
   const [isClient, setIsClient] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
   const [isPhoneModalOpen, setPhoneModalOpen] = useState(false);
+  const [isHelpdeskModalOpen, setHelpdeskModalOpen] = useState(false);
   const closeNotification = () => setNotification(null);
   const router = useRouter();
 
@@ -409,6 +411,25 @@ const handlePhoneSubmit = async (phone: string) => {
     });
   };
 
+   const handleHelpdeskSubmit = async ({ description, attachment }: { description: string, attachment: File | null }) => {
+    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('description', description);
+      if (attachment) {
+        formData.append('photo', attachment);
+      }
+      const response = await fetch('/api/helpdesk', { method: 'POST', body: formData });
+      if (!response.ok) throw new Error('Gagal mengirim laporan.');
+      
+      setNotification({ isOpen: true, title: 'Berhasil', message: 'Laporan Anda telah berhasil dikirim.', type: 'success' });
+    } catch (error: any) {
+      setNotification({ isOpen: true, title: 'Gagal', message: error.message, type: 'error' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const performLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/admin'); 
@@ -442,7 +463,6 @@ const handlePhoneSubmit = async (phone: string) => {
       <div className="bg-gray-50 min-h-screen">
 <header className="bg-red-600 shadow-sm">
   <div className="   px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
-  
     <div className="flex items-center gap-2">
       <div className="flex-shrink-0">
         <div className="w-[50px] aspect-square rounded-full overflow-hidden shadow-lg">
@@ -451,15 +471,18 @@ const handlePhoneSubmit = async (phone: string) => {
       </div>
       <div><h1 className="text-xl font-bold text-white">Absen Magang</h1></div>
     </div>
-    <button 
-      onClick={handleLogout}
-      className="p-2 text-white rounded-full hover:bg-red-700"
-      title="Logout"
-    >
-      <FiLogOut size={22} />
-    </button>
-  </div>
-</header>
+    <div className="flex items-center gap-2">
+            {/* Tombol Helpdesk */}
+            <button onClick={() => setHelpdeskModalOpen(true)} className="p-2 text-white rounded-full hover:bg-red-700" title="Helpdesk">
+              <FiHeadphones size={22} />
+            </button>
+            {/* Tombol Logout */}
+            <button onClick={handleLogout} className="p-2 text-white rounded-full hover:bg-red-700" title="Logout">
+              <FiLogOut size={22} />
+            </button>
+          </div>
+        </div>
+      </header>
         <main className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4 md:gap-6 mb-8">
@@ -483,7 +506,7 @@ const handlePhoneSubmit = async (phone: string) => {
               <div className="flex-grow pt-2">
               <h1 className="text-lg md:text-3xl font-bold text-gray-900">Halo, {user?.name}!</h1>
               <p className="mt-1 text-sm md:text-base text-gray-600">{user?.division} | Periode: {user?.internshipPeriod}</p>              
-              <div className="mt-2 flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <p className="text-xs md:text-sm text-gray-600">
                   No. Rekening: 
                   {bankAccount ? (
@@ -500,7 +523,7 @@ const handlePhoneSubmit = async (phone: string) => {
                   <FiEdit size={16} />
                 </button>
               </div>
-              <div className="mt-2 flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <p className="text-xs md:text-sm text-gray-600">
                   No. WA: 
                   {phoneNumber ? (
@@ -653,6 +676,11 @@ const handlePhoneSubmit = async (phone: string) => {
         isOpen={isDetailModalOpen}
         onClose={() => setDetailModalOpen(false)}
         record={selectedHistoryItem}
+      />
+      <HelpdeskModal
+        isOpen={isHelpdeskModalOpen}
+        onClose={() => setHelpdeskModalOpen(false)}
+        onSubmit={handleHelpdeskSubmit}
       />
        <NotificationModal
       isOpen={!!notification}

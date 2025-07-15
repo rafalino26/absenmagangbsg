@@ -29,6 +29,7 @@ model User {
 
   // Relasi: Satu User punya banyak data Absensi
   attendances       Attendance[]
+  helpdeskTickets HelpdeskTicket[]
 }
 
 // MODEL UNTUK RIWAYAT ABSENSI
@@ -45,5 +46,17 @@ model Attendance {
   // Kunci penghubung ke tabel User
   userId      Int
   // Definisi relasi: Absensi ini milik satu User
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model HelpdeskTicket {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  description String   @db.Text // @db.Text untuk teks yang panjang
+  proofUrl    String?
+  status      String   @default("OPEN") // Status bisa: OPEN, IN_PROGRESS, RESOLVED
+
+  // Relasi ke user yang melapor
+  userId      Int
   user        User     @relation(fields: [userId], references: [id])
 }
