@@ -45,6 +45,7 @@ export default function AdminDashboardPage() {
   const [selectedRecord, setSelectedRecord] = useState<AttendanceRecord | null>(null);
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
  const fetchInterns = useCallback(async (month: string) => {
     // setIsLoading(true) dihapus dari sini
@@ -95,6 +96,13 @@ export default function AdminDashboardPage() {
   
 const displayedData = useMemo(() => {
     let data = [...summaryData];
+      if (searchQuery) {
+    const lowercasedQuery = searchQuery.toLowerCase();
+    data = data.filter(intern =>  
+      intern.name.toLowerCase().includes(lowercasedQuery) ||
+      formatInternCode(intern.id).includes(lowercasedQuery)
+    );
+  }
     switch (sortBy) {
       case 'Terbaru':
         data.sort((a, b) => new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime());
@@ -110,7 +118,7 @@ const displayedData = useMemo(() => {
         break;
     }
     return data;
-  }, [summaryData, sortBy]);
+  }, [summaryData, sortBy, searchQuery]);
 
       const csvHeaders = [
     { label: "No", key: "no" },
@@ -310,50 +318,61 @@ const displayedData = useMemo(() => {
           </div>
 
           {/* Baris 1: Khusus untuk Filter */}
-<div className="mb-4 p-4 bg-white rounded-lg shadow-sm border">
-  <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
-    <CustomDropdown
-      label="Bulan"
-      options={monthOptions}
-      selectedValue={monthFilter}
-      onSelect={setMonthFilter}
-    />
-    <CustomDropdown
-      label="Urutkan"
-      options={['Terbaru', 'Terlama', 'Abjad']}
-      selectedValue={sortBy}
-      onSelect={setSortBy}
-    />
-  </div>
-</div>
+          <div className="mb-4 p-4 bg-white rounded-lg shadow-sm border">
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
+              <CustomDropdown
+                label="Bulan"
+                options={monthOptions}
+                selectedValue={monthFilter}
+                onSelect={setMonthFilter}
+              />
+              <CustomDropdown
+                label="Urutkan"
+                options={['Terbaru', 'Terlama', 'Abjad']}
+                selectedValue={sortBy}
+                onSelect={setSortBy}
+              />
+              <div>
+            <label htmlFor="search" className="text-sm font-medium text-gray-700 mr-2">Cari Nama:</label>
+            <input
+              type="text"
+              id="search"
+              placeholder="Ketik nama/Kode..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full sm:w-auto rounded-md p-2 text-black border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
+            />
+          </div>
+            </div>
+          </div>
 
-{/* Baris 2: Khusus untuk Tombol Aksi */}
-<div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-  {/* Tombol Tambah Peserta di Kiri */}
-  <button 
-    onClick={() => setAddInternModalOpen(true)}
-    className="flex items-center justify-center gap-2 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors w-full md:w-auto"
-  >
-    <FiPlus />
-    <span>Tambah Peserta</span>
-  </button>
+          {/* Baris 2: Khusus untuk Tombol Aksi */}
+          <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            {/* Tombol Tambah Peserta di Kiri */}
+            <button 
+              onClick={() => setAddInternModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors w-full md:w-auto"
+            >
+              <FiPlus />
+              <span>Tambah Peserta</span>
+            </button>
 
-  {/* Tombol Download di Kanan */}
-  <div className="w-full md:w-auto">
-    {isClient && (
-      <CSVLink
-        data={csvData}
-        headers={csvHeaders}
-        separator={";"}
-        filename={`Laporan_Absensi_${monthFilter.replace(' ', '_')}.csv`}
-        className="flex w-full items-center justify-center gap-2 bg-black text-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 transition-colors"
-      >
-        <FiDownload />
-        <span className="lg:inline">Download</span>
-      </CSVLink>
-    )}
-  </div>
-</div>
+            {/* Tombol Download di Kanan */}
+            <div className="w-full md:w-auto">
+              {isClient && (
+                <CSVLink
+                  data={csvData}
+                  headers={csvHeaders}
+                  separator={";"}
+                  filename={`Laporan_Absensi_${monthFilter.replace(' ', '_')}.csv`}
+                  className="flex w-full items-center justify-center gap-2 bg-black text-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  <FiDownload />
+                  <span className="lg:inline">Download</span>
+                </CSVLink>
+              )}
+            </div>
+          </div>
 
           <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
