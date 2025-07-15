@@ -17,6 +17,7 @@ import DashboardSkeleton from '../components/loading/DashboardSkeleton';
 import UserDetailModal from '../components/Modal/UserDetailModal';
 import NotificationModal from '../components/Modal/NotificationModal';
 import SpinnerOverlay from '../components/loading/SpinnerOverlay';
+import PhoneModal from '../components/Modal/PhoneModal';
 import { NotificationState } from '../types';
 
 interface HistoryItem {
@@ -84,6 +85,8 @@ export default function DashboardPage() {
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
+  const [isPhoneModalOpen, setPhoneModalOpen] = useState(false);
   const closeNotification = () => setNotification(null);
   const router = useRouter();
 
@@ -105,7 +108,8 @@ export default function DashboardPage() {
         } else {
           setBankAccount(null);   
         }
-        
+        if (userData.phoneNumber) setPhoneNumber(userData.phoneNumber);
+          else setPhoneNumber(null);
         if (userData.profilePicUrl) {
           setProfilePic(userData.profilePicUrl);
         } else {
@@ -176,8 +180,6 @@ const csvData = history
       kehadiran: item.type === 'Hadir' ? 1 : 0,
     };
   });
-
-// ... (sisa kode komponen tidak berubah)
 
 
  const handleConfirmAttendance = async (photoFile: File) => {
@@ -275,7 +277,7 @@ const handleConfirmLeave = async ({ reason, attachment }: { reason: string, atta
   }
 };
 
-  const handleViewDetails = (item: HistoryItem) => {
+const handleViewDetails = (item: HistoryItem) => {
     setSelectedHistoryItem(item);
     setDetailModalOpen(true);
   };
@@ -347,6 +349,48 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
     } else {
       const errorData = await response.json();
       setError(errorData.error || "Gagal menyimpan info rekening.");
+    }
+  } catch (e: any) {
+    setError("Gagal terhubung ke server.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+const handlePhoneSubmit = async (phone: string) => {
+  setPhoneModalOpen(false); // Tutup modal nomor HP
+  setIsSubmitting(true);
+  setError(null);
+
+  const formData = new FormData();
+  formData.append('phoneNumber', phone);
+
+  try {
+    const response = await fetch('/api/users/profile', {
+      method: 'PATCH',
+      body: formData,
+    });
+
+    if (response.ok) {
+      // Ambil data user yang sudah ter-update dari respons API
+      const updatedUserData = await response.json();
+      
+      // Perbarui state user dan nomor telepon secara lokal
+      setUser(updatedUserData);
+      if (updatedUserData.phoneNumber) {
+        setPhoneNumber(updatedUserData.phoneNumber);
+      }
+
+      // Tampilkan notifikasi sukses
+      setNotification({
+        isOpen: true,
+        title: 'Berhasil',
+        message: 'Nomor telepon berhasil disimpan.',
+        type: 'success',
+      });
+    } else {
+      const errorData = await response.json();
+      setError(errorData.error || "Gagal menyimpan nomor telepon.");
     }
   } catch (e: any) {
     setError("Gagal terhubung ke server.");
@@ -450,9 +494,22 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
                 </p>
                 <button
                   onClick={() => setBankAccountModalOpen(true)}
-                  className="p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full"
+                  className="p-1 text-gray-500 hover:text-red-600 hover:bg-black rounded-full"
                   aria-label="Edit Informasi Rekening"
                 >
+                  <FiEdit size={16} />
+                </button>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                <p className="text-xs md:text-sm text-gray-600">
+                  No. WA: 
+                  {phoneNumber ? (
+                    <span className="font-semibold text-gray-800 ml-1">{phoneNumber}</span>
+                  ) : (
+                    <span className="text-red-500 ml-1">Silakan masukkan nomor WA</span>
+                  )}
+                </p>
+                <button onClick={() => setPhoneModalOpen(true)} className="p-1 text-gray-500 hover:text-black hover:bg-red-50 rounded-full">
                   <FiEdit size={16} />
                 </button>
               </div>
@@ -585,6 +642,12 @@ const handleBankAccountSubmit = async (data: { bank: string; number: string }) =
         onClose={() => setBankAccountModalOpen(false)}
         onSubmit={handleBankAccountSubmit}
         currentAccount={bankAccount}
+      />
+      <PhoneModal
+        isOpen={isPhoneModalOpen}
+        onClose={() => setPhoneModalOpen(false)}
+        onSubmit={handlePhoneSubmit}
+        currentPhone={phoneNumber}
       />
         <UserDetailModal
         isOpen={isDetailModalOpen}

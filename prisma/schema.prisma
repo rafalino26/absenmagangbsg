@@ -23,6 +23,7 @@ model User {
   bankName          String?  
   accountNumber     String?
   profilePicUrl     String?
+  phoneNumber       String?
   joinDate          DateTime @default(now())
   isActive          Boolean  @default(true)
 

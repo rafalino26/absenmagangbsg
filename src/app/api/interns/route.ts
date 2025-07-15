@@ -60,6 +60,7 @@ export async function GET(req: NextRequest) {
           internshipPeriod: intern.internshipPeriod, // <-- Data ini tetap kita kirim
           joinDate: intern.joinDate.toISOString(),
           bankAccount: intern.bankName && intern.accountNumber ? { bank: intern.bankName, number: intern.accountNumber } : null,
+          phoneNumber: intern.phoneNumber,
           hadir,
           izin,
           terlambat,

@@ -39,6 +39,7 @@ export interface InternSummary {
   bankAccount: { bank: string; number: string; } | null;
   joinDate: string; 
   absenDates: string;
+  phoneNumber : string;
 }
 
 export type NotificationType = 'success' | 'error' | 'confirm';

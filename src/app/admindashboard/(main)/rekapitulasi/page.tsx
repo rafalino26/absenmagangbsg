@@ -382,6 +382,9 @@ const displayedData = useMemo(() => {
                       <div className="text-xs text-gray-500 mt-1">
                           Rek: {intern.bankAccount ? `${intern.bankAccount.bank} - ${intern.bankAccount.number}` : '-'}
                         </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                        WA: {intern.phoneNumber || '-'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-green-600 font-bold">{intern.hadir}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-blue-600 font-bold">{intern.izin}</td>

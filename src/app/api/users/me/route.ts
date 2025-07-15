@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
         profilePicUrl: true,
         bankName: true,
         accountNumber: true,
+        phoneNumber: true,
       }
     });
 
