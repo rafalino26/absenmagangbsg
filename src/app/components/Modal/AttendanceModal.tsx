@@ -13,9 +13,10 @@ interface AttendanceModalProps {
 }
 
 const compressionOptions = {
-  maxSizeMB: 2,
+  maxSizeMB: 2.5,
   maxWidthOrHeight: 1080,
   useWebWorker: true,
+  initialQuality: 0.8
 };
 
 export default function AttendanceModal({ isOpen, onClose, onSubmit, attendanceType }: AttendanceModalProps) {
