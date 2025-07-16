@@ -196,11 +196,9 @@ const displayedData = useMemo(() => {
     }
     
     const newIntern = await response.json();
-    
-    // Refresh data dulu...
+  
     await fetchInterns(monthFilter);
 
-    // Baru tampilkan notifikasi sukses
     setNotification({
       isOpen: true,
       title: 'Berhasil!',

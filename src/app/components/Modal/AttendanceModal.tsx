@@ -13,7 +13,7 @@ interface AttendanceModalProps {
 }
 
 const compressionOptions = {
-  maxSizeMB: 1,
+  maxSizeMB: 2,
   maxWidthOrHeight: 1080,
   useWebWorker: true,
 };

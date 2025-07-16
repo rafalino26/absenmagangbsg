@@ -151,25 +151,18 @@ export default function DashboardPage() {
     setAttendanceModalOpen(true);
   };
 
-// Di dalam komponen DashboardPage
-
-// 1. Siapkan header kolom yang baru untuk CSV
 const csvHeaders = [
   { label: "Tanggal", key: "date" },
   { label: "Status", key: "title" },
   { label: "Keterangan", key: "description" },
-  { label: "Hadir", key: "kehadiran" }, // <-- Kolom baru
+  { label: "Hadir", key: "kehadiran" }, 
 ];
 
-// 2. Siapkan data dengan logika yang sudah diperbarui
 const csvData = history
-  // Filter untuk membuang "Absen Pulang"
   .filter(item => item.type !== 'Pulang')
   // Map untuk memformat setiap baris
   .map(item => {
     let description = item.description;
-
-    // Tambahkan "(Terlambat)" jika user terlambat
     if (item.type === 'Hadir' && isLate(item.description)) {
       description = `(Terlambat) ${item.description} `;
     }
@@ -178,7 +171,6 @@ const csvData = history
       date: item.date,
       title: item.title,
       description: description,
-      // Kolom "Hadir" akan berisi 1 jika status Hadir, dan 0 jika Izin/Tidak Hadir
       kehadiran: item.type === 'Hadir' ? 1 : 0,
     };
   });

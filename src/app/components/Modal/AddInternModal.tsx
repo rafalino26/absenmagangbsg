@@ -12,7 +12,7 @@ export interface NewInternData {
   name: string;
   division: string;
   period: string;
-  password: string; 
+  email: string; 
 }
 
 interface AddInternModalProps {
@@ -25,11 +25,9 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
   const [name, setName] = useState('');
   const [division, setDivision] = useState('');
   const [period, setPeriod] = useState('');
-  // 2. Tambahkan state untuk password
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
   const [range, setRange] = useState<DateRange | undefined>();
-    const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = () => {
@@ -38,9 +36,9 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
       periodString = `${format(range.from, 'd LLL yyyy')} - ${format(range.to, 'd LLL yyyy')}`;
     }
 
-    if (name && division && password && periodString) {
-      onSubmit({ name, division, period: periodString, password });
-      onClose();
+    if (name && division && email && periodString) {
+      onSubmit({ name, division, period: periodString, email });
+      handleClose();
     } else {
       alert("Semua field wajib diisi.");
     }
@@ -50,7 +48,7 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
     setRange(undefined);
     setName('');
     setDivision('');
-    setPassword('');
+    setEmail('');
     setIsPickerOpen(false); // Pastikan picker juga tertutup
     onClose();
   };
@@ -109,7 +107,7 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
               
               {/* Pop-up Kalender */}
               {isPickerOpen && (
-                <div className="absolute -mt-2 bg-white border rounded-md shadow-lg z-10">
+                <div className="absolute -mt-2 text-black bg-white border rounded-md shadow-lg z-10">
                   <DayPicker
                     mode="range"
                     selected={range}
@@ -125,31 +123,19 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
               )}
             </div>
           </div>
-
-          {/* 3. Tambahkan input untuk password di sini */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password Awal</label>
-            <div className="relative mt-1">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="block w-full text-black p-2 pr-10 border border-gray-300 rounded-md"
-                placeholder="Buat password untuk peserta"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <FaEye /> : <FaEyeSlash />}
-              </button>
-            </div>
+           <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Peserta</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md"
+              placeholder="Untuk mengirim info login"
+            />
           </div>
-
+    
         </div>
-
         <div className="p-4 bg-gray-50 border-t flex justify-end">
            <button type="button" onClick={handleSubmit} className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700">Simpan</button>
         </div>
