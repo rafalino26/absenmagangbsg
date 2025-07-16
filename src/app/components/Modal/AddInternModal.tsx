@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Impor ikon mata
+import { useState, useRef, useEffect  } from 'react';
+import { FaEye, FaEyeSlash, FaCalendar } from 'react-icons/fa'; // Impor ikon mata
 import { FiX } from 'react-icons/fi';
+import { format } from 'date-fns';
+import { DayPicker, DateRange } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 
 // 1. Tambahkan properti 'password' di interface
 export interface NewInternData {
@@ -25,18 +28,53 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
   // 2. Tambahkan state untuk password
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [range, setRange] = useState<DateRange | undefined>();
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = () => {
-    // 4. Perbarui validasi dan data yang dikirim
-    if (name && division && period && password) {
-      onSubmit({ name, division, period, password });
+    let periodString = '';
+    if (range?.from && range.to) {
+      periodString = `${format(range.from, 'd LLL yyyy')} - ${format(range.to, 'd LLL yyyy')}`;
+    }
+
+    if (name && division && password && periodString) {
+      onSubmit({ name, division, period: periodString, password });
       onClose();
     } else {
       alert("Semua field wajib diisi.");
     }
   };
+  
+  const handleClose = () => {
+    setRange(undefined);
+    setName('');
+    setDivision('');
+    setPassword('');
+    setIsPickerOpen(false); // Pastikan picker juga tertutup
+    onClose();
+  };
+
+    useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+        setIsPickerOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [pickerRef]);
 
   if (!isOpen) return null;
+
+    let displayValue = 'Pilih rentang tanggal...';
+  if (range?.from) {
+    if (!range.to) {
+      displayValue = format(range.from, 'd LLL yyyy');
+    } else {
+      displayValue = `${format(range.from, 'd LLL yyyy')} – ${format(range.to, 'd LLL yyyy')}`;
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
@@ -55,9 +93,37 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
             <label htmlFor="division" className="block text-sm font-medium text-gray-700">Divisi</label>
             <input type="text" id="division" value={division} onChange={(e) => setDivision(e.target.value)} className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md"/>
           </div>
-          <div>
+           <div>
             <label htmlFor="period" className="block text-sm font-medium text-gray-700">Periode Magang</label>
-            <input type="text" id="period" value={period} onChange={(e) => setPeriod(e.target.value)} className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md" placeholder="Contoh: 1 Agu 2025 - 31 Okt 2025"/>
+            <div className="relative mt-1" ref={pickerRef}>
+              {/* Input Teks sebagai Pemicu */}
+              <input
+                id="period"
+                type="text"
+                readOnly
+                value={displayValue}
+                onClick={() => setIsPickerOpen(true)}
+                className="w-full p-2 text-black border border-gray-300 rounded-md cursor-pointer pr-10"
+              />
+              <FaCalendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              
+              {/* Pop-up Kalender */}
+              {isPickerOpen && (
+                <div className="absolute -mt-2 bg-white border rounded-md shadow-lg z-10">
+                  <DayPicker
+                    mode="range"
+                    selected={range}
+                    onSelect={(selectedRange) => {
+                      setRange(selectedRange);
+                      if (selectedRange?.from && selectedRange?.to) {
+                        setIsPickerOpen(false);
+                      }
+                    }}
+                    numberOfMonths={1}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 3. Tambahkan input untuk password di sini */}
@@ -89,5 +155,6 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
         </div>
       </div>
     </div>
+
   );
 }
