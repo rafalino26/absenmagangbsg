@@ -181,7 +181,7 @@ const displayedData = useMemo(() => {
   };
 
   const handleAddInternSubmit = async (data: NewInternData) => {
-  setAddInternModalOpen(false); // Tutup modalnya dulu
+  setAddInternModalOpen(false);
   setIsSubmitting(true);
   try {
     const response = await fetch('/api/interns', {
@@ -190,27 +190,33 @@ const displayedData = useMemo(() => {
       body: JSON.stringify(data),
     });
 
+    const result = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Gagal menambah peserta.');
+      throw new Error(result.error || 'Gagal menambah peserta.');
     }
-    
-    const newIntern = await response.json();
   
-    await fetchInterns(monthFilter);
-
-    setNotification({
-      isOpen: true,
-      title: 'Berhasil!',
-      message: `Peserta baru ${newIntern.name} berhasil ditambahkan. Kode Magangnya adalah: ${formatInternCode(newIntern.id)}`,
-      type: 'success',
-    });
-
+    if (result.warning) {
+      setNotification({
+        isOpen: true,
+        title: 'Berhasil dengan Peringatan',
+        message: result.warning,
+        type: 'success',
+      });
+    } else {
+      setNotification({
+        isOpen: true,
+        title: 'Berhasil!',
+        message: `Peserta baru ${result.name} berhasil ditambahkan. Info login telah dikirim ke email.`,
+        type: 'success',
+      });
+    }
+    fetchInterns(monthFilter); 
   } catch (error: any) {
     setNotification({
       isOpen: true,
       title: 'Gagal',
-      message: error.message || 'Terjadi kesalahan.',
+      message: error.message,
       type: 'error',
     });
   } finally {

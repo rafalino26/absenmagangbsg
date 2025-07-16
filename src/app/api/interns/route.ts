@@ -101,28 +101,44 @@ export async function GET(req: NextRequest) {
 
 
 export async function POST(req: Request) {
+  let newInternId: number | null = null;
+  
   try {
     const { name, division, period, email } = await req.json();
 
     if (!name || !division || !period || !email) {
       return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
     }
-    const tempPassword = `${name.split(' ')[0].toLowerCase()}${Date.now().toString().slice(-4)}`;
 
-    const hashedPassword = await hash(tempPassword, 10);
-
+    // Buat user dengan password sementara untuk dapat ID
     const newIntern = await prisma.user.create({
-      data: {
-        name,
-        division,
-        internshipPeriod: period,
-        email,
-        password: hashedPassword, 
-      },
+      data: { name, division, internshipPeriod: period, email, password: 'PENDING' },
+    });
+    newInternId = newIntern.id; // Simpan ID-nya
+
+    // Buat password asli dan hash
+    const firstName = name.split(' ')[0].toLowerCase();
+    const internCode = String(newIntern.id).padStart(3, '0');
+    const autoPassword = `${firstName}${internCode}`;
+    const hashedPassword = await hash(autoPassword, 10);
+    
+    // Update user dengan password yang sudah di-hash
+    await prisma.user.update({
+      where: { id: newIntern.id },
+      data: { password: hashedPassword },
     });
 
-    const internCode = String(newIntern.id).padStart(3, '0');
-    await sendLoginDetailsByEmail(email, name, internCode, tempPassword);
+    // Setelah user DIJAMIN berhasil dibuat & di-update, BARU coba kirim email
+    try {
+      await sendLoginDetailsByEmail(email, name, internCode, autoPassword);
+    } catch (emailError) {
+      console.error("GAGAL MENGIRIM EMAIL, TAPI USER SUDAH DIBUAT:", emailError);
+      // Kirim respons sukses, TAPI dengan pesan peringatan
+      return NextResponse.json({
+        ...newIntern,
+        warning: `Peserta berhasil dibuat (Kode: ${internCode}), tetapi notifikasi email gagal dikirim. Harap berikan info login secara manual.`
+      });
+    }
     
     return NextResponse.json(newIntern, { status: 201 });
 
