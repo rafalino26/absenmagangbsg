@@ -106,7 +106,11 @@ export default function AttendanceModal({ isOpen, onClose, onSubmit, attendanceT
                   mirrored={true}
                   screenshotFormat="image/jpeg"
                   className="rounded-lg w-full"
-                  videoConstraints={{ facingMode: "user" }}
+                  videoConstraints={{ 
+                    width: 1920, 
+                    height: 1080,
+                    facingMode: "user" 
+                  }}
                 />
                <button 
                 onClick={capturePhoto} 
