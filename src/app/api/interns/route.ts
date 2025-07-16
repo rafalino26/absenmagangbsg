@@ -99,50 +99,38 @@ export async function GET(req: NextRequest) {
   }
 }
 
+
 export async function POST(req: Request) {
   try {
-    // Terima email, bukan password
     const { name, division, period, email } = await req.json();
 
     if (!name || !division || !period || !email) {
       return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
     }
+    const tempPassword = `${name.split(' ')[0].toLowerCase()}${Date.now().toString().slice(-4)}`;
 
-    // Buat user baru untuk mendapatkan ID (Kode Magang)
+    const hashedPassword = await hash(tempPassword, 10);
+
     const newIntern = await prisma.user.create({
       data: {
         name,
         division,
         internshipPeriod: period,
         email,
-        password: '', // Password diisi sementara, akan di-update
+        password: hashedPassword, 
       },
     });
 
-    // Buat password otomatis
-    const firstName = name.split(' ')[0].toLowerCase();
     const internCode = String(newIntern.id).padStart(3, '0');
-    const autoPassword = `${firstName}${internCode}`;
-
-    // 2. Panggil fungsi pengiriman email di sini
-    await sendLoginDetailsByEmail(email, name, internCode, autoPassword);
-
-    // Hash password lalu update ke database
-    const hashedPassword = await hash(autoPassword, 10);
-    await prisma.user.update({
-      where: { id: newIntern.id },
-      data: { password: hashedPassword },
-    });
+    await sendLoginDetailsByEmail(email, name, internCode, tempPassword);
     
     return NextResponse.json(newIntern, { status: 201 });
+
   } catch (error) {
-    // TAMBAHKAN LOGIKA INI untuk menangkap error spesifik
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      return NextResponse.json({ error: 'Email ini sudah terdaftar. Gunakan email lain.' }, { status: 409 }); // 409 Conflict
+      return NextResponse.json({ error: 'Email ini sudah terdaftar. Gunakan email lain.' }, { status: 409 });
     }
-    
-    // Untuk semua error lainnya
     console.error("Error saat membuat peserta:", error);
-    return NextResponse.json({ error: 'Gagal membuat peserta baru' }, { status: 500 });
+    return NextResponse.json({ error: 'Gagal membuat peserta baru atau mengirim email.' }, { status: 500 });
   }
 }
