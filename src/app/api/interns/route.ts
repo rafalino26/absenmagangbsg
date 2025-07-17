@@ -2,11 +2,11 @@ import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { hash } from 'bcrypt';
 import nodemailer from 'nodemailer';
+import { format } from 'date-fns';
 
 const prisma = new PrismaClient();
 
 async function sendLoginDetailsByEmail(email: string, name: string, internCode: string, password: string) {
-  // Konfigurasi "kantor pos" Gmail
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -15,7 +15,6 @@ async function sendLoginDetailsByEmail(email: string, name: string, internCode: 
     },
   });
 
-  // Kirim email
   await transporter.sendMail({
     from: `"Sistem Absensi" <${process.env.GMAIL_USER}>`,
     to: email,
@@ -24,7 +23,6 @@ async function sendLoginDetailsByEmail(email: string, name: string, internCode: 
   });
 }
 
-// Fungsi helper untuk mengubah string "Bulan Tahun" menjadi rentang tanggal
 function getMonthDateRange(monthString: string) {
   const monthMap: { [key: string]: number } = {
     'Januari': 0, 'Februari': 1, 'Maret': 2, 'April': 3, 'Mei': 4, 'Juni': 5,
@@ -45,23 +43,21 @@ function getMonthDateRange(monthString: string) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const month = searchParams.get('month');
+    const month = req.nextUrl.searchParams.get('month');
     let dateFilter = {};
+    let periodFilter = {};
 
     if (month && month !== 'Semua Bulan') {
       const dateRange = getMonthDateRange(month);
       if (dateRange) {
         dateFilter = { timestamp: { gte: dateRange.startDate, lt: dateRange.endDate } };
+        periodFilter = { periodStartDate: { lte: dateRange.endDate }, periodEndDate: { gte: dateRange.startDate } };
       }
     }
     
     const interns = await prisma.user.findMany({
-      where: {
-        role: 'INTERN',
-        isActive: true,
-        attendances: month && month !== 'Semua Bulan' ? { some: dateFilter } : undefined,
-      },
+      where: { role: 'INTERN', isActive: true, ...periodFilter },
+      orderBy: { name: 'asc' },
     });
 
     const summaryData = await Promise.all(
@@ -71,13 +67,14 @@ export async function GET(req: NextRequest) {
         const hadir = await prisma.attendance.count({ where: { ...commonWhere, type: 'Hadir' } });
         const izin = await prisma.attendance.count({ where: { ...commonWhere, type: 'Izin' } });
         const terlambat = await prisma.attendance.count({ where: { ...commonWhere, isLate: true } });
-        const absen = 0; // Kembali ke placeholder
+        const absen = 0;
 
         return {
           id: intern.id,
           name: intern.name,
           division: intern.division,
-          internshipPeriod: intern.internshipPeriod, // <-- Data ini tetap kita kirim
+          periodStartDate: intern.periodStartDate?.toISOString(),
+          periodEndDate: intern.periodEndDate?.toISOString(),
           joinDate: intern.joinDate.toISOString(),
           bankAccount: intern.bankName && intern.accountNumber ? { bank: intern.bankName, number: intern.accountNumber } : null,
           phoneNumber: intern.phoneNumber,
@@ -86,57 +83,58 @@ export async function GET(req: NextRequest) {
           terlambat,
           absen,
           totalUangMakan: hadir * 15000,
-          absenDates: '-', // Kembali ke placeholder
         };
       })
     );
-
     return NextResponse.json(summaryData);
-
   } catch (error) {
     console.error("Error saat mengambil data rekapitulasi:", error);
     return NextResponse.json({ error: 'Gagal mengambil data' }, { status: 500 });
   }
 }
 
+// di file app/api/interns/route.ts
 
 export async function POST(req: Request) {
-  let newInternId: number | null = null;
-  
   try {
-    const { name, division, period, email } = await req.json();
+    const { name, division, email, periodStartDate, periodEndDate } = await req.json();
 
-    if (!name || !division || !period || !email) {
+    if (!name || !division || !email || !periodStartDate || !periodEndDate) {
       return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
     }
 
-    // Buat user dengan password sementara untuk dapat ID
+    // Langkah 1: Buat user dengan password sementara untuk dapat ID
     const newIntern = await prisma.user.create({
-      data: { name, division, internshipPeriod: period, email, password: 'PENDING' },
+      data: {
+        name,
+        division,
+        email,
+        password: 'PENDING_PASSWORD', // Teks sementara
+        periodStartDate: new Date(periodStartDate),
+        periodEndDate: new Date(periodEndDate),
+      },
     });
-    newInternId = newIntern.id; // Simpan ID-nya
 
-    // Buat password asli dan hash
+    // Langkah 2: Buat password asli menggunakan ID yang baru didapat
     const firstName = name.split(' ')[0].toLowerCase();
     const internCode = String(newIntern.id).padStart(3, '0');
     const autoPassword = `${firstName}${internCode}`;
+
+    // Langkah 3: Hash password asli dan UPDATE data user
     const hashedPassword = await hash(autoPassword, 10);
-    
-    // Update user dengan password yang sudah di-hash
     await prisma.user.update({
       where: { id: newIntern.id },
       data: { password: hashedPassword },
     });
-
-    // Setelah user DIJAMIN berhasil dibuat & di-update, BARU coba kirim email
+    
+    // Langkah 4: Coba kirim email dengan password asli (yang belum di-hash)
     try {
       await sendLoginDetailsByEmail(email, name, internCode, autoPassword);
     } catch (emailError) {
       console.error("GAGAL MENGIRIM EMAIL, TAPI USER SUDAH DIBUAT:", emailError);
-      // Kirim respons sukses, TAPI dengan pesan peringatan
       return NextResponse.json({
         ...newIntern,
-        warning: `Peserta berhasil dibuat (Kode: ${internCode}), tetapi notifikasi email gagal dikirim. Harap berikan info login secara manual.`
+        warning: `Peserta berhasil dibuat (Kode: ${internCode}), tetapi notifikasi email gagal dikirim.`
       });
     }
     
@@ -144,9 +142,9 @@ export async function POST(req: Request) {
 
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      return NextResponse.json({ error: 'Email ini sudah terdaftar. Gunakan email lain.' }, { status: 409 });
+      return NextResponse.json({ error: 'Email ini sudah terdaftar.' }, { status: 409 });
     }
     console.error("Error saat membuat peserta:", error);
-    return NextResponse.json({ error: 'Gagal membuat peserta baru atau mengirim email.' }, { status: 500 });
+    return NextResponse.json({ error: 'Gagal membuat peserta baru.' }, { status: 500 });
   }
 }

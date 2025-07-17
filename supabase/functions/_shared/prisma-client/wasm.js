@@ -182,7 +182,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../../.env"
   },
   "relativePath": "../../../../prisma",
@@ -192,7 +192,6 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -201,8 +200,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider        = \"prisma-client-js\"\n  previewFeatures = [\"driverAdapters\"]\n  output          = \"../supabase/functions/_shared/prisma-client\"\n}\n\ndatasource db {\n  provider  = \"postgresql\"\n  url       = env(\"DATABASE_URL\")\n  directUrl = env(\"DIRECT_URL\")\n}\n\nmodel User {\n  id              Int       @id @default(autoincrement())\n  name            String\n  email           String?   @unique\n  password        String\n  role            String    @default(\"INTERN\")\n  division        String\n  periodStartDate DateTime?\n  periodEndDate   DateTime?\n  bankName        String?\n  accountNumber   String?\n  profilePicUrl   String?\n  phoneNumber     String?\n  joinDate        DateTime  @default(now())\n  isActive        Boolean   @default(true)\n\n  attendances     Attendance[]\n  helpdeskTickets HelpdeskTicket[]\n}\n\nmodel Attendance {\n  id          Int      @id @default(autoincrement())\n  type        String // 'Hadir', 'Pulang', atau 'Izin'\n  timestamp   DateTime @default(now()) // Waktu saat data dibuat\n  description String // Untuk jam (misal: \"08:05 WITA\") atau alasan izin\n  photoUrl    String?\n  latitude    Float?\n  longitude   Float?\n  isLate      Boolean  @default(false)\n  userId      Int\n  user        User     @relation(fields: [userId], references: [id])\n}\n\nmodel HelpdeskTicket {\n  id          Int      @id @default(autoincrement())\n  createdAt   DateTime @default(now())\n  description String   @db.Text // @db.Text untuk teks yang panjang\n  proofUrl    String?\n  status      String   @default(\"OPEN\") // Status bisa: OPEN, IN_PROGRESS, RESOLVED\n  userId      Int\n  user        User     @relation(fields: [userId], references: [id])\n}\n",
-  "inlineSchemaHash": "13dbd72aec6aae6cab7e56fbe7ac50227b3f45cf2308bb5d10974ed8f6bff8be",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider        = \"prisma-client-js\"\n  previewFeatures = [\"driverAdapters\"]\n  output          = \"../supabase/functions/_shared/prisma-client\"\n}\n\ndatasource db {\n  provider  = \"postgresql\"\n  url       = env(\"DATABASE_URL\")\n  directUrl = env(\"DATABASE_URL_DIRECT\")\n}\n\nmodel User {\n  id              Int       @id @default(autoincrement())\n  name            String\n  email           String?   @unique\n  password        String\n  role            String    @default(\"INTERN\")\n  division        String\n  periodStartDate DateTime?\n  periodEndDate   DateTime?\n  bankName        String?\n  accountNumber   String?\n  profilePicUrl   String?\n  phoneNumber     String?\n  joinDate        DateTime  @default(now())\n  isActive        Boolean   @default(true)\n\n  attendances     Attendance[]\n  helpdeskTickets HelpdeskTicket[]\n}\n\nmodel Attendance {\n  id          Int      @id @default(autoincrement())\n  type        String // 'Hadir', 'Pulang', atau 'Izin'\n  timestamp   DateTime @default(now()) // Waktu saat data dibuat\n  description String // Untuk jam (misal: \"08:05 WITA\") atau alasan izin\n  photoUrl    String?\n  latitude    Float?\n  longitude   Float?\n  isLate      Boolean  @default(false)\n  userId      Int\n  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nmodel HelpdeskTicket {\n  id          Int      @id @default(autoincrement())\n  createdAt   DateTime @default(now())\n  description String   @db.Text // @db.Text untuk teks yang panjang\n  proofUrl    String?\n  status      String   @default(\"OPEN\") // Status bisa: OPEN, IN_PROGRESS, RESOLVED\n  userId      Int\n  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n",
+  "inlineSchemaHash": "c7143dc19aa67bc6e5baa36a157e06f770e9f7f6730c81dc8ab4ad2e46a7879f",
   "copyEngine": true
 }
 config.dirname = '/'

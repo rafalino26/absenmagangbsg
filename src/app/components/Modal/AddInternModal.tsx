@@ -11,8 +11,9 @@ import 'react-day-picker/dist/style.css';
 export interface NewInternData {
   name: string;
   division: string;
-  period: string;
-  email: string; 
+  email: string;
+  periodStartDate: Date;
+  periodEndDate: Date;
 }
 
 interface AddInternModalProps {
@@ -31,16 +32,17 @@ export default function AddInternModal({ isOpen, onClose, onSubmit }: AddInternM
   const pickerRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = () => {
-    let periodString = '';
-    if (range?.from && range.to) {
-      periodString = `${format(range.from, 'd LLL yyyy')} - ${format(range.to, 'd LLL yyyy')}`;
-    }
-
-    if (name && division && email && periodString) {
-      onSubmit({ name, division, period: periodString, email });
+    if (name && division && email && range?.from && range.to) {
+      onSubmit({
+        name,
+        division,
+        email,
+        periodStartDate: range.from,
+        periodEndDate: range.to,
+      });
       handleClose();
     } else {
-      alert("Semua field wajib diisi.");
+      alert("Semua field wajib diisi, termasuk rentang tanggal periode.");
     }
   };
   

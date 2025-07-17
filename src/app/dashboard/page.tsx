@@ -19,7 +19,8 @@ import NotificationModal from '../components/Modal/NotificationModal';
 import SpinnerOverlay from '../components/loading/SpinnerOverlay';
 import PhoneModal from '../components/Modal/PhoneModal';
 import HelpdeskModal from '../components/Modal/HelpdeskModal';
-import { NotificationState } from '../types';
+import { AttendanceRecord,NotificationState,UserProfile } from '../types';
+import { format } from 'date-fns';
 
 interface HistoryItem {
   id: number;
@@ -30,12 +31,6 @@ interface HistoryItem {
   lat?: number; 
   lon?: number; 
   photoUrl?: string;
-}
-
-interface UserProfile {
-  name: string;
-  division: string;
-  internshipPeriod: string;
 }
 
 interface LocationState {
@@ -427,6 +422,10 @@ const handlePhoneSubmit = async (phone: string) => {
     router.push('/admin'); 
   };
 
+    const periodDisplay = (user?.periodStartDate && user.periodEndDate)
+    ? `${format(new Date(user.periodStartDate), 'd LLL yyyy')} - ${format(new Date(user.periodEndDate), 'd LLL yyyy')}`
+    : 'Periode tidak diatur';
+
   if (isLoading) {
     return (
       <>
@@ -497,7 +496,7 @@ const handlePhoneSubmit = async (phone: string) => {
               </div>
               <div className="flex-grow pt-2">
               <h1 className="text-lg md:text-3xl font-bold text-gray-900">Halo, {user?.name}!</h1>
-              <p className="mt-1 text-sm md:text-base text-gray-600">{user?.division} | Periode: {user?.internshipPeriod}</p>              
+              <p className="mt-1 text-sm md:text-base text-gray-600">{user?.division} | Periode: {periodDisplay}</p>              
               <div className="flex items-center gap-2">
                 <p className="text-xs md:text-sm text-gray-600">
                   No. Rekening: 

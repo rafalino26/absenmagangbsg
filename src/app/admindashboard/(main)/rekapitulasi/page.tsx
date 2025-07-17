@@ -12,6 +12,7 @@ import EditInternModal from '@/app/components/Modal/EditInternModal';
 import NotificationModal   from '@/app/components/Modal/NotificationModal';
 import AdminLiveDetailModal from '@/app/components/Modal/AdminLiveDetailModal';
 import SpinnerOverlay from '@/app/components/loading/SpinnerOverlay';
+import { format } from 'date-fns';
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('id-ID', {
@@ -131,15 +132,17 @@ const displayedData = useMemo(() => {
     { label: "Keterangan", key: "keterangan" },
   ];
 
-     const csvData = displayedData.map((intern, index) => ({
+const csvData = displayedData.map((intern, index) => ({
   no: index + 1,
   name: intern.name,
   division: intern.division,
   accountNumber: intern.bankAccount ? `${intern.bankAccount.bank} - ${intern.bankAccount.number}` : '-',
   hadir: intern.hadir,
-  absenDates: intern.absenDates, // Akan berisi placeholder '-' dari backend
+  absenDates: intern.absenDates,
   totalUangMakan: `Rp${new Intl.NumberFormat('id-ID').format(intern.totalUangMakan)}`,
-  keterangan: intern.internshipPeriod, // Menggunakan data periode yang benar
+  keterangan: (intern.periodStartDate && intern.periodEndDate)
+    ? `${format(new Date(intern.periodStartDate), 'd LLL yyyy')} - ${format(new Date(intern.periodEndDate), 'd LLL yyyy')}`
+    : 'Periode tidak diatur',
 }));
 
   useEffect(() => {
@@ -233,7 +236,7 @@ const displayedData = useMemo(() => {
     setEditModalOpen(false);
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/interns/${id}`, {
+      const response = await fetch(`/api/interns/manage?id=${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -262,35 +265,28 @@ const displayedData = useMemo(() => {
     }
   };
 
- const handleDeleteClick = (intern: InternSummary) => {
-    setNotification({
-      isOpen: true,
-      title: 'Konfirmasi Hapus',
-      message: `Anda yakin ingin menghapus peserta bernama ${intern.name}? Tindakan ini akan mengarsipkannya.`,
-      type: 'confirm',
-      onConfirm: () => performDelete(intern.id), // Panggil fungsi delete sebenarnya saat dikonfirmasi
-    });
-  };
-
-  const performDelete = async (id: number) => {
+ // Ganti nama fungsi menjadi lebih sesuai
+const performArchive = async (id: number) => {
   setIsSubmitting(true);
   try {
-    const response = await fetch(`/api/interns/${id}`, { method: 'DELETE' });
+    // Ubah method menjadi 'PATCH' dan kirim body 'action'
+    const response = await fetch(`/api/interns/manage?id=${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'archive' }), // Kirim perintah arsip
+    });
     
     if (!response.ok) {
-      throw new Error('Gagal menghapus peserta.');
+      throw new Error('Gagal mengarsipkan peserta.');
     }
 
-    // Refresh data dulu...
-    await fetchInterns(monthFilter);
-
-    // Baru tampilkan notifikasi sukses
     setNotification({ 
       isOpen: true, 
       title: 'Berhasil', 
-      message: 'Peserta berhasil dihapus (diarsip).', 
+      message: 'Peserta berhasil diarsipkan.', 
       type: 'success' 
     });
+    fetchInterns(monthFilter);
     
   } catch (error: any) {
     setNotification({ 
@@ -300,8 +296,19 @@ const displayedData = useMemo(() => {
       type: 'error' 
     });
   } finally {
-    setIsSubmitting(false); // Pastikan loading selalu berhenti
+    setIsSubmitting(false);
   }
+};
+
+// Ubah handleDeleteClick agar memanggil performArchive
+const handleDeleteClick = (intern: InternSummary) => {
+  setNotification({
+    isOpen: true,
+    title: 'Konfirmasi Arsip',
+    message: `Anda yakin ingin mengarsipkan peserta bernama ${intern.name}?`,
+    type: 'confirm',
+    onConfirm: () => performArchive(intern.id),
+  });
 };
 
    if (isLoading) {
@@ -402,6 +409,12 @@ const displayedData = useMemo(() => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">{intern.name}</div>
                       <div className="text-sm text-gray-500">Kode: {formatInternCode(intern.id)}| {intern.division}</div>
+                       <div className="text-xs text-gray-500 mt-1">
+                        {(intern.periodStartDate && intern.periodEndDate)
+                          ? `Periode:${format(new Date(intern.periodStartDate), 'd LLL yy')} - ${format(new Date(intern.periodEndDate), 'd LLL yy')}`
+                          : '-'
+                        }
+                      </div>
                       <div className="text-xs text-gray-500 mt-1">
                           Rek: {intern.bankAccount ? `${intern.bankAccount.bank} - ${intern.bankAccount.number}` : '-'}
                         </div>

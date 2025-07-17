@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Menggunakan Fi untuk konsistensi
-import { FiX  } from 'react-icons/fi'; // Menggunakan Fi untuk konsistensi
+import { FiX, FiCalendar  } from 'react-icons/fi'; // Menggunakan Fi untuk konsistensi
 import { InternSummary } from '@/app/types';
+import { DayPicker, DateRange } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
+import { format } from 'date-fns';
 
 // Tipe data untuk props yang diterima komponen ini
 interface EditInternModalProps {
@@ -21,28 +24,36 @@ export default function EditInternModal({ isOpen, onClose, onSubmit, internData 
   const [password, setPassword] = useState(''); // Untuk reset password
   const [showPassword, setShowPassword] = useState(false);
 
-  // 1. useEffect untuk mengisi form dengan data yang ada saat modal dibuka
-  useEffect(() => {
-    if (internData) {
-      setName(internData.name);
-      setDivision(internData.division);
-      // Asumsi internshipPeriod ada di InternSummary, jika tidak ada sesuaikan
-      setPeriod((internData as any).internshipPeriod || ''); 
-      setPassword(''); // Selalu kosongkan password saat modal dibuka
+  const [range, setRange] = useState<DateRange | undefined>();
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+  if (internData) {
+    setName(internData.name);
+    setDivision(internData.division);
+    
+    if (internData.periodStartDate && internData.periodEndDate) {
+      setRange({
+        from: new Date(internData.periodStartDate),
+        to: new Date(internData.periodEndDate),
+      });
+    } else {
+      setRange(undefined);
     }
-  }, [internData]);
+    setPassword('');
+  }
+}, [internData]);
 
   const handleSubmit = () => {
-    if (!internData) return; // Jaga-jaga jika data tidak ada
-
-    // Siapkan data yang akan dikirim
+    if (!internData) return;
     const dataToSubmit: any = {
       name,
       division,
-      internshipPeriod: period,
+      periodStartDate: range?.from,
+      periodEndDate: range?.to,
     };
 
-    // 2. Hanya tambahkan password jika field-nya diisi
     if (password) {
       dataToSubmit.password = password;
     }
@@ -50,6 +61,11 @@ export default function EditInternModal({ isOpen, onClose, onSubmit, internData 
     onSubmit(internData.id, dataToSubmit);
     onClose();
   };
+  
+    let displayValue = 'Pilih rentang tanggal...';
+  if (range?.from && range.to) {
+    displayValue = `${format(range.from, 'd LLL yyyy')} – ${format(range.to, 'd LLL yyyy')}`;
+  }
 
   if (!isOpen || !internData) return null;
 
@@ -71,9 +87,35 @@ export default function EditInternModal({ isOpen, onClose, onSubmit, internData 
             <label htmlFor="edit-division" className="block text-sm font-medium text-gray-700">Divisi</label>
             <input type="text" id="edit-division" value={division} onChange={(e) => setDivision(e.target.value)} className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md"/>
           </div>
-          <div>
+         <div>
             <label htmlFor="edit-period" className="block text-sm font-medium text-gray-700">Periode Magang</label>
-            <input type="text" id="edit-period" value={period} onChange={(e) => setPeriod(e.target.value)} className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md" placeholder="Contoh: 1 Agu 2025 - 31 Okt 2025"/>
+            <div className="relative mt-1" ref={pickerRef}>
+              <input
+                id="edit-period"
+                type="text"
+                readOnly
+                value={displayValue}
+                onClick={() => setIsPickerOpen(true)}
+                className="w-full p-2 text-black border border-gray-300 rounded-md cursor-pointer pr-10"
+              />
+              <FiCalendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              
+              {isPickerOpen && (
+                <div className="absolute -mt-2 bg-white border rounded-md text-black shadow-lg z-10">
+                  <DayPicker
+                    mode="range"
+                    selected={range}
+                    onSelect={(selectedRange) => {
+                      setRange(selectedRange);
+                      if (selectedRange?.from && selectedRange?.to) {
+                        setIsPickerOpen(false);
+                      }
+                    }}
+                    numberOfMonths={1}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* 4. Input untuk reset password */}

@@ -10,7 +10,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  directUrl = env("DATABASE_URL_DIRECT")
 }
 
 model User {
@@ -43,7 +43,7 @@ model Attendance {
   longitude   Float?
   isLate      Boolean  @default(false)
   userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model HelpdeskTicket {
@@ -53,5 +53,5 @@ model HelpdeskTicket {
   proofUrl    String?
   status      String   @default("OPEN") // Status bisa: OPEN, IN_PROGRESS, RESOLVED
   userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
