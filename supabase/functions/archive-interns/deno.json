@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@prisma/adapter-pg": "https://esm.sh/@prisma/adapter-pg"
+  }
+}
