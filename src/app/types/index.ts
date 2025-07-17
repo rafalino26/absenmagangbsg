@@ -27,8 +27,8 @@ export interface InternSummary {
   id: number;
   name: string;
   division: string;
-  periodStartDate: string; 
-  periodEndDate: string;
+  periodStartDate: string | null; 
+  periodEndDate: string | null;
   hadir: number;
   izin: number;
   absen: number;
