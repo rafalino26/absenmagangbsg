@@ -12,7 +12,8 @@ serve(async (req) => {
     const adapter = new PrismaPg(pool)
     const prisma = new PrismaClient({ adapter })
 
-    const today = new Date()
+     const today = new Date();
+    today.setUTCHours(0, 0, 0, 0); 
 
     const expiredInterns = await prisma.user.findMany({
       where: {
