@@ -1,9 +1,10 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { db } from '@/lib/db'; 
+import { Prisma } from '@prisma/client';
 import { createClient } from '@supabase/supabase-js';
-import { verify } from 'jsonwebtoken';
+import { verify, JsonWebTokenError } from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient(); // <-- 3. Hapus baris ini
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!
@@ -25,7 +26,8 @@ export async function PATCH(req: NextRequest) {
     const accountNumber = formData.get('accountNumber') as string | null;
     const phoneNumber = formData.get('phoneNumber') as string | null;
 
-    let dataToUpdate: any = {};
+    // 4. Gunakan tipe 'Prisma.UserUpdateInput' untuk keamanan maksimal
+    let dataToUpdate: Prisma.UserUpdateInput = {};
 
     if (photoFile) {
       const fileName = `avatars/${userId}-${Date.now()}`;
@@ -33,10 +35,15 @@ export async function PATCH(req: NextRequest) {
         .from('attendance-proofs')
         .upload(fileName, photoFile, { upsert: true });
 
-      if (uploadError) throw new Error('Gagal mengupload foto profil.');
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        throw new Error('Gagal mengupload foto profil.');
+      }
 
       const { data: urlData } = supabase.storage.from('attendance-proofs').getPublicUrl(fileName);
-      dataToUpdate.profilePicUrl = urlData.publicUrl;
+      if (urlData) {
+        dataToUpdate.profilePicUrl = urlData.publicUrl;
+      }
     }
 
     if (bankName && accountNumber) {
@@ -48,7 +55,11 @@ export async function PATCH(req: NextRequest) {
       dataToUpdate.phoneNumber = phoneNumber; 
     }
 
-    const updatedUser = await prisma.user.update({
+    if (Object.keys(dataToUpdate).length === 0) {
+        return NextResponse.json({ error: 'Tidak ada data yang diperbarui.' }, { status: 400 });
+    }
+
+    const updatedUser = await db.user.update({ // <-- 5. Gunakan 'db'
       where: { id: userId },
       data: dataToUpdate,
     });
@@ -56,7 +67,11 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json(updatedUser);
 
   } catch (error) {
+    if (error instanceof JsonWebTokenError) {
+      return NextResponse.json({ error: 'Token tidak valid' }, { status: 401 });
+    }
+    const errorMessage = error instanceof Error ? error.message : 'Gagal memperbarui profil';
     console.error("Update Profile Error:", error);
-    return NextResponse.json({ error: 'Gagal memperbarui profil' }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

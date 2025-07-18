@@ -1,14 +1,20 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { db } from '@/lib/db'; 
+import { Prisma } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const attendanceWithUser = Prisma.validator<Prisma.AttendanceDefaultArgs>()({
+  include: { user: { select: { name: true } } },
+});
+
+type AttendanceWithUser = Prisma.AttendanceGetPayload<typeof attendanceWithUser>;
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get('filter');
 
-    let whereClause = {};
+    let whereClause: Prisma.AttendanceWhereInput = {};
     
     if (filter === 'Hari Ini') {
       const startOfDay = new Date();
@@ -24,21 +30,19 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    const attendanceRecords = await prisma.attendance.findMany({
+    const attendanceRecords = await db.attendance.findMany({
       where: whereClause,
-      include: { user: { select: { name: true } } }, 
+      include: attendanceWithUser.include, 
       orderBy: { timestamp: 'desc' },
     });
 
-    const liveHistory = attendanceRecords.map(record => {
+    const liveHistory = attendanceRecords.map((record: AttendanceWithUser) => {
   const recordDate = new Date(record.timestamp);
-  
-  // Buat format tanggal, contoh: "Senin, 14 Juli 2025"
+
   const dateString = recordDate.toLocaleDateString('id-ID', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
 
-  // Buat format jam, contoh: "14:00 WITA"
   const timeString = recordDate.toLocaleTimeString('id-ID', {
     hour: '2-digit', minute: '2-digit'
   }) + ' WITA';
@@ -48,10 +52,7 @@ export async function GET(req: NextRequest) {
     name: record.user.name,
     type: record.type as 'Hadir' | 'Pulang' | 'Izin',
     title: record.type === 'Hadir' ? 'Absen Masuk' : record.type === 'Pulang' ? 'Absen Pulang' : 'Pengajuan Izin',
-    
-    // Ganti 'description' dengan format gabungan
     description: record.type === 'Izin' ? record.description : `${dateString} (${timeString})`,
-    
     isLate: record.isLate,
     photoUrl: record.photoUrl,
     lat: record.latitude,

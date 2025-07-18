@@ -3,16 +3,18 @@ import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 import { serialize } from 'cookie';
+import { db } from '@/lib/db';
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 export async function POST(req: Request) {
   try {
     const { username, password } = await req.json();
 
-    // 1. Cari user berdasarkan NAMA dan pastikan rolenya adalah ADMIN
-    const admin = await prisma.user.findFirst({
+    if (!username || !password) {
+        return NextResponse.json({ error: 'Username dan password wajib diisi.' }, { status: 400 });
+    }
+    const admin = await db.user.findFirst({
       where: {
         name: username,
         role: 'ADMIN',
@@ -28,14 +30,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Password salah.' }, { status: 401 });
     }
 
-    // 2. Buat token khusus untuk admin
     const token = sign(
-      { userId: admin.id, name: admin.name, role: admin.role }, // Simpan role di token
+      { userId: admin.id, name: admin.name, role: admin.role }, 
       JWT_SECRET,
       { expiresIn: '8h' }
     );
 
-    // 3. Buat cookie dengan nama berbeda, misal 'adminAuthToken'
     const serializedCookie = serialize('adminAuthToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

@@ -1,10 +1,23 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { verify } from 'jsonwebtoken';
-import { format } from 'date-fns'; // Impor fungsi format
+import { db } from '@/lib/db'; 
+import { Prisma } from '@prisma/client'; 
+import { verify, JsonWebTokenError } from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+
+const userProfileSelect = Prisma.validator<Prisma.UserSelect>()({
+  id: true,
+  name: true,
+  division: true,
+  periodStartDate: true,
+  periodEndDate: true,
+  profilePicUrl: true,
+  bankName: true,
+  accountNumber: true,
+  phoneNumber: true,
+});
+
+type UserProfile = Prisma.UserGetPayload<{ select: typeof userProfileSelect }>;
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,24 +25,11 @@ export async function GET(req: NextRequest) {
     if (!token) {
       return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
     }
-
     const decodedToken = verify(token, JWT_SECRET) as { userId: number };
     const userId = decodedToken.userId;
-
-    // 1. Ubah `select` untuk mengambil kolom tanggal yang baru
-    const user = await prisma.user.findUnique({
+    const user: UserProfile | null = await db.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        division: true,
-        periodStartDate: true, // Ambil tanggal mulai
-        periodEndDate: true,   // Ambil tanggal akhir
-        profilePicUrl: true,
-        bankName: true,
-        accountNumber: true,
-        phoneNumber: true,
-      }
+      select: userProfileSelect,
     });
 
     if (!user) {
@@ -39,7 +39,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(user);
 
   } catch (error) {
+    if (error instanceof JsonWebTokenError) {
+      return NextResponse.json({ error: 'Token tidak valid' }, { status: 401 });
+    }
     console.error("Error mengambil data user:", error);
     return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 });
   }
-} 
+}

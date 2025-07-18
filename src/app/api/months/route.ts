@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@/lib/db';
 
 export async function GET() {
   try {
-    // Ambil semua data absensi, tapi hanya kolom timestamp
-    const attendances = await prisma.attendance.findMany({
+    const attendances = await db.attendance.findMany({ 
       select: {
         timestamp: true,
       },
@@ -15,9 +12,9 @@ export async function GET() {
       },
     });
 
-    // Proses untuk mendapatkan daftar bulan unik
     const monthYearSet = new Set<string>();
-    attendances.forEach(att => {
+    
+    attendances.forEach((att: { timestamp: Date }) => {
       const date = new Date(att.timestamp);
       const monthYear = date.toLocaleDateString('id-ID', {
         month: 'long',

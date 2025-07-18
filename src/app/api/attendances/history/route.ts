@@ -1,11 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client'; // 1. Impor tipe 'Attendance'
 import { verify } from 'jsonwebtoken';
+import { User, Attendance } from '@prisma/client';
+import { db } from '@/lib/db';
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
-
-type Attendance = NonNullable<Awaited<ReturnType<typeof prisma.attendance.findFirst>>>
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,12 +14,11 @@ export async function GET(req: NextRequest) {
     const decodedToken = verify(token, JWT_SECRET) as { userId: number };
     const userId = decodedToken.userId;
 
-    const attendanceHistory = await prisma.attendance.findMany({
+    const attendanceHistory = await db.attendance.findMany({
       where: { userId: userId },
       orderBy: { timestamp: 'desc' },
     });
 
-    // 2. Beri tipe 'Attendance' pada parameter 'item'
     const formattedHistory = attendanceHistory.map((item: Attendance) => ({
       id: item.id,
       type: item.type as 'Hadir' | 'Pulang' | 'Izin',

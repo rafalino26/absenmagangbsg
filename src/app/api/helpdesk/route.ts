@@ -1,18 +1,22 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { db } from '@/lib/db';
+import { Prisma } from '@prisma/client'; 
 import { createClient } from '@supabase/supabase-js';
-import { verify } from 'jsonwebtoken';
+import { verify, JsonWebTokenError } from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_KEY!);
 
-// FUNGSI UNTUK MENGAMBIL SEMUA LAPORAN (UNTUK ADMIN)
+const ticketWithUser = Prisma.validator<Prisma.HelpdeskTicketDefaultArgs>()({
+  include: { user: { select: { name: true } } },
+});
+type TicketWithUser = Prisma.HelpdeskTicketGetPayload<typeof ticketWithUser>;
+
+
 export async function GET(req: NextRequest) {
   try {
-    // Menghapus logika filter, sekarang hanya mengambil semua tiket
-    const tickets = await prisma.helpdeskTicket.findMany({
-      include: { user: { select: { name: true } } },
+    const tickets: TicketWithUser[] = await db.helpdeskTicket.findMany({ // <-- 4. Gunakan 'db'
+      include: ticketWithUser.include,
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json(tickets);
@@ -22,7 +26,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// FUNGSI UNTUK MENGIRIM LAPORAN BARU (DARI USER)
 export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get('authToken')?.value;
@@ -37,24 +40,35 @@ export async function POST(req: NextRequest) {
 
     if (!description) return NextResponse.json({ error: 'Deskripsi laporan wajib diisi.' }, { status: 400 });
 
-    let photoUrl: string | null = null;
+    let dataToSave: Prisma.HelpdeskTicketCreateInput = {
+      description,
+      user: { connect: { id: userId } }
+    };
+
     if (photoFile) {
       const fileName = `helpdesk/${userId}-${Date.now()}-${photoFile.name}`;
-      const { error } = await supabase.storage.from('attendance-proofs').upload(fileName, photoFile);
-      if (error) throw new Error('Gagal upload bukti.');
-      photoUrl = supabase.storage.from('attendance-proofs').getPublicUrl(fileName).data.publicUrl;
+      const { error: uploadError } = await supabase.storage.from('attendance-proofs').upload(fileName, photoFile);
+      
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        throw new Error('Gagal mengupload bukti laporan.');
+      }
+      
+      const { data: urlData } = supabase.storage.from('attendance-proofs').getPublicUrl(fileName);
+      dataToSave.proofUrl = urlData.publicUrl;
     }
 
-    const newTicket = await prisma.helpdeskTicket.create({
-      data: {
-        userId,
-        description,
-        proofUrl: photoUrl,
-      }
+    const newTicket = await db.helpdeskTicket.create({
+      data: dataToSave
     });
 
     return NextResponse.json(newTicket, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Gagal mengirim laporan' }, { status: 500 });
+    if (error instanceof JsonWebTokenError) {
+        return NextResponse.json({ error: 'Token tidak valid' }, { status: 401 });
+    }
+    const errorMessage = error instanceof Error ? error.message : 'Gagal mengirim laporan';
+    console.error("Error POST helpdesk:", error);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

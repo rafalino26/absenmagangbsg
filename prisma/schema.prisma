@@ -3,10 +3,13 @@
 
 generator client {
   provider = "prisma-client-js"
+}
+
+generator edge_client { 
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
   output          = "../supabase/functions/_shared/prisma-client"
 }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -35,9 +38,9 @@ datasource db {
 
 model Attendance {
   id          Int      @id @default(autoincrement())
-  type        String   // 'Hadir', 'Pulang', atau 'Izin'
+  type        String   
   timestamp   DateTime @default(now()) // Waktu saat data dibuat
-  description String   // Untuk jam (misal: "08:05 WITA") atau alasan izin
+  description String   
   photoUrl    String?
   latitude    Float?
   longitude   Float?

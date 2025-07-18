@@ -3,8 +3,8 @@ import { PrismaClient } from '@prisma/client';
 import { compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 import { serialize } from 'cookie';
+import { db } from '@/lib/db';
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 export async function POST(req: Request) {
@@ -15,11 +15,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Kode Magang dan password wajib diisi.' }, { status: 400 });
     }
     
-    const user = await prisma.user.findUnique({
+    const internId = parseInt(internCode, 10);
+    if (isNaN(internId)) {
+      return NextResponse.json({ error: 'Format Kode Magang tidak valid.' }, { status: 400 });
+    }
+    
+    const user = await db.user.findFirst({
       where: { 
-        id: parseInt(internCode),
+        id: internId,
         isActive: true,
-       }, 
+      }, 
     });
 
     if (!user) {
@@ -31,15 +36,12 @@ export async function POST(req: Request) {
     if (!passwordIsValid) {
       return NextResponse.json({ error: 'Kode Magang atau Password salah.' }, { status: 401 });
     }
-
-    // 1. Buat token tanpa waktu kedaluwarsa spesifik (opsional, tapi lebih konsisten)
+    
     const token = sign(
       { userId: user.id, name: user.name },
       JWT_SECRET
-      // Properti expiresIn dihapus
     );
 
-    // 2. Simpan tiket di browser sebagai session cookie (tanpa maxAge)
     const serializedCookie = serialize('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

@@ -1,9 +1,9 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { createClient } from '@supabase/supabase-js';
-import { verify } from 'jsonwebtoken';
+import { verify, JsonWebTokenError } from 'jsonwebtoken';
+import { db } from '@/lib/db';
+import { Prisma } from '@prisma/client';
 
-const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,7 +12,6 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verifikasi Pengguna dari Cookie (tetap sama)
     const token = req.cookies.get('authToken')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
@@ -20,7 +19,6 @@ export async function POST(req: NextRequest) {
     const decodedToken = verify(token, JWT_SECRET) as { userId: number };
     const userId = decodedToken.userId;
 
-    // 2. Ambil data dari FormData
     const formData = await req.formData();
     const type = formData.get('type') as string;
     const description = formData.get('description') as string;
@@ -30,9 +28,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Tipe dan keterangan wajib diisi.' }, { status: 400 });
     }
     
-    let dataToSave: any = { userId, type, description };
+     let dataToSave: Prisma.AttendanceCreateInput = {
+      type,
+      description,
+      user: { connect: { id: userId } }
+    };
     
-    // 3. Jika ada file foto/lampiran, upload ke Supabase
     if (photoFile) {
       const fileName = `proofs/${userId}-${Date.now()}-${photoFile.name}`;
       const { error: uploadError } = await supabase.storage
@@ -47,21 +48,31 @@ export async function POST(req: NextRequest) {
     
     // 4. Tambahkan data lokasi HANYA jika tipenya bukan 'Izin'
     if (type === 'Hadir' || type === 'Pulang') {
-      dataToSave.latitude = parseFloat(formData.get('latitude') as string);
-      dataToSave.longitude = parseFloat(formData.get('longitude') as string);
-      dataToSave.isLate = formData.get('isLate') === 'true';
+      const lat = formData.get('latitude');
+      const lon = formData.get('longitude');
+
+      // 5. Validasi data lokasi agar lebih tangguh
+      if (lat && lon) {
+        dataToSave.latitude = parseFloat(lat as string);
+        dataToSave.longitude = parseFloat(lon as string);
+        dataToSave.isLate = formData.get('isLate') === 'true';
+      } else {
+        return NextResponse.json({ error: 'Data lokasi tidak ditemukan untuk absensi ini.' }, { status: 400 });
+      }
     }
     
     // 5. Simpan ke database
-    const newAttendance = await prisma.attendance.create({ data: dataToSave });
+    const newAttendance = await db.attendance.create({ data: dataToSave });
 
     return NextResponse.json(newAttendance, { status: 201 });
 
   } catch (error) {
-    if (error instanceof Error && error.name === 'JsonWebTokenError') {
+    if (error instanceof JsonWebTokenError) {
       return NextResponse.json({ error: 'Token tidak valid' }, { status: 401 });
     }
     console.error("Error di API attendances:", error);
-    return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 });
+    // Beri pesan error yang lebih spesifik jika memungkinkan
+    const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan pada server';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
