@@ -5,7 +5,7 @@ import { verify } from 'jsonwebtoken';
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
-type Attendance = Awaited<ReturnType<typeof prisma.attendance.findFirst>>
+type Attendance = NonNullable<Awaited<ReturnType<typeof prisma.attendance.findFirst>>>
 
 export async function GET(req: NextRequest) {
   try {
