@@ -1,5 +1,4 @@
 [functions.archive-interns]
-schedule = "0 0 * * *" 
 enabled = true
 verify_jwt = true
 import_map = "./functions/archive-interns/deno.json"

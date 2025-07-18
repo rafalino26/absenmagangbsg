@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "https://deno.land/std@0.168.0/http/server.ts": "https://deno.land/std@0.168.0/http/server.ts",
+    "https://deno.land/x/postgres@v0.17.0/mod.ts": "https://deno.land/x/postgres@v0.17.0/mod.ts",
+    "@prisma/client/edge": "./_shared/prisma-client/edge.js",
+    "@prisma/adapter-pg": "https://esm.sh/@prisma/adapter-pg@5.1.1"
+  }
+}
