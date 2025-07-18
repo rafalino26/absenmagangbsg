@@ -1,9 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { PrismaClient, Attendance } from '@prisma/client'; // 1. Impor tipe 'Attendance'
+import { PrismaClient } from '@prisma/client'; // 1. Impor tipe 'Attendance'
 import { verify } from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+
+type Attendance = Awaited<ReturnType<typeof prisma.attendance.findFirst>>
 
 export async function GET(req: NextRequest) {
   try {
