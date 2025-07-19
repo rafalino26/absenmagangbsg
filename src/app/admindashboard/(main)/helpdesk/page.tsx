@@ -62,21 +62,24 @@ export default function HelpdeskPage() {
     });
   };
 
-    // Fungsi untuk menjalankan proses hapus ke backend
-  const performPermanentDelete = async (id: number) => {
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/helpdesk/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Gagal menghapus laporan.');
-      
-      setNotification({ isOpen: true, title: 'Berhasil', message: 'Laporan telah dihapus permanen.', type: 'success' });
-      fetchTickets(); // Refresh daftar setelah berhasil
-    } catch (error: any) {
-      setNotification({ isOpen: true, title: 'Gagal', message: error.message, type: 'error' });
-    } finally {
-      setIsSubmitting(false);
+const performPermanentDelete = async (id: number) => {
+  setIsSubmitting(true);
+  try {
+    const response = await fetch(`/api/helpdesk/manage?id=${id}`, { method: 'DELETE' });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Gagal menghapus laporan.');
     }
-  };
+    
+    setNotification({ isOpen: true, title: 'Berhasil', message: 'Laporan telah dihapus permanen.', type: 'success' });
+    fetchTickets();
+  } catch (error: any) {
+    setNotification({ isOpen: true, title: 'Gagal', message: error.message, type: 'error' });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
      if (isLoading) {
       return <AdminDashboardSkeleton />;

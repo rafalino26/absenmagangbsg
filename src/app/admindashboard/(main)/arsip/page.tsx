@@ -33,17 +33,31 @@ export default function ArchivePage() {
     fetchArchivedInterns();
   }, [fetchArchivedInterns]);
 
- const handleRestore = async (id: number) => {
-    if (!confirm("Anda yakin ingin mengembalikan peserta ini ke daftar aktif?")) return;
-    
+  const handleRestore = (id: number, name: string) => {
+    setNotification({
+      isOpen: true,
+      title: 'Kembalikan Peserta?',
+      message: `Anda yakin ingin mengembalikan ${name} ke daftar peserta aktif?`,
+      type: 'confirm',
+      onConfirm: () => performRestore(id),
+    });
+  };
+
+  const performRestore = async (id: number) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/interns/${id}`, {
+      // URL diperbaiki untuk menggunakan query parameter
+      const response = await fetch(`/api/interns/manage?id=${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        // Body sekarang mengirim action: 'restore'
         body: JSON.stringify({ action: 'restore' }),
       });
-      if (!response.ok) throw new Error('Gagal me-restore peserta.');
+
+      if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Gagal me-restore peserta.');
+      }
       
       setNotification({ isOpen: true, title: 'Berhasil', message: 'Peserta telah berhasil dikembalikan ke daftar aktif.', type: 'success' });
       fetchArchivedInterns(); // Refresh daftar arsip
@@ -116,7 +130,7 @@ export default function ArchivePage() {
                     </td>
                  <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex justify-center gap-4">
-                        <button onClick={() => handleRestore(intern.id)} className="text-green-600 hover:text-green-900" title="Restore">
+                        <button onClick={() => handleRestore(intern.id, intern.name)} className="text-green-600 hover:text-green-900" title="Restore">
                           <FiRotateCcw />
                         </button>
                         <button onClick={() => handlePermanentDelete(intern)} className="text-red-600 hover:text-red-900" title="Hapus Permanen">

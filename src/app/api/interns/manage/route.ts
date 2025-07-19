@@ -12,19 +12,18 @@ export async function PATCH(req: NextRequest) {
     if (isNaN(userId)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
 
     const body = await req.json();
-    
     let dataToUpdate: Prisma.UserUpdateInput = {};
 
     if (body.action === 'archive') {
       dataToUpdate.isActive = false;
+    } else if (body.action === 'restore') { 
+      dataToUpdate.isActive = true;
     } else {
       const { name, division, periodStartDate, periodEndDate, password } = body;
-      
       if (name) dataToUpdate.name = name;
       if (division) dataToUpdate.division = division;
       if (periodStartDate) dataToUpdate.periodStartDate = new Date(periodStartDate);
       if (periodEndDate) dataToUpdate.periodEndDate = new Date(periodEndDate);
-      
       if (password) {
         dataToUpdate.password = await hash(password, 10);
       }

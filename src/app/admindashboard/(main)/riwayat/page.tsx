@@ -83,7 +83,9 @@ export default function LiveAttendancePage() {
                           {item.title}
                       </span>
                     </td>
-                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${item.isLate ? 'text-red-600' : 'text-gray-700'}`}>
+                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
+                      (item.isLate && item.type === 'Hadir') ? 'text-red-600' : 'text-gray-700'
+                    }`}>
                       {item.description}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
