@@ -27,11 +27,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: `Tidak ada file di folder '${FOLDER_TO_CLEAN}'.` });
     }
 
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setUTCHours(0, 0, 0, 0); // Set ke awal hari UTC
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // Lalu kurangi 7 hari
+    const sixDaysAgo = new Date(); // (Nama variabel juga diubah agar jelas)
+    sixDaysAgo.setUTCHours(0, 0, 0, 0); 
+    sixDaysAgo.setDate(sixDaysAgo.getDate() - 6); // Mengurangi 6 hari
 
-    const filesToDelete = files.filter(file => new Date(file.created_at) <= sevenDaysAgo);
+    const filesToDelete = files.filter(file => new Date(file.created_at) <= sixDaysAgo);
 
     if (filesToDelete.length === 0) {
       return NextResponse.json({ message: 'Tidak ada file yang perlu dihapus.' });
