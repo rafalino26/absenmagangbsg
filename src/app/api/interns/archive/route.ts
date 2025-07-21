@@ -4,10 +4,10 @@ import { db } from '@/lib/db'; // Menggunakan koneksi Prisma yang sudah ada
 
 export async function GET(req: NextRequest) {
   // Pengaman agar hanya cron job yang bisa mengakses
-  const secret = req.nextUrl.searchParams.get('secret');
-  if (secret !== process.env.CRON_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+//   const secret = req.nextUrl.searchParams.get('secret');
+//   if (secret !== process.env.CRON_SECRET) {
+//     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+//   }
 
   try {
     const today = new Date();
