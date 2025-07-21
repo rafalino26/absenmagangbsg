@@ -32,7 +32,7 @@ serve(async (req) => {
 
     const filesToDelete = files.filter(file => {
       const createdAtDate = new Date(file.created_at);
-      return createdAtDate < sevenDaysAgo;
+      return createdAtDate <= sevenDaysAgo;
     });
 
     if (filesToDelete.length === 0) {
