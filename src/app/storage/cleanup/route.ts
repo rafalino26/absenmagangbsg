@@ -45,6 +45,7 @@ const filesToDelete = files.filter(file => new Date(file.created_at) < threshold
     if (removeError) throw removeError;
 
     return NextResponse.json({ message: `Berhasil menghapus ${fileNamesToDelete.length} file.` });
+    console.log(`[CLEANUP-STORAGE] Successfully deleted ${fileNamesToDelete.length} files.`);
 
   } catch (error: any) {
     console.error('[STORAGE CLEANUP ERROR]', error);
