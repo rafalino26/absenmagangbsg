@@ -30,7 +30,7 @@ export default function AdminLayout({
 
    const performLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/admin'); // Arahkan ke halaman login admin
+    router.push('/admindashboard'); // Arahkan ke halaman login admin
   };
 
   return (

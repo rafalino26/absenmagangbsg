@@ -33,14 +33,14 @@ export async function POST(req: Request) {
     const token = sign(
       { userId: admin.id, name: admin.name, role: admin.role }, 
       JWT_SECRET,
-      { expiresIn: '8h' }
+      { expiresIn: '1h' }
     );
 
     const serializedCookie = serialize('adminAuthToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 60 * 60 * 8,
+      maxAge: 60 * 60 * 1,
       path: '/',
     });
 
