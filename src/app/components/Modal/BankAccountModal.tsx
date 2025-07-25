@@ -18,6 +18,8 @@ interface BankAccountModalProps {
 export default function BankAccountModal({ isOpen, onClose, onSubmit, currentAccount }: BankAccountModalProps) {
   // 1. State 'bank' sudah tidak diperlukan lagi
   const [accountNumber, setAccountNumber] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   useEffect(() => {
     // Hanya mengisi nomor rekening yang sudah ada
@@ -55,21 +57,34 @@ export default function BankAccountModal({ isOpen, onClose, onSubmit, currentAcc
             <p className="text-sm font-semibold text-red-600">
               WAJIB MEMASUKAN REKENING BANK BSG
             </p>
-          </div>
-          
-          <div>
-            <label htmlFor="account-number" className="block text-sm font-medium text-gray-700 mb-2">Nomor Rekening BSG</label>
-            <input
-              type="number"
-              id="account-number"
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
-              className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
-              placeholder="Masukkan nomor rekening BSG Anda..."
-            />
-          </div>
+          </div>    
+         <div>
+          <label htmlFor="account-number" className="block text-sm font-medium text-gray-700 mb-2">
+            Nomor Rekening BSG
+          </label>
+          <input
+            type="text"
+            id="account-number"
+            value={accountNumber}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d*$/.test(value)) {
+                setAccountNumber(value);
+                setErrorMessage('');
+              } else {
+                setErrorMessage('Nomor rekening hanya boleh berupa angka.');
+              }
+            }}
+            className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+            placeholder="Masukkan nomor rekening BSG Anda..."
+            inputMode="numeric"
+            pattern="[0-9]*"
+          />
+          {errorMessage && (
+            <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+          )}
         </div>
-
+        </div>
         <div className="p-4 bg-gray-50 border-t flex justify-end gap-3">
            <button type="button" onClick={onClose} className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</button>
            <button type="button" onClick={handleSubmit} className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">Simpan</button>

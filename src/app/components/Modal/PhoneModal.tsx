@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 
-// 1. Definisikan props yang baru
 interface PhoneModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,25 +11,34 @@ interface PhoneModalProps {
 }
 
 export default function PhoneModal({ isOpen, onClose, onSubmit, currentPhone }: PhoneModalProps) {
-  // 2. State hanya untuk nomor telepon
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // 3. useEffect untuk mengisi form dengan data yang sudah ada
   useEffect(() => {
     if (isOpen && currentPhone) {
       setPhoneNumber(currentPhone);
     } else {
-      setPhoneNumber(''); // Kosongkan saat modal ditutup atau tidak ada data awal
+      setPhoneNumber('');
+      setErrorMessage('');
     }
   }, [currentPhone, isOpen]);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setPhoneNumber(value);
+      setErrorMessage('');
+    } else {
+      setErrorMessage('Nomor telepon hanya boleh berisi angka.');
+    }
+  };
+
   const handleSubmit = () => {
-    // 4. Validasi simpel dan kirim hanya nomor telepon
-    if (phoneNumber.trim().length > 9) { // Cek apakah nomor cukup panjang
+    if (phoneNumber.trim().length > 9) {
       onSubmit(phoneNumber);
       onClose();
     } else {
-      alert("Nomor telepon tidak valid. Harap isi dengan benar.");
+      setErrorMessage('Nomor telepon tidak valid. Minimal 10 digit.');
     }
   };
 
@@ -40,29 +48,48 @@ export default function PhoneModal({ isOpen, onClose, onSubmit, currentPhone }: 
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md flex flex-col">
         <div className="flex justify-between items-center p-4 border-b">
-          {/* 5. Ganti Judul Modal */}
           <h3 className="text-lg font-bold text-gray-800">Informasi Nomor Telepon</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+            <FiX size={24} />
+          </button>
         </div>
-        
+
         <div className="p-6 flex-grow space-y-4">
-          {/* 6. Ganti Form Input menjadi untuk nomor telepon */}
           <div>
-            <label htmlFor="phone-number" className="block text-sm font-medium text-gray-700 mb-2">Nomor Telepon (WhatsApp)</label>
+            <label htmlFor="phone-number" className="block text-sm font-medium text-gray-700 mb-2">
+              Nomor Telepon (WhatsApp)
+            </label>
             <input
-              type="number"
+              type="text"
               id="phone-number"
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              onChange={handleChange}
               className="w-full p-2 text-black border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
               placeholder="Contoh: 081234567890"
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
+            {errorMessage && (
+              <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+            )}
           </div>
         </div>
 
         <div className="p-4 bg-gray-50 border-t flex justify-end gap-3">
-           <button type="button" onClick={onClose} className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</button>
-           <button type="button" onClick={handleSubmit} className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">Simpan</button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Simpan
+          </button>
         </div>
       </div>
     </div>
