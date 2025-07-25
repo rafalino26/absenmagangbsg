@@ -419,7 +419,7 @@ const handlePhoneSubmit = async (phone: string) => {
 
   const performLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/admin'); 
+    router.push('/'); 
   };
 
     const periodDisplay = (user?.periodStartDate && user.periodEndDate)

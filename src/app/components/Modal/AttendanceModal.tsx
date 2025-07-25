@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import imageCompression from 'browser-image-compression';
-import { FiCamera, FiUpload, FiX, FiRefreshCw } from 'react-icons/fi';
+import { FiCamera, FiX, FiRefreshCw } from 'react-icons/fi';
 
 interface AttendanceModalProps {
   isOpen: boolean;
@@ -22,41 +22,24 @@ const compressionOptions = {
 export default function AttendanceModal({ isOpen, onClose, onSubmit, attendanceType }: AttendanceModalProps) {
   const [photo, setPhoto] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [isWebcamActive, setWebcamActive] = useState(false);
-  
   const webcamRef = useRef<Webcam>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-
-  const resetPhoto = useCallback(() => {
+  // Fungsi untuk reset state
+  const resetState = useCallback(() => {
     setPhoto(null);
     setPhotoFile(null);
-    setWebcamActive(false);
   }, []);
 
+  // Reset state setiap kali modal ditutup
   useEffect(() => {
     if (!isOpen) {
       const timer = setTimeout(() => {
-        resetPhoto();
-      }, 300);
+        resetState();
+      }, 300); // Beri jeda untuk animasi penutupan
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen, resetPhoto]);
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      try {
-        const compressedFile = await imageCompression(file, compressionOptions);
-        setPhoto(URL.createObjectURL(compressedFile));
-        setPhotoFile(compressedFile);
-      } catch (error) {
-        console.error("Error compressing file:", error);
-        alert("Gagal memproses gambar.");
-      }
-    }
-  };
+  }, [isOpen, resetState]);
 
   const capturePhoto = useCallback(async () => {
     const imageSrc = webcamRef.current?.getScreenshot();
@@ -68,7 +51,6 @@ export default function AttendanceModal({ isOpen, onClose, onSubmit, attendanceT
         const compressedFile = await imageCompression(file, compressionOptions);
         setPhoto(URL.createObjectURL(compressedFile));
         setPhotoFile(compressedFile);
-        setWebcamActive(false);
       } catch (error) {
         console.error("Error processing webcam image:", error);
         alert("Gagal mengambil gambar dari webcam.");
@@ -94,37 +76,35 @@ export default function AttendanceModal({ isOpen, onClose, onSubmit, attendanceT
         
         <div className="p-6 flex-grow">
           {photo ? (
+            // Tampilan setelah foto diambil
             <div className="flex flex-col items-center gap-4">
               <img src={photo} alt="Preview" className="rounded-lg max-h-64 w-auto" />
-              <button onClick={resetPhoto} className="flex items-center gap-2 text-blue-600 font-semibold"><FiRefreshCw/> Ulangi</button>
+              <button onClick={resetState} className="flex items-center gap-2 text-blue-600 font-semibold">
+                <FiRefreshCw/> Ulangi
+              </button>
             </div>
-          ) : isWebcamActive ? (
+          ) : (
+            // Tampilan webcam aktif
             <div className="flex flex-col items-center gap-4">
-               <Webcam
-                  audio={false}
-                  ref={webcamRef}
-                  mirrored={true}
-                  screenshotFormat="image/jpeg"
-                  className="rounded-lg w-full"
-                  videoConstraints={{ 
-                    width: 1920, 
-                    height: 1080,
-                    facingMode: "user" 
-                  }}
-                />
-               <button 
+              <Webcam
+                audio={false}
+                ref={webcamRef}
+                mirrored={true}
+                screenshotFormat="image/jpeg"
+                className="rounded-lg w-full"
+                videoConstraints={{ 
+                  width: 1920, 
+                  height: 1080,
+                  facingMode: "user" 
+                }}
+              />
+              <button 
                 onClick={capturePhoto} 
                 className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center border-2 border-black hover:bg-gray-300 transition-colors"
                 aria-label="Ambil Gambar"
               >
                 <FiCamera size={24} className="text-black" />
               </button>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              <button onClick={() => setWebcamActive(true)} className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2"><FiCamera/> Ambil Foto (Webcam)</button>
-              <button onClick={() => fileInputRef.current?.click()} className="w-full bg-gray-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-700 flex items-center justify-center gap-2"><FiUpload/> Upload dari Galeri</button>
-              <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
             </div>
           )}
         </div>
