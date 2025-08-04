@@ -16,45 +16,89 @@ datasource db {
   directUrl = env("DATABASE_URL_DIRECT")
 }
 
-  model User {
-    id                Int      @id @default(autoincrement())
-    name              String
-    email             String?  @unique 
-    password          String   
-    role              String   @default("INTERN")
-    division          String
-    periodStartDate   DateTime? 
-    periodEndDate     DateTime? 
-    bankName          String?  
-    accountNumber     String?
-    profilePicUrl     String?
-    phoneNumber       String?
-    joinDate          DateTime @default(now())
-    isActive          Boolean  @default(true)
+ model User {
+  id              Int      @id @default(autoincrement())
+  name            String
+  email           String?  @unique
+  password        String
+  role            Role     @default(INTERN)
+  division        String
+  periodStartDate DateTime?
+  periodEndDate   DateTime?
+  bankName        String?
+  accountNumber   String?
+  profilePicUrl   String?
+  phoneNumber     String?
+  joinDate        DateTime @default(now())
+  isActive        Boolean  @default(true)
 
-    attendances       Attendance[]
-    helpdeskTickets HelpdeskTicket[]
-  }
+  attendances     Attendance[]
+  helpdeskTickets HelpdeskTicket[]
+
+  // --- TAMBAHAN UNTUK FITUR MENTOR & LOGBOOK ---
+  mentorId        Int?
+  mentor          User?    @relation("MentorToInterns", fields: [mentorId], references: [id])
+  interns         User[]   @relation("MentorToInterns")
+  dailyLogs       DailyLog[]
+  // --- SELESAI TAMBAHAN ---
+}
 
 model Attendance {
-  id          Int      @id @default(autoincrement())
-  type        String   
-  timestamp   DateTime @default(now()) // Waktu saat data dibuat
-  description String   
+  id          Int            @id @default(autoincrement())
+  type        AttendanceType
+  timestamp   DateTime       @default(now())
+  description String
   photoUrl    String?
   latitude    Float?
   longitude   Float?
-  isLate      Boolean  @default(false)
+  isLate      Boolean        @default(false)
   userId      Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model HelpdeskTicket {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  description String   @db.Text // @db.Text untuk teks yang panjang
+  id          Int          @id @default(autoincrement())
+  createdAt   DateTime     @default(now())
+  description String       @db.Text
   proofUrl    String?
-  status      String   @default("OPEN") // Status bisa: OPEN, IN_PROGRESS, RESOLVED
+  status      TicketStatus @default(OPEN)
   userId      Int
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- MODEL BARU UNTUK LOGBOOK ---
+model DailyLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity  String   @db.Text
+  status    LogStatus @default(PENDING)
+  notes     String?  // Catatan dari mentor saat mereview
+  createdAt DateTime @default(now())
+}
+// --- SELESAI MODEL BARU ---
+
+// --- ENUM YANG SUDAH KITA PERBAIKI & TAMBAHKAN ---
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  INTERN
+}
+
+enum AttendanceType {
+  Hadir
+  Pulang
+  Izin
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum LogStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

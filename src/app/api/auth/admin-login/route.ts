@@ -4,6 +4,7 @@ import { compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 import { serialize } from 'cookie';
 import { db } from '@/lib/db';
+import { Role } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
@@ -14,10 +15,12 @@ export async function POST(req: Request) {
     if (!username || !password) {
         return NextResponse.json({ error: 'Username dan password wajib diisi.' }, { status: 400 });
     }
-    const admin = await db.user.findFirst({
+   const admin = await db.user.findFirst({
       where: {
         name: username,
-        role: 'ADMIN',
+        role: { 
+          in: [Role.ADMIN, Role.SUPER_ADMIN]
+        }
       },
     });
 
@@ -50,6 +53,7 @@ export async function POST(req: Request) {
     });
 
   } catch (error) {
-    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
-  }
+  console.error("LOGIN ADMIN ERROR:", error);
+  return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+}
 }
