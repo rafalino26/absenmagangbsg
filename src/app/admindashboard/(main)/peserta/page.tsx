@@ -39,7 +39,7 @@ export default function ManageInternsPage() {
   const fetchInterns = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/interns');
+      const response = await fetch('/api/admin/manage-interns');
       if (!response.ok) {
         const result = await response.json();
         throw new Error(result.error || 'Gagal mengambil data peserta.');
@@ -77,7 +77,7 @@ export default function ManageInternsPage() {
   const performArchive = async (id: number) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/admin/interns/${id}`, {
+      const response = await fetch(`/api/admin/manage-interns/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: false }), // Kirim data untuk mengarsip

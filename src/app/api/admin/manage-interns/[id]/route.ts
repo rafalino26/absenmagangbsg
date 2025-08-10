@@ -61,3 +61,26 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: 'Gagal memperbarui data peserta' }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest, context: RouteContext) {
+  const auth = await verifySuperAdmin(req);
+  if (auth.error) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  try {
+    const id = parseInt(context.params.id); // Akses id melalui context.params.id
+    if (isNaN(id)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
+
+    await db.attendance.deleteMany({ where: { userId: id } });
+    await db.helpdeskTicket.deleteMany({ where: { userId: id } });
+    await db.dailyLog.deleteMany({ where: { userId: id } });
+    
+    await db.user.delete({ where: { id } });
+
+    return NextResponse.json({ message: 'Peserta dan semua datanya berhasil dihapus permanen' });
+  } catch (error) {
+    console.error('[DELETE INTERN ERROR]', error);
+    return NextResponse.json({ error: 'Gagal menghapus data peserta' }, { status: 500 });
+  }
+}
