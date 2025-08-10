@@ -1,7 +1,10 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { db } from '@/lib/db'; 
-import { Prisma } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
+import { verify } from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 const attendanceWithUser = Prisma.validator<Prisma.AttendanceDefaultArgs>()({
   include: { user: { select: { name: true } } },
@@ -11,10 +14,20 @@ type AttendanceWithUser = Prisma.AttendanceGetPayload<typeof attendanceWithUser>
 
 export async function GET(req: NextRequest) {
   try {
+      const token = req.cookies.get('adminAuthToken')?.value;
+    if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
+    const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
+
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get('filter');
 
     let whereClause: Prisma.AttendanceWhereInput = {};
+    
+    // 2. Tambahkan filter berdasarkan mentor jika role-nya ADMIN
+    if (decoded.role === Role.ADMIN) {
+      whereClause.user = { mentorId: decoded.userId };
+    }
+
     
     if (filter === 'Hari Ini') {
       const startOfDay = new Date();
@@ -32,11 +45,11 @@ export async function GET(req: NextRequest) {
 
     const attendanceRecords = await db.attendance.findMany({
       where: whereClause,
-      include: attendanceWithUser.include, 
+      include: { user: { select: { name: true } } }, 
       orderBy: { timestamp: 'desc' },
     });
 
-    const liveHistory = attendanceRecords.map((record: AttendanceWithUser) => {
+  const liveHistory = attendanceRecords.map((record: AttendanceWithUser) => {
   const recordDate = new Date(record.timestamp);
 
   const dateString = recordDate.toLocaleDateString('id-ID', {

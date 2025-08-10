@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     );
 
     const serializedCookie = serialize('adminAuthToken', token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 60 * 60 * 1,

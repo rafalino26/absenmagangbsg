@@ -1,8 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/lib/db'; 
-import { Prisma, User } from '@prisma/client'; 
+import { Prisma, User, Role, AttendanceType } from '@prisma/client'; 
 import { hash } from 'bcrypt';
 import nodemailer from 'nodemailer';
+import { verify } from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 async function sendLoginDetailsByEmail(email: string, name: string, internCode: string, password: string) {
   const transporter = nodemailer.createTransport({
@@ -46,9 +49,20 @@ function getMonthDateRange(monthString: string) {
 
 export async function GET(req: NextRequest) {
   try {
+     const token = req.cookies.get('adminAuthToken')?.value;
+    if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
+    const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
+
     const month = req.nextUrl.searchParams.get('month');
     let dateFilter: Prisma.AttendanceWhereInput = {};
     let periodFilter: Prisma.UserWhereInput = {};
+    
+    // 2. Buat filter mentor berdasarkan role
+    let mentorFilter: Prisma.UserWhereInput = {};
+    if (decoded.role === Role.ADMIN) { // Jika yang login adalah Mentor
+      mentorFilter = { mentorId: decoded.userId };
+    }
+
 
     if (month && month !== 'Semua Bulan') {
       const dateRange = getMonthDateRange(month);
@@ -59,18 +73,24 @@ export async function GET(req: NextRequest) {
     }
     
     const interns = await db.user.findMany({ 
-      where: { role: 'INTERN', isActive: true, ...periodFilter },
-      orderBy: { name: 'asc' },
-    });
+          where: { 
+            role: Role.INTERN, 
+            isActive: true, 
+            ...periodFilter,
+            ...mentorFilter
+          },
+          orderBy: { name: 'asc' },
+        });
 
     const summaryData = await Promise.all(
       interns.map(async (intern: User) => {
         const commonWhere = { userId: intern.id, ...dateFilter };
         
-        const hadir = await db.attendance.count({ where: { ...commonWhere, type: 'Hadir' } });
-        const izin = await db.attendance.count({ where: { ...commonWhere, type: 'Izin' } });
+        // Gunakan enum untuk tipe absensi
+         const hadir = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Hadir } });
+        const izin = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Izin } });
         const terlambat = await db.attendance.count({ where: { ...commonWhere, isLate: true } });
-        const absen = 0; 
+        const absen = 0;
 
         return {
           id: intern.id,
@@ -93,55 +113,5 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error saat mengambil data rekapitulasi:", error);
     return NextResponse.json({ error: 'Gagal mengambil data rekapitulasi' }, { status: 500 });
-  }
-}
-
-export async function POST(req: Request) {
-  try {
-    const { name, division, email, periodStartDate, periodEndDate } = await req.json();
-
-    if (!name || !division || !email || !periodStartDate || !periodEndDate) {
-      return NextResponse.json({ error: 'Semua data wajib diisi' }, { status: 400 });
-    }
-    const dataToCreate: Prisma.UserCreateInput = {
-      name,
-      division,
-      email,
-      password: 'PENDING_PASSWORD_GENERATION', 
-      periodStartDate: new Date(periodStartDate),
-      periodEndDate: new Date(periodEndDate),
-    };
-
-    const newIntern = await db.user.create({ data: dataToCreate });
-
-    const firstName = name.split(' ')[0].toLowerCase();
-    const internCode = String(newIntern.id).padStart(3, '0');
-    const autoPassword = `${firstName}${internCode}`;
-
-    const hashedPassword = await hash(autoPassword, 10);
-    await db.user.update({
-      where: { id: newIntern.id },
-      data: { password: hashedPassword },
-    });
-    
-    try {
-      await sendLoginDetailsByEmail(email, name, internCode, autoPassword);
-    } catch (emailError) {
-      console.error(`GAGAL MENGIRIM EMAIL ke ${email} (User: ${name}, ID: ${newIntern.id}). Error:`, emailError);
-      return NextResponse.json({
-        message: `Peserta berhasil dibuat (Kode: ${internCode}), tetapi notifikasi email gagal dikirim.`,
-        warning: true,
-        user: newIntern,
-      }, { status: 201 }); 
-    }
-    
-    return NextResponse.json(newIntern, { status: 201 });
-
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      return NextResponse.json({ error: 'Email ini sudah terdaftar.' }, { status: 409 });
-    }
-    console.error("Error saat membuat peserta:", error);
-    return NextResponse.json({ error: 'Gagal membuat peserta baru.' }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/lib/db';
-import { Prisma } from '@prisma/client'; 
+import { Prisma, Role } from '@prisma/client'; 
 import { createClient } from '@supabase/supabase-js';
 import { verify, JsonWebTokenError } from 'jsonwebtoken';
 
@@ -15,7 +15,20 @@ type TicketWithUser = Prisma.HelpdeskTicketGetPayload<typeof ticketWithUser>;
 
 export async function GET(req: NextRequest) {
   try {
-    const tickets: TicketWithUser[] = await db.helpdeskTicket.findMany({ // <-- 4. Gunakan 'db'
+     const token = req.cookies.get('adminAuthToken')?.value;
+    if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
+    const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
+
+    let whereClause: Prisma.HelpdeskTicketWhereInput = {};
+
+    // 2. Tambahkan filter mentor jika role-nya ADMIN
+    if (decoded.role === Role.ADMIN) {
+      whereClause.user = { mentorId: decoded.userId };
+    }
+
+    // 3. Query dijalankan dengan whereClause yang dinamis
+    const tickets: TicketWithUser[] = await db.helpdeskTicket.findMany({
+      where: whereClause,
       include: ticketWithUser.include,
       orderBy: { createdAt: 'desc' },
     });

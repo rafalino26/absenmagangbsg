@@ -7,59 +7,104 @@ import { InternSummary } from '@/app/types';
 import { DayPicker, DateRange } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { format } from 'date-fns';
+import { NotificationState } from '@/app/types';
 
-// Tipe data untuk props yang diterima komponen ini
+// Tipe data untuk props
+interface InternData {
+  id: number;
+  name: string;
+  division: string;
+  periodStartDate?: string | null;
+  periodEndDate?: string | null;
+  mentor?: { id: number; name: string } | null;
+}
+interface Mentor {
+  id: number;
+  name: string;
+}
 interface EditInternModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (id: number, data: Partial<InternSummary> & { password?: string }) => void;
-  internData: InternSummary | null;
+  onSuccess: () => void;
+  internData: InternData | null;
+  setNotification: (notification: NotificationState | null) => void;
 }
 
-export default function EditInternModal({ isOpen, onClose, onSubmit, internData }: EditInternModalProps) {
-  // State untuk setiap field di form
+
+export default function EditInternModal({ isOpen, onClose, onSuccess, internData, setNotification }: EditInternModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [division, setDivision] = useState('');
   const [period, setPeriod] = useState('');
   const [password, setPassword] = useState(''); // Untuk reset password
   const [showPassword, setShowPassword] = useState(false);
-
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [mentorId, setMentorId] = useState<string>('');
   const [range, setRange] = useState<DateRange | undefined>();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
-useEffect(() => {
-  if (internData) {
-    setName(internData.name);
-    setDivision(internData.division);
-    
-    if (internData.periodStartDate && internData.periodEndDate) {
-      setRange({
-        from: new Date(internData.periodStartDate),
-        to: new Date(internData.periodEndDate),
-      });
-    } else {
-      setRange(undefined);
+  useEffect(() => {
+    if (internData) {
+      setName(internData.name);
+      setDivision(internData.division);
+      setMentorId(internData.mentor?.id?.toString() || '');
+      if (internData.periodStartDate && internData.periodEndDate) {
+        setRange({ from: new Date(internData.periodStartDate), to: new Date(internData.periodEndDate) });
+      }
     }
-    setPassword('');
-  }
-}, [internData]);
+  }, [internData]);
 
-  const handleSubmit = () => {
+  // Ambil daftar mentor saat modal terbuka
+  useEffect(() => {
+    if (isOpen) {
+      const fetchMentors = async () => {
+        try {
+          const res = await fetch('/api/admin/mentors');
+          if (!res.ok) throw new Error('Gagal memuat mentor');
+          setMentors(await res.json());
+        } catch (error: any) {
+          setNotification({ isOpen: true, title: 'Error', message: error.message, type: 'error' });
+        }
+      };
+      fetchMentors();
+    }
+  }, [isOpen, setNotification]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!internData) return;
-    const dataToSubmit: any = {
-      name,
-      division,
-      periodStartDate: range?.from,
-      periodEndDate: range?.to,
-    };
+    
+    setIsSubmitting(true);
+    try {
+      const dataToSubmit: any = {
+        name,
+        division,
+        periodStartDate: range?.from,
+        periodEndDate: range?.to,
+        mentorId: parseInt(mentorId),
+      };
+      if (password) dataToSubmit.password = password;
 
-    if (password) {
-      dataToSubmit.password = password;
+      const response = await fetch(`/api/admin/interns/${internData.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSubmit),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || 'Gagal menyimpan perubahan.');
+      }
+
+      setNotification({ isOpen: true, title: 'Berhasil', message: 'Data peserta berhasil diperbarui.', type: 'success' });
+      onSuccess();
+      onClose();
+    } catch (error: any) {
+      setNotification({ isOpen: true, title: 'Gagal', message: error.message, type: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    onSubmit(internData.id, dataToSubmit);
-    onClose();
   };
   
     let displayValue = 'Pilih rentang tanggal...';
@@ -77,8 +122,8 @@ useEffect(() => {
           <h3 className="text-lg font-bold text-gray-800">Edit Peserta Magang</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
         </div>
-        
-        <div className="p-6 flex-grow space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-black">
+        <div className="flex-grow space-y-4">
           <div>
             <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
             <input type="text" id="edit-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md"/>
@@ -117,7 +162,20 @@ useEffect(() => {
               )}
             </div>
           </div>
-
+         <div>
+            <label className="block text-sm font-medium text-gray-700">Pilih Mentor</label>
+            <select
+              value={mentorId}
+              onChange={(e) => setMentorId(e.target.value)}
+              required
+              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="" disabled>-- Tugaskan ke Mentor --</option>
+              {mentors.map(mentor => (
+                <option key={mentor.id} value={mentor.id}>{mentor.name}</option>
+              ))}
+            </select>
+          </div>
           {/* 4. Input untuk reset password */}
           <div>
             <label htmlFor="edit-password" className="block text-sm font-medium text-gray-700">Password Baru (Opsional)</label>
@@ -143,8 +201,11 @@ useEffect(() => {
         </div>
 
         <div className="p-4 bg-gray-50 border-t flex justify-end">
-           <button type="button" onClick={handleSubmit} className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700">Simpan Perubahan</button>
+          <button type="submit" disabled={isSubmitting} className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400">
+              {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </button>
         </div>
+        </form>
       </div>
     </div>
   );

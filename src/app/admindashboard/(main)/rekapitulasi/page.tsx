@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {  FiDownload, FiEye, FiPlus, FiTrash2, FiEdit, FiMoreVertical } from 'react-icons/fi';
 import AdminDetailModal from '../../../components/Modal/AdminDetailModal';
 import CustomDropdown from '../../../components/Modal/CustomDropdown';
-import AddInternModal, { NewInternData } from '@/app/components/Modal/AddInternModal';
+
 import { CSVLink } from 'react-csv';
 import { InternSummary, NotificationState, AttendanceRecord } from '@/app/types';
 import AdminDashboardSkeleton from '@/app/components/loading/AdminDashboardSkeleton';
@@ -34,7 +34,6 @@ export default function AdminDashboardPage() {
   const [sortBy, setSortBy] = useState('Terbaru');
   const [isDetailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedIntern, setSelectedIntern] = useState<InternSummary | null>(null);
-  const [isAddInternModalOpen, setAddInternModalOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [notification, setNotification] = useState<NotificationState | null>(null);
@@ -183,133 +182,6 @@ const csvData = displayedData.map((intern, index) => ({
     setLiveDetailModalOpen(true);
   };
 
-  const handleAddInternSubmit = async (data: NewInternData) => {
-  setAddInternModalOpen(false);
-  setIsSubmitting(true);
-  try {
-    const response = await fetch('/api/interns', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Gagal menambah peserta.');
-    }
-  
-    if (result.warning) {
-      setNotification({
-        isOpen: true,
-        title: 'Berhasil dengan Peringatan',
-        message: result.warning,
-        type: 'success',
-      });
-    } else {
-      setNotification({
-        isOpen: true,
-        title: 'Berhasil!',
-        message: `Peserta baru ${result.name} berhasil ditambahkan. Info login telah dikirim ke email.`,
-        type: 'success',
-      });
-    }
-    fetchInterns(monthFilter); 
-  } catch (error: any) {
-    setNotification({
-      isOpen: true,
-      title: 'Gagal',
-      message: error.message,
-      type: 'error',
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-  const handleEditClick = (intern: InternSummary) => {
-    setSelectedIntern(intern);
-    setEditModalOpen(true);
-  };
-
-   const handleEditSubmit = async (id: number, data: any) => {
-    setEditModalOpen(false);
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(`/api/interns/manage?id=${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Gagal memperbarui data.');
-      }
-      await fetchInterns(monthFilter);
-      setNotification({
-        isOpen: true,
-        title: 'Berhasil',
-        message: 'Data peserta berhasil diperbarui.',
-        type: 'success',
-      });
-    } catch (error: any) {
-      setNotification({
-        isOpen: true,
-        title: 'Gagal',
-        message: 'Gagal memperbarui data.',
-        type: 'error',
-      });
-    }
-      finally {
-    setIsSubmitting(false);
-    }
-  };
-
- // Ganti nama fungsi menjadi lebih sesuai
-const performArchive = async (id: number) => {
-  setIsSubmitting(true);
-  try {
-    // Ubah method menjadi 'PATCH' dan kirim body 'action'
-    const response = await fetch(`/api/interns/manage?id=${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'archive' }), // Kirim perintah arsip
-    });
-    
-    if (!response.ok) {
-      throw new Error('Gagal mengarsipkan peserta.');
-    }
-
-    setNotification({ 
-      isOpen: true, 
-      title: 'Berhasil', 
-      message: 'Peserta berhasil diarsipkan.', 
-      type: 'success' 
-    });
-    fetchInterns(monthFilter);
-    
-  } catch (error: any) {
-    setNotification({ 
-      isOpen: true, 
-      title: 'Gagal', 
-      message: error.message || 'Terjadi kesalahan.', 
-      type: 'error' 
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-// Ubah handleDeleteClick agar memanggil performArchive
-const handleDeleteClick = (intern: InternSummary) => {
-  setNotification({
-    isOpen: true,
-    title: 'Konfirmasi Arsip',
-    message: `Anda yakin ingin mengarsipkan peserta bernama ${intern.name}?`,
-    type: 'confirm',
-    onConfirm: () => performArchive(intern.id),
-  });
-};
 
    if (isLoading) {
     return <AdminDashboardSkeleton />;
@@ -359,15 +231,6 @@ const handleDeleteClick = (intern: InternSummary) => {
 
           {/* Baris 2: Khusus untuk Tombol Aksi */}
           <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            {/* Tombol Tambah Peserta di Kiri */}
-            <button 
-              onClick={() => setAddInternModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors w-full md:w-auto"
-            >
-              <FiPlus />
-              <span>Tambah Peserta</span>
-            </button>
-
             {/* Tombol Download di Kanan */}
             <div className="w-full md:w-auto">
               {isClient && (
@@ -428,40 +291,13 @@ const handleDeleteClick = (intern: InternSummary) => {
                     <td className="px-6 py-4 whitespace-nowrap text-center text-yellow-600 font-bold">{intern.terlambat}</td>
                     <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">{formatCurrency(intern.totalUangMakan)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="relative inline-block text-left" ref={openMenuId === intern.id ? menuRef : null}>
-                      <button
-                        onClick={() => setOpenMenuId(openMenuId === intern.id ? null : intern.id)}
-                        className="p-2 rounded-full hover:bg-gray-100"
-                      >
-                        <FiMoreVertical size={20} className="text-gray-600"/>
-                      </button>
-                      {openMenuId === intern.id && (
-                        <div
-                          className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
-                        >
-                          <div className="py-1" role="menu" aria-orientation="vertical">
-                            <button
-                              onClick={() => { handleViewDetails(intern); setOpenMenuId(null); }}
-                              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <FiEye /> Lihat Detail
-                            </button>
-                            <button
-                              onClick={() => { handleEditClick(intern); setOpenMenuId(null); }}
-                              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <FiEdit /> Edit Peserta
-                            </button>
-                            <button
-                              onClick={() => { handleDeleteClick(intern); setOpenMenuId(null); }}
-                              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                            >
-                              <FiTrash2 /> Hapus Peserta
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <button
+                      onClick={() => handleViewDetails(intern)}
+                      className="text-gray-500 hover:text-indigo-600"
+                      title="Lihat Detail" 
+                    >
+                      <FiEye size={20} />
+                    </button>
                   </td>
                   </tr>
               ))
@@ -472,11 +308,6 @@ const handleDeleteClick = (intern: InternSummary) => {
         </div>
       </main>
     </div>
-    <AddInternModal 
-        isOpen={isAddInternModalOpen}
-        onClose={() => setAddInternModalOpen(false)}
-        onSubmit={handleAddInternSubmit}
-      />
     <AdminDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setDetailModalOpen(false)}
@@ -490,12 +321,6 @@ const handleDeleteClick = (intern: InternSummary) => {
         isOpen={isLiveDetailModalOpen}
         onClose={() => setLiveDetailModalOpen(false)}
         record={selectedRecord}
-      />
-    <EditInternModal 
-        isOpen={isEditModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        onSubmit={handleEditSubmit}
-        internData={selectedIntern}
       />
       <NotificationModal
         isOpen={!!notification}
