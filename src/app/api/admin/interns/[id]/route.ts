@@ -7,6 +7,12 @@ import { hash } from 'bcrypt';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
+interface RouteContext {
+  params: {
+    id: string;
+  };
+}
+
 async function verifySuperAdmin(req: NextRequest) {
   const token = req.cookies.get('adminAuthToken')?.value;
   if (!token) return { error: 'Tidak terautentikasi', status: 401 };
@@ -21,14 +27,14 @@ async function verifySuperAdmin(req: NextRequest) {
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: RouteContext) {
   const auth = await verifySuperAdmin(req);
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id); // Akses id melalui context.params.id
     if (isNaN(id)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
 
     const body = await req.json();
@@ -48,11 +54,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       dataToUpdate.password = await hash(password, 10);
     }
 
-    const updatedUser = await db.user.update({
-      where: { id },
-      data: dataToUpdate,
-    });
-
+    const updatedUser = await db.user.update({ where: { id }, data: dataToUpdate });
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error('[UPDATE INTERN ERROR]', error);
@@ -60,14 +62,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: RouteContext) {
   const auth = await verifySuperAdmin(req);
   if (auth.error) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id); // Akses id melalui context.params.id
     if (isNaN(id)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
 
     await db.attendance.deleteMany({ where: { userId: id } });
