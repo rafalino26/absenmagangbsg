@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     
     const user = await db.user.findFirst({
       where: { 
-        id: internId,
+        internCode: internCode, 
         isActive: true,
       }, 
     });

@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 // Tipe data untuk peserta magang, sesuai dengan apa yang dikirim oleh API
 interface Intern {
   id: number;
+  internCode: string | null;
   name: string;
   division: string;
   isActive: boolean;
@@ -138,7 +139,7 @@ export default function ManageInternsPage() {
                     <td className="px-6 py-4">
                       <div className="font-medium text-gray-900">{intern.name}</div>
                       <div className="text-sm text-gray-500">
-                        Kode: {String(intern.id).padStart(3, '0')} | Periode: {intern.periodStartDate && intern.periodEndDate ? `${format(new Date(intern.periodStartDate), 'd LLL yy')} - ${format(new Date(intern.periodEndDate), 'd LLL yy')}` : '-'}
+                        Kode: {intern.internCode}| Periode: {intern.periodStartDate && intern.periodEndDate ? `${format(new Date(intern.periodStartDate), 'd LLL yy')} - ${format(new Date(intern.periodEndDate), 'd LLL yy')}` : '-'}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">{intern.division}</td>

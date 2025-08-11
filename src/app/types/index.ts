@@ -25,6 +25,7 @@ export interface AttendanceRecord {
 
 export interface InternSummary {
   id: number;
+  internCode: string | null;
   name: string;
   division: string;
   periodStartDate: string | null; 

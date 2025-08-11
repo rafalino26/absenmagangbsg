@@ -271,7 +271,7 @@ const csvData = displayedData.map((intern, index) => ({
                   <tr key={intern.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">{intern.name}</div>
-                      <div className="text-sm text-gray-500">Kode: {formatInternCode(intern.id)}| {intern.division}</div>
+                      <div className="text-sm text-gray-500">Kode: {intern.internCode || '-'} | {intern.division}</div>
                        <div className="text-xs text-gray-500 mt-1">
                         {(intern.periodStartDate && intern.periodEndDate)
                           ? `Periode:${format(new Date(intern.periodStartDate), 'd LLL yy')} - ${format(new Date(intern.periodEndDate), 'd LLL yy')}`

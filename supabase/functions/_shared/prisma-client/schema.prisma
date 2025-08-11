@@ -19,6 +19,7 @@ datasource db {
 
 model User {
   id              Int       @id @default(autoincrement())
+  internCode      String?   @unique
   name            String
   email           String?   @unique
   password        String
@@ -36,12 +37,10 @@ model User {
   attendances     Attendance[]
   helpdeskTickets HelpdeskTicket[]
 
-  // --- TAMBAHAN UNTUK FITUR MENTOR & LOGBOOK ---
   mentorId  Int?
   mentor    User?      @relation("MentorToInterns", fields: [mentorId], references: [id])
   interns   User[]     @relation("MentorToInterns")
   dailyLogs DailyLog[]
-  // --- SELESAI TAMBAHAN ---
 }
 
 model Attendance {
@@ -67,7 +66,6 @@ model HelpdeskTicket {
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// --- MODEL BARU UNTUK LOGBOOK ---
 model DailyLog {
   id        Int       @id @default(autoincrement())
   userId    Int
@@ -78,9 +76,6 @@ model DailyLog {
   createdAt DateTime  @default(now())
 }
 
-// --- SELESAI MODEL BARU ---
-
-// --- ENUM YANG SUDAH KITA PERBAIKI & TAMBAHKAN ---
 enum Role {
   SUPER_ADMIN
   ADMIN

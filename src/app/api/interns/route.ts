@@ -94,6 +94,7 @@ export async function GET(req: NextRequest) {
 
         return {
           id: intern.id,
+          internCode: intern.internCode,
           name: intern.name,
           division: intern.division,
           periodStartDate: intern.periodStartDate?.toISOString(),

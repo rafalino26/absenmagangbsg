@@ -65,7 +65,7 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
     
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/admin/interns', {
+      const response = await fetch('/api/admin/manage-interns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -56,6 +56,7 @@ export async function GET(req: NextRequest) {
       },
       select: {
         id: true,
+        internCode: true,
         name: true,
         division: true,
         periodStartDate: true,
@@ -89,44 +90,48 @@ export async function POST(req: NextRequest) {
   try {
     const { name, division, email, periodStartDate, periodEndDate, mentorId } = await req.json();
 
-    if (!name || !division || !email || !periodStartDate || !periodEndDate ) {
-      return NextResponse.json({ error: 'Data tidak lengkap. Mentor wajib dipilih.' }, { status: 400 });
+    if (!name || !division || !periodStartDate || !periodEndDate) { // mentorId bisa opsional
+      return NextResponse.json({ error: 'Data tidak lengkap.' }, { status: 400 });
     }
-
-    // Buat password otomatis berdasarkan ID. Ini lebih konsisten.
-    // Kita akan buat user dulu dengan password sementara.
-    const tempUser = await db.user.create({
-        data: {
-            name,
-            division,
-            email,
-            password: 'PENDING', // Password sementara
-            role: Role.INTERN,
-            periodStartDate: new Date(periodStartDate),
-            periodEndDate: new Date(periodEndDate),
-            mentorId: mentorId ? parseInt(mentorId) : null,
-        }
+    
+    // --- LOGIKA BARU UNTUK KODE MAGANG ---
+    // 1. Cari peserta dengan internCode tertinggi
+    const lastIntern = await db.user.findFirst({
+        where: { role: Role.INTERN, internCode: { not: null } },
+        orderBy: { id: 'desc' }, // Cek dari ID terbaru untuk efisiensi
+        select: { internCode: true }
     });
+    
+    const lastCodeNumber = lastIntern?.internCode ? parseInt(lastIntern.internCode) : 0;
+    const newInternCode = String(lastCodeNumber + 1).padStart(3, '0');
+    // --- SELESAI LOGIKA BARU ---
 
-    const internCode = String(tempUser.id).padStart(3, '0');
     const firstName = name.split(' ')[0].toLowerCase();
-    const autoPassword = `${firstName}${internCode}`;
+    const autoPassword = `${firstName}${newInternCode}`;
     const hashedPassword = await hash(autoPassword, 10);
-
-    // Update user dengan password yang benar
-    const newIntern = await db.user.update({
-        where: { id: tempUser.id },
-        data: { password: hashedPassword }
+    
+    const newIntern = await db.user.create({
+      data: {
+        internCode: newInternCode, // Simpan kode magang baru
+        name,
+        division,
+        email,
+        password: hashedPassword,
+        role: Role.INTERN,
+        periodStartDate: new Date(periodStartDate),
+        periodEndDate: new Date(periodEndDate),
+        mentorId: mentorId ? parseInt(mentorId) : null,
+      },
     });
 
     if (email) {
       try {
-        await sendLoginDetailsByEmail(email, name, internCode, autoPassword);
+        await sendLoginDetailsByEmail(email, name, newInternCode, autoPassword);
       } catch (emailError) {
         console.error(`GAGAL MENGIRIM EMAIL ke ${email}`, emailError);
         const { password, ...internData } = newIntern;
         return NextResponse.json({
-          message: `Peserta berhasil dibuat (Kode: ${internCode}), tetapi notifikasi email gagal dikirim.`,
+          message: `Peserta berhasil dibuat (Kode: ${newInternCode}), tetapi notifikasi email gagal dikirim.`,
           warning: true,
           user: internData,
         }, { status: 201 });
