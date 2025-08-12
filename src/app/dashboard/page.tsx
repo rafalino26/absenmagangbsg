@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, MouseEvent  } from 'react';
-import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiChevronDown, FiDownload, FiHeadphones } from 'react-icons/fi';
+import { useState, useEffect, useCallback, useRef  } from 'react';
+import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiChevronDown, FiDownload, FiHeadphones, FiMoreVertical, FiClipboard  } from 'react-icons/fi';
 import { CSVLink } from 'react-csv';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -19,8 +19,9 @@ import NotificationModal from '../components/Modal/NotificationModal';
 import SpinnerOverlay from '../components/loading/SpinnerOverlay';
 import PhoneModal from '../components/Modal/PhoneModal';
 import HelpdeskModal from '../components/Modal/HelpdeskModal';
-import { AttendanceRecord,NotificationState,UserProfile } from '../types';
+import { NotificationState, UserProfile } from '../types';
 import { format } from 'date-fns';
+import ActivityLogModal from '../components/Modal/ActivityLogModal';
 
 interface HistoryItem {
   id: number;
@@ -84,6 +85,9 @@ export default function DashboardPage() {
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
   const [isPhoneModalOpen, setPhoneModalOpen] = useState(false);
   const [isHelpdeskModalOpen, setHelpdeskModalOpen] = useState(false);
+  const [isActivityModalOpen, setActivityModalOpen] = useState(false);
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const closeNotification = () => setNotification(null);
   const router = useRouter();
 
@@ -417,6 +421,35 @@ const handlePhoneSubmit = async (phone: string) => {
     }
   };
 
+const handleActivityLogSubmit = async ({ activities, otherActivity }: { activities: string[], otherActivity: string }) => {
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/logs/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activities, otherActivity }),
+      });
+      if (!response.ok) throw new Error('Gagal mengirim laporan aktivitas.');
+
+      setNotification({ isOpen: true, title: 'Berhasil', message: 'Laporan aktivitas berhasil dikirim.', type: 'success' });
+    } catch (error: any) {
+      setNotification({ isOpen: true, title: 'Gagal', message: error.message, type: 'error' });
+    } finally {
+      setIsSubmitting(false);
+      setActivityModalOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuRef]);
+
   const performLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/'); 
@@ -452,28 +485,51 @@ const handlePhoneSubmit = async (phone: string) => {
     <>
     {isSubmitting && <SpinnerOverlay />}
       <div className="bg-gray-50 min-h-screen">
-<header className="bg-red-600 shadow-sm">
-  <div className="   px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
-    <div className="flex items-center gap-2">
-      <div className="flex-shrink-0">
-        <div className="w-[50px] aspect-square rounded-full overflow-hidden shadow-lg">
-          <Image src="/logobsg.jpg" width={800} height={500} alt="Logo" className="w-full h-full object-cover"/>
-        </div>
-      </div>
-      <div><h1 className="text-xl font-bold text-white">Absen Magang</h1></div>
-    </div>
-    <div className="flex items-center gap-2">
-            {/* Tombol Helpdesk */}
-            <button onClick={() => setHelpdeskModalOpen(true)} className="p-2 text-white rounded-full hover:bg-red-700" title="Helpdesk">
-              <FiHeadphones size={22} />
-            </button>
-            {/* Tombol Logout */}
-            <button onClick={handleLogout} className="p-2 text-white rounded-full hover:bg-red-700" title="Logout">
-              <FiLogOut size={22} />
-            </button>
+<header className="bg-red-600 shadow-sm sticky top-0 z-30">
+          <div className="px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex-shrink-0">
+                <div className="w-[50px] aspect-square rounded-full overflow-hidden shadow-lg">
+                  <Image src="/logobsg.jpg" width={800} height={500} alt="Logo" className="w-full h-full object-cover"/>
+                </div>
+              </div>
+              <div><h1 className="text-xl font-bold text-white">Absen Magang</h1></div>
+            </div>
+
+            {/* Tombol Aksi untuk Desktop (terlihat di ukuran 'md' ke atas) */}
+            <div className="hidden md:flex items-center gap-2">
+              <button onClick={() => setActivityModalOpen(true)} className="p-2 text-white rounded-full hover:bg-red-700" title="Log Aktivitas">
+                <FiClipboard size={22} />
+              </button>
+              <button onClick={() => setHelpdeskModalOpen(true)} className="p-2 text-white rounded-full hover:bg-red-700" title="Helpdesk">
+                <FiHeadphones size={22} />
+              </button>
+              <button onClick={handleLogout} className="p-2 text-white rounded-full hover:bg-red-700" title="Logout">
+                <FiLogOut size={22} />
+              </button>
+            </div>
+
+            {/* Tombol Menu untuk Mobile (terlihat HANYA di bawah ukuran 'md') */}
+            <div className="relative md:hidden" ref={menuRef}>
+              <button onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-white">
+                <FiMoreVertical size={24} />
+              </button>
+              {isMobileMenuOpen && (
+                <div className="origin-top-right absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border py-1">
+                  <button onClick={() => { setActivityModalOpen(true); setMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <FiClipboard /><span>Isi Log Aktivitas</span>
+                  </button>
+                  <button onClick={() => { setHelpdeskModalOpen(true); setMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <FiHeadphones /><span>Helpdesk</span>
+                  </button>
+                  <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                    <FiLogOut /><span>Logout</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
         <main className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4 md:gap-6 mb-8">
@@ -681,7 +737,12 @@ const handlePhoneSubmit = async (phone: string) => {
       type={notification?.type || 'success'}
       onConfirm={notification?.onConfirm}
     />
-    
+        <ActivityLogModal
+        isOpen={isActivityModalOpen}
+        onClose={() => setActivityModalOpen(false)}
+        onSubmit={handleActivityLogSubmit}
+        isSubmitting={isSubmitting}
+      />    
     </>
   );
 }

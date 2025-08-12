@@ -75,6 +75,11 @@ model DailyLog {
   createdAt DateTime @default(now())
 }
 
+model PredefinedActivity {
+  id   Int    @id @default(autoincrement())
+  task String @unique // Nama tugas/aktivitasnya
+}
+
 enum Role {
   SUPER_ADMIN
   ADMIN

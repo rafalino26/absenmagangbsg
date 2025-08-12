@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiGrid, FiClock, FiX, FiMessageSquare, FiUsers, FiUserPlus } from 'react-icons/fi';
+import { FiGrid, FiClock, FiX, FiMessageSquare, FiUsers, FiUserPlus, FiFileText, FiArchive } from 'react-icons/fi';
 import { Role } from '@prisma/client';
 
 interface SidebarProps {
@@ -14,10 +14,11 @@ interface SidebarProps {
 const navLinks = [
   { name: 'Rekapitulasi', href: '/admindashboard/rekapitulasi', icon: FiGrid },
   { name: 'Riwayat Absensi', href: '/admindashboard/riwayat', icon: FiClock },
-  { name: 'Arsip Magang', href: '/admindashboard/arsip', icon: FiClock, requiredRole: Role.SUPER_ADMIN },
+  { name: 'Arsip Magang', href: '/admindashboard/arsip', icon: FiArchive, requiredRole: Role.SUPER_ADMIN },
   { name: 'Helpdesk', href: '/admindashboard/helpdesk', icon: FiMessageSquare }, 
   { name: 'Kelola Mentor', href: '/admindashboard/mentors', icon: FiUsers, requiredRole: Role.SUPER_ADMIN },
-   { name: 'Kelola Peserta', href: '/admindashboard/peserta', icon: FiUserPlus, requiredRole: Role.SUPER_ADMIN }
+  { name: 'Kelola Peserta', href: '/admindashboard/peserta', icon: FiUserPlus, requiredRole: Role.SUPER_ADMIN },
+  { name: 'Log Harian', href: '/admindashboard/log-harian', icon: FiFileText }, 
 ];
 
 export default function Sidebar({ isOpen, setIsOpen, role }: SidebarProps) {

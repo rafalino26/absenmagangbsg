@@ -171,6 +171,11 @@ exports.Prisma.DailyLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.PredefinedActivityScalarFieldEnum = {
+  id: 'id',
+  task: 'task'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -213,7 +218,8 @@ exports.Prisma.ModelName = {
   User: 'User',
   Attendance: 'Attendance',
   HelpdeskTicket: 'HelpdeskTicket',
-  DailyLog: 'DailyLog'
+  DailyLog: 'DailyLog',
+  PredefinedActivity: 'PredefinedActivity'
 };
 
 /**

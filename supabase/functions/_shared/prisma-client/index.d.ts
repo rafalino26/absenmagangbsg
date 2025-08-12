@@ -33,6 +33,11 @@ export type HelpdeskTicket = $Result.DefaultSelection<Prisma.$HelpdeskTicketPayl
  * 
  */
 export type DailyLog = $Result.DefaultSelection<Prisma.$DailyLogPayload>
+/**
+ * Model PredefinedActivity
+ * 
+ */
+export type PredefinedActivity = $Result.DefaultSelection<Prisma.$PredefinedActivityPayload>
 
 /**
  * Enums
@@ -253,6 +258,16 @@ export class PrismaClient<
     * ```
     */
   get dailyLog(): Prisma.DailyLogDelegate<ExtArgs>;
+
+  /**
+   * `prisma.predefinedActivity`: Exposes CRUD operations for the **PredefinedActivity** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more PredefinedActivities
+    * const predefinedActivities = await prisma.predefinedActivity.findMany()
+    * ```
+    */
+  get predefinedActivity(): Prisma.PredefinedActivityDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -697,7 +712,8 @@ export namespace Prisma {
     User: 'User',
     Attendance: 'Attendance',
     HelpdeskTicket: 'HelpdeskTicket',
-    DailyLog: 'DailyLog'
+    DailyLog: 'DailyLog',
+    PredefinedActivity: 'PredefinedActivity'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -713,7 +729,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "attendance" | "helpdeskTicket" | "dailyLog"
+      modelProps: "user" | "attendance" | "helpdeskTicket" | "dailyLog" | "predefinedActivity"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -994,6 +1010,76 @@ export namespace Prisma {
           count: {
             args: Prisma.DailyLogCountArgs<ExtArgs>
             result: $Utils.Optional<DailyLogCountAggregateOutputType> | number
+          }
+        }
+      }
+      PredefinedActivity: {
+        payload: Prisma.$PredefinedActivityPayload<ExtArgs>
+        fields: Prisma.PredefinedActivityFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PredefinedActivityFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PredefinedActivityFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload>
+          }
+          findFirst: {
+            args: Prisma.PredefinedActivityFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PredefinedActivityFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload>
+          }
+          findMany: {
+            args: Prisma.PredefinedActivityFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload>[]
+          }
+          create: {
+            args: Prisma.PredefinedActivityCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload>
+          }
+          createMany: {
+            args: Prisma.PredefinedActivityCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PredefinedActivityCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload>[]
+          }
+          delete: {
+            args: Prisma.PredefinedActivityDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload>
+          }
+          update: {
+            args: Prisma.PredefinedActivityUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload>
+          }
+          deleteMany: {
+            args: Prisma.PredefinedActivityDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PredefinedActivityUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.PredefinedActivityUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PredefinedActivityPayload>
+          }
+          aggregate: {
+            args: Prisma.PredefinedActivityAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePredefinedActivity>
+          }
+          groupBy: {
+            args: Prisma.PredefinedActivityGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PredefinedActivityGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PredefinedActivityCountArgs<ExtArgs>
+            result: $Utils.Optional<PredefinedActivityCountAggregateOutputType> | number
           }
         }
       }
@@ -5429,6 +5515,882 @@ export namespace Prisma {
 
 
   /**
+   * Model PredefinedActivity
+   */
+
+  export type AggregatePredefinedActivity = {
+    _count: PredefinedActivityCountAggregateOutputType | null
+    _avg: PredefinedActivityAvgAggregateOutputType | null
+    _sum: PredefinedActivitySumAggregateOutputType | null
+    _min: PredefinedActivityMinAggregateOutputType | null
+    _max: PredefinedActivityMaxAggregateOutputType | null
+  }
+
+  export type PredefinedActivityAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type PredefinedActivitySumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type PredefinedActivityMinAggregateOutputType = {
+    id: number | null
+    task: string | null
+  }
+
+  export type PredefinedActivityMaxAggregateOutputType = {
+    id: number | null
+    task: string | null
+  }
+
+  export type PredefinedActivityCountAggregateOutputType = {
+    id: number
+    task: number
+    _all: number
+  }
+
+
+  export type PredefinedActivityAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type PredefinedActivitySumAggregateInputType = {
+    id?: true
+  }
+
+  export type PredefinedActivityMinAggregateInputType = {
+    id?: true
+    task?: true
+  }
+
+  export type PredefinedActivityMaxAggregateInputType = {
+    id?: true
+    task?: true
+  }
+
+  export type PredefinedActivityCountAggregateInputType = {
+    id?: true
+    task?: true
+    _all?: true
+  }
+
+  export type PredefinedActivityAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PredefinedActivity to aggregate.
+     */
+    where?: PredefinedActivityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PredefinedActivities to fetch.
+     */
+    orderBy?: PredefinedActivityOrderByWithRelationInput | PredefinedActivityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PredefinedActivityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PredefinedActivities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PredefinedActivities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned PredefinedActivities
+    **/
+    _count?: true | PredefinedActivityCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PredefinedActivityAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PredefinedActivitySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PredefinedActivityMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PredefinedActivityMaxAggregateInputType
+  }
+
+  export type GetPredefinedActivityAggregateType<T extends PredefinedActivityAggregateArgs> = {
+        [P in keyof T & keyof AggregatePredefinedActivity]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePredefinedActivity[P]>
+      : GetScalarType<T[P], AggregatePredefinedActivity[P]>
+  }
+
+
+
+
+  export type PredefinedActivityGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PredefinedActivityWhereInput
+    orderBy?: PredefinedActivityOrderByWithAggregationInput | PredefinedActivityOrderByWithAggregationInput[]
+    by: PredefinedActivityScalarFieldEnum[] | PredefinedActivityScalarFieldEnum
+    having?: PredefinedActivityScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PredefinedActivityCountAggregateInputType | true
+    _avg?: PredefinedActivityAvgAggregateInputType
+    _sum?: PredefinedActivitySumAggregateInputType
+    _min?: PredefinedActivityMinAggregateInputType
+    _max?: PredefinedActivityMaxAggregateInputType
+  }
+
+  export type PredefinedActivityGroupByOutputType = {
+    id: number
+    task: string
+    _count: PredefinedActivityCountAggregateOutputType | null
+    _avg: PredefinedActivityAvgAggregateOutputType | null
+    _sum: PredefinedActivitySumAggregateOutputType | null
+    _min: PredefinedActivityMinAggregateOutputType | null
+    _max: PredefinedActivityMaxAggregateOutputType | null
+  }
+
+  type GetPredefinedActivityGroupByPayload<T extends PredefinedActivityGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PredefinedActivityGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PredefinedActivityGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PredefinedActivityGroupByOutputType[P]>
+            : GetScalarType<T[P], PredefinedActivityGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PredefinedActivitySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    task?: boolean
+  }, ExtArgs["result"]["predefinedActivity"]>
+
+  export type PredefinedActivitySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    task?: boolean
+  }, ExtArgs["result"]["predefinedActivity"]>
+
+  export type PredefinedActivitySelectScalar = {
+    id?: boolean
+    task?: boolean
+  }
+
+
+  export type $PredefinedActivityPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "PredefinedActivity"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      task: string
+    }, ExtArgs["result"]["predefinedActivity"]>
+    composites: {}
+  }
+
+  type PredefinedActivityGetPayload<S extends boolean | null | undefined | PredefinedActivityDefaultArgs> = $Result.GetResult<Prisma.$PredefinedActivityPayload, S>
+
+  type PredefinedActivityCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<PredefinedActivityFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: PredefinedActivityCountAggregateInputType | true
+    }
+
+  export interface PredefinedActivityDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['PredefinedActivity'], meta: { name: 'PredefinedActivity' } }
+    /**
+     * Find zero or one PredefinedActivity that matches the filter.
+     * @param {PredefinedActivityFindUniqueArgs} args - Arguments to find a PredefinedActivity
+     * @example
+     * // Get one PredefinedActivity
+     * const predefinedActivity = await prisma.predefinedActivity.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PredefinedActivityFindUniqueArgs>(args: SelectSubset<T, PredefinedActivityFindUniqueArgs<ExtArgs>>): Prisma__PredefinedActivityClient<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one PredefinedActivity that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {PredefinedActivityFindUniqueOrThrowArgs} args - Arguments to find a PredefinedActivity
+     * @example
+     * // Get one PredefinedActivity
+     * const predefinedActivity = await prisma.predefinedActivity.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PredefinedActivityFindUniqueOrThrowArgs>(args: SelectSubset<T, PredefinedActivityFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PredefinedActivityClient<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first PredefinedActivity that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PredefinedActivityFindFirstArgs} args - Arguments to find a PredefinedActivity
+     * @example
+     * // Get one PredefinedActivity
+     * const predefinedActivity = await prisma.predefinedActivity.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PredefinedActivityFindFirstArgs>(args?: SelectSubset<T, PredefinedActivityFindFirstArgs<ExtArgs>>): Prisma__PredefinedActivityClient<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first PredefinedActivity that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PredefinedActivityFindFirstOrThrowArgs} args - Arguments to find a PredefinedActivity
+     * @example
+     * // Get one PredefinedActivity
+     * const predefinedActivity = await prisma.predefinedActivity.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PredefinedActivityFindFirstOrThrowArgs>(args?: SelectSubset<T, PredefinedActivityFindFirstOrThrowArgs<ExtArgs>>): Prisma__PredefinedActivityClient<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more PredefinedActivities that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PredefinedActivityFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all PredefinedActivities
+     * const predefinedActivities = await prisma.predefinedActivity.findMany()
+     * 
+     * // Get first 10 PredefinedActivities
+     * const predefinedActivities = await prisma.predefinedActivity.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const predefinedActivityWithIdOnly = await prisma.predefinedActivity.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PredefinedActivityFindManyArgs>(args?: SelectSubset<T, PredefinedActivityFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a PredefinedActivity.
+     * @param {PredefinedActivityCreateArgs} args - Arguments to create a PredefinedActivity.
+     * @example
+     * // Create one PredefinedActivity
+     * const PredefinedActivity = await prisma.predefinedActivity.create({
+     *   data: {
+     *     // ... data to create a PredefinedActivity
+     *   }
+     * })
+     * 
+     */
+    create<T extends PredefinedActivityCreateArgs>(args: SelectSubset<T, PredefinedActivityCreateArgs<ExtArgs>>): Prisma__PredefinedActivityClient<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many PredefinedActivities.
+     * @param {PredefinedActivityCreateManyArgs} args - Arguments to create many PredefinedActivities.
+     * @example
+     * // Create many PredefinedActivities
+     * const predefinedActivity = await prisma.predefinedActivity.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PredefinedActivityCreateManyArgs>(args?: SelectSubset<T, PredefinedActivityCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many PredefinedActivities and returns the data saved in the database.
+     * @param {PredefinedActivityCreateManyAndReturnArgs} args - Arguments to create many PredefinedActivities.
+     * @example
+     * // Create many PredefinedActivities
+     * const predefinedActivity = await prisma.predefinedActivity.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many PredefinedActivities and only return the `id`
+     * const predefinedActivityWithIdOnly = await prisma.predefinedActivity.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PredefinedActivityCreateManyAndReturnArgs>(args?: SelectSubset<T, PredefinedActivityCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a PredefinedActivity.
+     * @param {PredefinedActivityDeleteArgs} args - Arguments to delete one PredefinedActivity.
+     * @example
+     * // Delete one PredefinedActivity
+     * const PredefinedActivity = await prisma.predefinedActivity.delete({
+     *   where: {
+     *     // ... filter to delete one PredefinedActivity
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PredefinedActivityDeleteArgs>(args: SelectSubset<T, PredefinedActivityDeleteArgs<ExtArgs>>): Prisma__PredefinedActivityClient<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one PredefinedActivity.
+     * @param {PredefinedActivityUpdateArgs} args - Arguments to update one PredefinedActivity.
+     * @example
+     * // Update one PredefinedActivity
+     * const predefinedActivity = await prisma.predefinedActivity.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PredefinedActivityUpdateArgs>(args: SelectSubset<T, PredefinedActivityUpdateArgs<ExtArgs>>): Prisma__PredefinedActivityClient<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more PredefinedActivities.
+     * @param {PredefinedActivityDeleteManyArgs} args - Arguments to filter PredefinedActivities to delete.
+     * @example
+     * // Delete a few PredefinedActivities
+     * const { count } = await prisma.predefinedActivity.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PredefinedActivityDeleteManyArgs>(args?: SelectSubset<T, PredefinedActivityDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more PredefinedActivities.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PredefinedActivityUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many PredefinedActivities
+     * const predefinedActivity = await prisma.predefinedActivity.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PredefinedActivityUpdateManyArgs>(args: SelectSubset<T, PredefinedActivityUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one PredefinedActivity.
+     * @param {PredefinedActivityUpsertArgs} args - Arguments to update or create a PredefinedActivity.
+     * @example
+     * // Update or create a PredefinedActivity
+     * const predefinedActivity = await prisma.predefinedActivity.upsert({
+     *   create: {
+     *     // ... data to create a PredefinedActivity
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the PredefinedActivity we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PredefinedActivityUpsertArgs>(args: SelectSubset<T, PredefinedActivityUpsertArgs<ExtArgs>>): Prisma__PredefinedActivityClient<$Result.GetResult<Prisma.$PredefinedActivityPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of PredefinedActivities.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PredefinedActivityCountArgs} args - Arguments to filter PredefinedActivities to count.
+     * @example
+     * // Count the number of PredefinedActivities
+     * const count = await prisma.predefinedActivity.count({
+     *   where: {
+     *     // ... the filter for the PredefinedActivities we want to count
+     *   }
+     * })
+    **/
+    count<T extends PredefinedActivityCountArgs>(
+      args?: Subset<T, PredefinedActivityCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PredefinedActivityCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a PredefinedActivity.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PredefinedActivityAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PredefinedActivityAggregateArgs>(args: Subset<T, PredefinedActivityAggregateArgs>): Prisma.PrismaPromise<GetPredefinedActivityAggregateType<T>>
+
+    /**
+     * Group by PredefinedActivity.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PredefinedActivityGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PredefinedActivityGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PredefinedActivityGroupByArgs['orderBy'] }
+        : { orderBy?: PredefinedActivityGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PredefinedActivityGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPredefinedActivityGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the PredefinedActivity model
+   */
+  readonly fields: PredefinedActivityFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for PredefinedActivity.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PredefinedActivityClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the PredefinedActivity model
+   */ 
+  interface PredefinedActivityFieldRefs {
+    readonly id: FieldRef<"PredefinedActivity", 'Int'>
+    readonly task: FieldRef<"PredefinedActivity", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * PredefinedActivity findUnique
+   */
+  export type PredefinedActivityFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * Filter, which PredefinedActivity to fetch.
+     */
+    where: PredefinedActivityWhereUniqueInput
+  }
+
+  /**
+   * PredefinedActivity findUniqueOrThrow
+   */
+  export type PredefinedActivityFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * Filter, which PredefinedActivity to fetch.
+     */
+    where: PredefinedActivityWhereUniqueInput
+  }
+
+  /**
+   * PredefinedActivity findFirst
+   */
+  export type PredefinedActivityFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * Filter, which PredefinedActivity to fetch.
+     */
+    where?: PredefinedActivityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PredefinedActivities to fetch.
+     */
+    orderBy?: PredefinedActivityOrderByWithRelationInput | PredefinedActivityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PredefinedActivities.
+     */
+    cursor?: PredefinedActivityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PredefinedActivities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PredefinedActivities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PredefinedActivities.
+     */
+    distinct?: PredefinedActivityScalarFieldEnum | PredefinedActivityScalarFieldEnum[]
+  }
+
+  /**
+   * PredefinedActivity findFirstOrThrow
+   */
+  export type PredefinedActivityFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * Filter, which PredefinedActivity to fetch.
+     */
+    where?: PredefinedActivityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PredefinedActivities to fetch.
+     */
+    orderBy?: PredefinedActivityOrderByWithRelationInput | PredefinedActivityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for PredefinedActivities.
+     */
+    cursor?: PredefinedActivityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PredefinedActivities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PredefinedActivities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of PredefinedActivities.
+     */
+    distinct?: PredefinedActivityScalarFieldEnum | PredefinedActivityScalarFieldEnum[]
+  }
+
+  /**
+   * PredefinedActivity findMany
+   */
+  export type PredefinedActivityFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * Filter, which PredefinedActivities to fetch.
+     */
+    where?: PredefinedActivityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of PredefinedActivities to fetch.
+     */
+    orderBy?: PredefinedActivityOrderByWithRelationInput | PredefinedActivityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing PredefinedActivities.
+     */
+    cursor?: PredefinedActivityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` PredefinedActivities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` PredefinedActivities.
+     */
+    skip?: number
+    distinct?: PredefinedActivityScalarFieldEnum | PredefinedActivityScalarFieldEnum[]
+  }
+
+  /**
+   * PredefinedActivity create
+   */
+  export type PredefinedActivityCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * The data needed to create a PredefinedActivity.
+     */
+    data: XOR<PredefinedActivityCreateInput, PredefinedActivityUncheckedCreateInput>
+  }
+
+  /**
+   * PredefinedActivity createMany
+   */
+  export type PredefinedActivityCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many PredefinedActivities.
+     */
+    data: PredefinedActivityCreateManyInput | PredefinedActivityCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PredefinedActivity createManyAndReturn
+   */
+  export type PredefinedActivityCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many PredefinedActivities.
+     */
+    data: PredefinedActivityCreateManyInput | PredefinedActivityCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * PredefinedActivity update
+   */
+  export type PredefinedActivityUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * The data needed to update a PredefinedActivity.
+     */
+    data: XOR<PredefinedActivityUpdateInput, PredefinedActivityUncheckedUpdateInput>
+    /**
+     * Choose, which PredefinedActivity to update.
+     */
+    where: PredefinedActivityWhereUniqueInput
+  }
+
+  /**
+   * PredefinedActivity updateMany
+   */
+  export type PredefinedActivityUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update PredefinedActivities.
+     */
+    data: XOR<PredefinedActivityUpdateManyMutationInput, PredefinedActivityUncheckedUpdateManyInput>
+    /**
+     * Filter which PredefinedActivities to update
+     */
+    where?: PredefinedActivityWhereInput
+  }
+
+  /**
+   * PredefinedActivity upsert
+   */
+  export type PredefinedActivityUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * The filter to search for the PredefinedActivity to update in case it exists.
+     */
+    where: PredefinedActivityWhereUniqueInput
+    /**
+     * In case the PredefinedActivity found by the `where` argument doesn't exist, create a new PredefinedActivity with this data.
+     */
+    create: XOR<PredefinedActivityCreateInput, PredefinedActivityUncheckedCreateInput>
+    /**
+     * In case the PredefinedActivity was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PredefinedActivityUpdateInput, PredefinedActivityUncheckedUpdateInput>
+  }
+
+  /**
+   * PredefinedActivity delete
+   */
+  export type PredefinedActivityDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+    /**
+     * Filter which PredefinedActivity to delete.
+     */
+    where: PredefinedActivityWhereUniqueInput
+  }
+
+  /**
+   * PredefinedActivity deleteMany
+   */
+  export type PredefinedActivityDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which PredefinedActivities to delete
+     */
+    where?: PredefinedActivityWhereInput
+  }
+
+  /**
+   * PredefinedActivity without action
+   */
+  export type PredefinedActivityDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PredefinedActivity
+     */
+    select?: PredefinedActivitySelect<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5501,6 +6463,14 @@ export namespace Prisma {
   };
 
   export type DailyLogScalarFieldEnum = (typeof DailyLogScalarFieldEnum)[keyof typeof DailyLogScalarFieldEnum]
+
+
+  export const PredefinedActivityScalarFieldEnum: {
+    id: 'id',
+    task: 'task'
+  };
+
+  export type PredefinedActivityScalarFieldEnum = (typeof PredefinedActivityScalarFieldEnum)[keyof typeof PredefinedActivityScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -5979,6 +6949,45 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"DailyLog"> | Date | string
   }
 
+  export type PredefinedActivityWhereInput = {
+    AND?: PredefinedActivityWhereInput | PredefinedActivityWhereInput[]
+    OR?: PredefinedActivityWhereInput[]
+    NOT?: PredefinedActivityWhereInput | PredefinedActivityWhereInput[]
+    id?: IntFilter<"PredefinedActivity"> | number
+    task?: StringFilter<"PredefinedActivity"> | string
+  }
+
+  export type PredefinedActivityOrderByWithRelationInput = {
+    id?: SortOrder
+    task?: SortOrder
+  }
+
+  export type PredefinedActivityWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    task?: string
+    AND?: PredefinedActivityWhereInput | PredefinedActivityWhereInput[]
+    OR?: PredefinedActivityWhereInput[]
+    NOT?: PredefinedActivityWhereInput | PredefinedActivityWhereInput[]
+  }, "id" | "task">
+
+  export type PredefinedActivityOrderByWithAggregationInput = {
+    id?: SortOrder
+    task?: SortOrder
+    _count?: PredefinedActivityCountOrderByAggregateInput
+    _avg?: PredefinedActivityAvgOrderByAggregateInput
+    _max?: PredefinedActivityMaxOrderByAggregateInput
+    _min?: PredefinedActivityMinOrderByAggregateInput
+    _sum?: PredefinedActivitySumOrderByAggregateInput
+  }
+
+  export type PredefinedActivityScalarWhereWithAggregatesInput = {
+    AND?: PredefinedActivityScalarWhereWithAggregatesInput | PredefinedActivityScalarWhereWithAggregatesInput[]
+    OR?: PredefinedActivityScalarWhereWithAggregatesInput[]
+    NOT?: PredefinedActivityScalarWhereWithAggregatesInput | PredefinedActivityScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"PredefinedActivity"> | number
+    task?: StringWithAggregatesFilter<"PredefinedActivity"> | string
+  }
+
   export type UserCreateInput = {
     internCode?: string | null
     name: string
@@ -6320,6 +7329,38 @@ export namespace Prisma {
     status?: EnumLogStatusFieldUpdateOperationsInput | $Enums.LogStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PredefinedActivityCreateInput = {
+    task: string
+  }
+
+  export type PredefinedActivityUncheckedCreateInput = {
+    id?: number
+    task: string
+  }
+
+  export type PredefinedActivityUpdateInput = {
+    task?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type PredefinedActivityUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    task?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type PredefinedActivityCreateManyInput = {
+    id?: number
+    task: string
+  }
+
+  export type PredefinedActivityUpdateManyMutationInput = {
+    task?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type PredefinedActivityUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    task?: StringFieldUpdateOperationsInput | string
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -6844,6 +7885,29 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumLogStatusFilter<$PrismaModel>
     _max?: NestedEnumLogStatusFilter<$PrismaModel>
+  }
+
+  export type PredefinedActivityCountOrderByAggregateInput = {
+    id?: SortOrder
+    task?: SortOrder
+  }
+
+  export type PredefinedActivityAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type PredefinedActivityMaxOrderByAggregateInput = {
+    id?: SortOrder
+    task?: SortOrder
+  }
+
+  export type PredefinedActivityMinOrderByAggregateInput = {
+    id?: SortOrder
+    task?: SortOrder
+  }
+
+  export type PredefinedActivitySumOrderByAggregateInput = {
+    id?: SortOrder
   }
 
   export type AttendanceCreateNestedManyWithoutUserInput = {
@@ -8293,6 +9357,10 @@ export namespace Prisma {
      * @deprecated Use DailyLogDefaultArgs instead
      */
     export type DailyLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DailyLogDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use PredefinedActivityDefaultArgs instead
+     */
+    export type PredefinedActivityArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PredefinedActivityDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

@@ -86,7 +86,7 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
       };
       if (password) dataToSubmit.password = password;
 
-      const response = await fetch(`/api/admin/interns/${internData.id}`, {
+      const response = await fetch(`/api/admin/manage-interns/${internData.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToSubmit),
