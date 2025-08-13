@@ -1,7 +1,7 @@
 // app/admindashboard/(main)/peserta/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FiPlus } from 'react-icons/fi';
 import SpinnerOverlay from '@/app/components/loading/SpinnerOverlay';
 import NotificationModal from '@/app/components/Modal/NotificationModal';
@@ -35,6 +35,7 @@ export default function ManageInternsPage() {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedIntern, setSelectedIntern] = useState<Intern | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fungsi untuk mengambil data peserta dari API
   const fetchInterns = useCallback(async () => {
@@ -98,6 +99,18 @@ export default function ManageInternsPage() {
     }
   };
 
+  const filteredInterns = useMemo(() => {
+    if (!searchQuery) {
+      return interns; // Jika tidak ada pencarian, tampilkan semua
+    }
+    const lowercasedQuery = searchQuery.toLowerCase();
+    return interns.filter(intern =>
+      intern.name.toLowerCase().includes(lowercasedQuery) ||
+      intern.internCode?.toLowerCase().includes(lowercasedQuery) ||
+      intern.division.toLowerCase().includes(lowercasedQuery)
+    );
+  }, [interns, searchQuery]);
+
   return (
     <>
       {isLoading && <SpinnerOverlay />}
@@ -112,7 +125,15 @@ export default function ManageInternsPage() {
           <FiPlus /> Tambah Peserta Baru
         </button>
       </div>
-
+        <div className="mb-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari berdasarkan nama atau kode atau divisi..."
+          className="w-full md:w-1/3 p-2 border border-gray-300 rounded-md text-black"
+        />
+      </div>
       <div className="bg-white rounded-lg shadow-sm border">
         <table className="min-w-full divide-y divide-gray-200">
          <thead className="bg-gray-50">
@@ -127,8 +148,8 @@ export default function ManageInternsPage() {
           </tr>
         </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {interns.length > 0 ? (
-              interns.map((intern) => {
+             {filteredInterns.length > 0 ? (
+              filteredInterns.map((intern) => {
                 const actions = [
                   { label: 'Edit', onClick: () => handleOpenEditModal(intern) },
                   { label: 'Arsipkan', onClick: () => handleArchiveConfirm(intern), className: 'text-orange-600 hover:bg-orange-50' },

@@ -56,6 +56,7 @@ export async function GET(req: NextRequest) {
       lat: record.latitude,
       lon: record.longitude,
       type: record.type, 
+      isLate: true,
       title: record.type === 'Hadir' ? 'Absen Masuk' : record.type === 'Pulang' ? 'Absen Pulang' : 'Pengajuan Izin',
     }));
 

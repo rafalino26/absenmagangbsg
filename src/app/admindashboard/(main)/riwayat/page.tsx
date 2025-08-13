@@ -58,7 +58,7 @@ export default function LiveAttendancePage() {
             selectedValue={dateFilter}
             onSelect={setDateFilter}
           />
-        <div className="bg-white rounded-lg shadow-sm border mt-4 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm border mt-4 overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>

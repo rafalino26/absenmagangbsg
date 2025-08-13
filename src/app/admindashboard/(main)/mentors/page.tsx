@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FiPlus } from 'react-icons/fi';
 import SpinnerOverlay from '@/app/components/loading/SpinnerOverlay';
 import NotificationModal from '@/app/components/Modal/NotificationModal';
@@ -24,6 +24,7 @@ export default function ManageMentorsPage() {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchMentors = useCallback(async () => {
     setIsLoading(true);
@@ -83,6 +84,17 @@ export default function ManageMentorsPage() {
     }
   };
 
+  const filteredMentors = useMemo(() => {
+    if (!searchQuery) {
+      return mentors;
+    }
+    const lowercasedQuery = searchQuery.toLowerCase();
+    return mentors.filter(mentor =>
+      mentor.name.toLowerCase().includes(lowercasedQuery) ||
+      mentor.division.toLowerCase().includes(lowercasedQuery) 
+    );
+  }, [mentors, searchQuery]);
+
   return (
     <>
       {isLoading && <SpinnerOverlay />}
@@ -97,7 +109,15 @@ export default function ManageMentorsPage() {
           <FiPlus /> Tambah Mentor Baru
         </button>
       </div>
-
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Cari berdasarkan nama atau divisi..."
+          className="w-full md:w-1/3 p-2 border border-gray-300 rounded-md text-black"
+        />
+      </div>
       <div className="bg-white rounded-lg shadow-sm border">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -108,8 +128,8 @@ export default function ManageMentorsPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {mentors.length > 0 ? (
-              mentors.map((mentor) => {
+           {filteredMentors.length > 0 ? (
+              filteredMentors.map((mentor) => {
                 // Definisikan aksi untuk menu
                 const actions = [
                   { label: 'Edit', onClick: () => handleOpenEditModal(mentor) },

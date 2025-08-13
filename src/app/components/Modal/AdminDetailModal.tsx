@@ -13,19 +13,20 @@ interface AdminDetailModalProps {
   month: string;
 }
 
-type FilterStatus = 'Semua' | 'Hadir' | 'Terlambat' | 'Izin' | 'Tidak Hadir';
+type FilterStatus = 'Semua' | 'Hadir' | 'Terlambat' | 'Izin' | 'Pulang';
 
 const getStatusText = (log: AttendanceRecord): string => {
   if (log.type === 'Hadir' && log.isLate) return 'Hadir (Terlambat)';
   if (log.type === 'Hadir') return 'Hadir';
   if (log.type === 'Izin') return 'Izin';
+  if (log.type === 'Pulang') return 'Pulang';
   return 'Tidak Hadir'; 
 };
 
 const getStatusColor = (statusText: string) => {
-  if (statusText.includes('Terlambat')) return 'text-yellow-600';
   if (statusText === 'Hadir') return 'text-green-600';
   if (statusText === 'Izin') return 'text-blue-600';
+  if (statusText === 'Pulang') return 'text-orange-600';
   return 'text-red-600'; 
 };
 
@@ -53,8 +54,8 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, on
             return log.type === 'Hadir' && log.isLate;
           case 'Izin':
             return log.type === 'Izin';
-          // Untuk 'Tidak Hadir', kita perlu data eksplisit. Untuk sekarang, kita asumsikan tidak ada.
-          // Jika ingin menampilkan 'Tidak Hadir', backend harus mengirim data ini.
+          case 'Pulang':
+            return log.type === 'Pulang'; 
           default:
             return false;
         }
@@ -83,7 +84,7 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, on
 
   if (!isOpen || !intern) return null;
 
-  const filterButtons: FilterStatus[] = ['Semua', 'Hadir', 'Terlambat', 'Izin', 'Tidak Hadir'];
+  const filterButtons: FilterStatus[] = ['Semua', 'Hadir', 'Terlambat', 'Izin', 'Pulang'];
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
@@ -135,6 +136,7 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, on
           <ul className="space-y-3">
             {filteredLog.length > 0 ? (
               filteredLog.map((log) => {
+                console.log("Mengecek log:", log);
                 const statusText = getStatusText(log); // Dapatkan teks status
                 return (
                   <li key={log.id} className="p-3 bg-gray-50 rounded-lg flex items-center justify-between gap-4">
@@ -143,7 +145,9 @@ export default function AdminDetailModal({ isOpen, onClose, intern, dailyLog, on
                       <p className={`text-sm font-bold ${getStatusColor(statusText)}`}>
                         {statusText}
                       </p>
-                      <p className="text-sm text-gray-500">{log.description}</p>
+                      <p className={`text-sm ${log.isLate && log.type === 'Hadir' ? 'text-red-600' : 'text-gray-500'}`}>
+                        {log.description}
+                      </p>
                     </div>
                     {(log.photoUrl || (log.lat && log.lon)) && (
                       <button 

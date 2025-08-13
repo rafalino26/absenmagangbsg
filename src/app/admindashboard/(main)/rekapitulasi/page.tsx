@@ -255,7 +255,6 @@ const csvData = displayedData.map((intern, index) => ({
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Peserta</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hadir</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Izin</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Tidak Hadir</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Terlambat</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Uang Makan</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -264,7 +263,7 @@ const csvData = displayedData.map((intern, index) => ({
               <tbody className="bg-white divide-y divide-gray-200">
                 {isLoading ? (
               <tr>
-                <td colSpan={7} className="text-center p-8 text-gray-500">Memuat data...</td>
+                <td colSpan={6} className="text-center p-8 text-gray-500">Memuat data...</td>
               </tr>
             ) : (
                 displayedData.map((intern) => (
@@ -287,7 +286,6 @@ const csvData = displayedData.map((intern, index) => ({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-green-600 font-bold">{intern.hadir}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-blue-600 font-bold">{intern.izin}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-red-600 font-bold">{intern.absen}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-yellow-600 font-bold">{intern.terlambat}</td>
                     <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">{formatCurrency(intern.totalUangMakan)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">

@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
         // Gunakan enum untuk tipe absensi
          const hadir = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Hadir } });
         const izin = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Izin } });
-        const terlambat = await db.attendance.count({ where: { ...commonWhere, isLate: true } });
+        const terlambat = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Hadir, isLate: true } });
         const absen = 0;
 
         return {
