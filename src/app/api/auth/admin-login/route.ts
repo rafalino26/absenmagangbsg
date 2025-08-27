@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       where: {
         name: username,
         role: { 
-          in: [Role.ADMIN, Role.SUPER_ADMIN]
+          in: [Role.SUPER_ADMIN, Role.ADMIN, Role.LECTURER] 
         }
       },
     });

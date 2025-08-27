@@ -37,9 +37,14 @@ model User {
   attendances     Attendance[]
   helpdeskTickets HelpdeskTicket[]
 
-  mentorId  Int?
-  mentor    User?      @relation("MentorToInterns", fields: [mentorId], references: [id])
-  interns   User[]     @relation("MentorToInterns")
+  mentorId        Int?
+  mentor          User?  @relation("MentorToInterns", fields: [mentorId], references: [id], onDelete: SetNull)
+  internsAsMentor User[] @relation("MentorToInterns")
+
+  lecturerId        Int?
+  lecturer          User?  @relation("LecturerToInterns", fields: [lecturerId], references: [id], onDelete: SetNull)
+  internsAsLecturer User[] @relation("LecturerToInterns")
+
   dailyLogs DailyLog[]
 }
 
@@ -71,6 +76,7 @@ model DailyLog {
   userId    Int
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   activity  String    @db.Text
+  photoUrl  String?
   status    LogStatus @default(PENDING)
   notes     String? // Catatan dari mentor saat mereview
   createdAt DateTime  @default(now())
@@ -84,6 +90,7 @@ model PredefinedActivity {
 enum Role {
   SUPER_ADMIN
   ADMIN
+  LECTURER
   INTERN
 }
 

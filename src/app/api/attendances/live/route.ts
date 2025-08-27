@@ -15,7 +15,7 @@ type AttendanceWithUser = Prisma.AttendanceGetPayload<typeof attendanceWithUser>
 export async function GET(req: NextRequest) {
   try {
     // 1. Verifikasi token untuk mendapatkan role dan id
-    const token = req.cookies.get('adminAuthToken')?.value;
+     const token = req.cookies.get('adminAuthToken')?.value;
     if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
     const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
 
@@ -27,6 +27,8 @@ export async function GET(req: NextRequest) {
     // 2. Tambahkan filter berdasarkan mentor jika role-nya ADMIN
     if (decoded.role === Role.ADMIN) {
       whereClause.user = { mentorId: decoded.userId };
+    } else if (decoded.role === Role.LECTURER) {
+      whereClause.user = { lecturerId: decoded.userId };
     }
     
     if (filter === 'Hari Ini') {
@@ -42,7 +44,7 @@ export async function GET(req: NextRequest) {
     }
 
     const attendanceRecords = await db.attendance.findMany({
-      where: whereClause, // 3. Terapkan whereClause yang sudah dinamis
+      where: whereClause, 
       include: attendanceWithUser.include, 
       orderBy: { timestamp: 'desc' },
     });

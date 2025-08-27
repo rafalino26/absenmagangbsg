@@ -46,6 +46,7 @@ export namespace $Enums {
   export const Role: {
   SUPER_ADMIN: 'SUPER_ADMIN',
   ADMIN: 'ADMIN',
+  LECTURER: 'LECTURER',
   INTERN: 'INTERN'
 };
 
@@ -1250,14 +1251,16 @@ export namespace Prisma {
   export type UserCountOutputType = {
     attendances: number
     helpdeskTickets: number
-    interns: number
+    internsAsMentor: number
+    internsAsLecturer: number
     dailyLogs: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     attendances?: boolean | UserCountOutputTypeCountAttendancesArgs
     helpdeskTickets?: boolean | UserCountOutputTypeCountHelpdeskTicketsArgs
-    interns?: boolean | UserCountOutputTypeCountInternsArgs
+    internsAsMentor?: boolean | UserCountOutputTypeCountInternsAsMentorArgs
+    internsAsLecturer?: boolean | UserCountOutputTypeCountInternsAsLecturerArgs
     dailyLogs?: boolean | UserCountOutputTypeCountDailyLogsArgs
   }
 
@@ -1289,7 +1292,14 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountInternsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountInternsAsMentorArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountInternsAsLecturerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserWhereInput
   }
 
@@ -1320,11 +1330,13 @@ export namespace Prisma {
   export type UserAvgAggregateOutputType = {
     id: number | null
     mentorId: number | null
+    lecturerId: number | null
   }
 
   export type UserSumAggregateOutputType = {
     id: number | null
     mentorId: number | null
+    lecturerId: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -1344,6 +1356,7 @@ export namespace Prisma {
     joinDate: Date | null
     isActive: boolean | null
     mentorId: number | null
+    lecturerId: number | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -1363,6 +1376,7 @@ export namespace Prisma {
     joinDate: Date | null
     isActive: boolean | null
     mentorId: number | null
+    lecturerId: number | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -1382,6 +1396,7 @@ export namespace Prisma {
     joinDate: number
     isActive: number
     mentorId: number
+    lecturerId: number
     _all: number
   }
 
@@ -1389,11 +1404,13 @@ export namespace Prisma {
   export type UserAvgAggregateInputType = {
     id?: true
     mentorId?: true
+    lecturerId?: true
   }
 
   export type UserSumAggregateInputType = {
     id?: true
     mentorId?: true
+    lecturerId?: true
   }
 
   export type UserMinAggregateInputType = {
@@ -1413,6 +1430,7 @@ export namespace Prisma {
     joinDate?: true
     isActive?: true
     mentorId?: true
+    lecturerId?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -1432,6 +1450,7 @@ export namespace Prisma {
     joinDate?: true
     isActive?: true
     mentorId?: true
+    lecturerId?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -1451,6 +1470,7 @@ export namespace Prisma {
     joinDate?: true
     isActive?: true
     mentorId?: true
+    lecturerId?: true
     _all?: true
   }
 
@@ -1557,6 +1577,7 @@ export namespace Prisma {
     joinDate: Date
     isActive: boolean
     mentorId: number | null
+    lecturerId: number | null
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -1595,10 +1616,13 @@ export namespace Prisma {
     joinDate?: boolean
     isActive?: boolean
     mentorId?: boolean
+    lecturerId?: boolean
     attendances?: boolean | User$attendancesArgs<ExtArgs>
     helpdeskTickets?: boolean | User$helpdeskTicketsArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
-    interns?: boolean | User$internsArgs<ExtArgs>
+    internsAsMentor?: boolean | User$internsAsMentorArgs<ExtArgs>
+    lecturer?: boolean | User$lecturerArgs<ExtArgs>
+    internsAsLecturer?: boolean | User$internsAsLecturerArgs<ExtArgs>
     dailyLogs?: boolean | User$dailyLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -1620,7 +1644,9 @@ export namespace Prisma {
     joinDate?: boolean
     isActive?: boolean
     mentorId?: boolean
+    lecturerId?: boolean
     mentor?: boolean | User$mentorArgs<ExtArgs>
+    lecturer?: boolean | User$lecturerArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -1640,18 +1666,22 @@ export namespace Prisma {
     joinDate?: boolean
     isActive?: boolean
     mentorId?: boolean
+    lecturerId?: boolean
   }
 
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     attendances?: boolean | User$attendancesArgs<ExtArgs>
     helpdeskTickets?: boolean | User$helpdeskTicketsArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
-    interns?: boolean | User$internsArgs<ExtArgs>
+    internsAsMentor?: boolean | User$internsAsMentorArgs<ExtArgs>
+    lecturer?: boolean | User$lecturerArgs<ExtArgs>
+    internsAsLecturer?: boolean | User$internsAsLecturerArgs<ExtArgs>
     dailyLogs?: boolean | User$dailyLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     mentor?: boolean | User$mentorArgs<ExtArgs>
+    lecturer?: boolean | User$lecturerArgs<ExtArgs>
   }
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1660,7 +1690,9 @@ export namespace Prisma {
       attendances: Prisma.$AttendancePayload<ExtArgs>[]
       helpdeskTickets: Prisma.$HelpdeskTicketPayload<ExtArgs>[]
       mentor: Prisma.$UserPayload<ExtArgs> | null
-      interns: Prisma.$UserPayload<ExtArgs>[]
+      internsAsMentor: Prisma.$UserPayload<ExtArgs>[]
+      lecturer: Prisma.$UserPayload<ExtArgs> | null
+      internsAsLecturer: Prisma.$UserPayload<ExtArgs>[]
       dailyLogs: Prisma.$DailyLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -1680,6 +1712,7 @@ export namespace Prisma {
       joinDate: Date
       isActive: boolean
       mentorId: number | null
+      lecturerId: number | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -2047,7 +2080,9 @@ export namespace Prisma {
     attendances<T extends User$attendancesArgs<ExtArgs> = {}>(args?: Subset<T, User$attendancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany"> | Null>
     helpdeskTickets<T extends User$helpdeskTicketsArgs<ExtArgs> = {}>(args?: Subset<T, User$helpdeskTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HelpdeskTicketPayload<ExtArgs>, T, "findMany"> | Null>
     mentor<T extends User$mentorArgs<ExtArgs> = {}>(args?: Subset<T, User$mentorArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
-    interns<T extends User$internsArgs<ExtArgs> = {}>(args?: Subset<T, User$internsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
+    internsAsMentor<T extends User$internsAsMentorArgs<ExtArgs> = {}>(args?: Subset<T, User$internsAsMentorArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
+    lecturer<T extends User$lecturerArgs<ExtArgs> = {}>(args?: Subset<T, User$lecturerArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    internsAsLecturer<T extends User$internsAsLecturerArgs<ExtArgs> = {}>(args?: Subset<T, User$internsAsLecturerArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
     dailyLogs<T extends User$dailyLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$dailyLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DailyLogPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2094,6 +2129,7 @@ export namespace Prisma {
     readonly joinDate: FieldRef<"User", 'DateTime'>
     readonly isActive: FieldRef<"User", 'Boolean'>
     readonly mentorId: FieldRef<"User", 'Int'>
+    readonly lecturerId: FieldRef<"User", 'Int'>
   }
     
 
@@ -2467,9 +2503,44 @@ export namespace Prisma {
   }
 
   /**
-   * User.interns
+   * User.internsAsMentor
    */
-  export type User$internsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$internsAsMentorArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * User.lecturer
+   */
+  export type User$lecturerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * User.internsAsLecturer
+   */
+  export type User$internsAsLecturerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the User
      */
@@ -4557,6 +4628,7 @@ export namespace Prisma {
     id: number | null
     userId: number | null
     activity: string | null
+    photoUrl: string | null
     status: $Enums.LogStatus | null
     notes: string | null
     createdAt: Date | null
@@ -4566,6 +4638,7 @@ export namespace Prisma {
     id: number | null
     userId: number | null
     activity: string | null
+    photoUrl: string | null
     status: $Enums.LogStatus | null
     notes: string | null
     createdAt: Date | null
@@ -4575,6 +4648,7 @@ export namespace Prisma {
     id: number
     userId: number
     activity: number
+    photoUrl: number
     status: number
     notes: number
     createdAt: number
@@ -4596,6 +4670,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     activity?: true
+    photoUrl?: true
     status?: true
     notes?: true
     createdAt?: true
@@ -4605,6 +4680,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     activity?: true
+    photoUrl?: true
     status?: true
     notes?: true
     createdAt?: true
@@ -4614,6 +4690,7 @@ export namespace Prisma {
     id?: true
     userId?: true
     activity?: true
+    photoUrl?: true
     status?: true
     notes?: true
     createdAt?: true
@@ -4710,6 +4787,7 @@ export namespace Prisma {
     id: number
     userId: number
     activity: string
+    photoUrl: string | null
     status: $Enums.LogStatus
     notes: string | null
     createdAt: Date
@@ -4738,6 +4816,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     activity?: boolean
+    photoUrl?: boolean
     status?: boolean
     notes?: boolean
     createdAt?: boolean
@@ -4748,6 +4827,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     activity?: boolean
+    photoUrl?: boolean
     status?: boolean
     notes?: boolean
     createdAt?: boolean
@@ -4758,6 +4838,7 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     activity?: boolean
+    photoUrl?: boolean
     status?: boolean
     notes?: boolean
     createdAt?: boolean
@@ -4779,6 +4860,7 @@ export namespace Prisma {
       id: number
       userId: number
       activity: string
+      photoUrl: string | null
       status: $Enums.LogStatus
       notes: string | null
       createdAt: Date
@@ -5179,6 +5261,7 @@ export namespace Prisma {
     readonly id: FieldRef<"DailyLog", 'Int'>
     readonly userId: FieldRef<"DailyLog", 'Int'>
     readonly activity: FieldRef<"DailyLog", 'String'>
+    readonly photoUrl: FieldRef<"DailyLog", 'String'>
     readonly status: FieldRef<"DailyLog", 'LogStatus'>
     readonly notes: FieldRef<"DailyLog", 'String'>
     readonly createdAt: FieldRef<"DailyLog", 'DateTime'>
@@ -6420,7 +6503,8 @@ export namespace Prisma {
     phoneNumber: 'phoneNumber',
     joinDate: 'joinDate',
     isActive: 'isActive',
-    mentorId: 'mentorId'
+    mentorId: 'mentorId',
+    lecturerId: 'lecturerId'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -6457,6 +6541,7 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     activity: 'activity',
+    photoUrl: 'photoUrl',
     status: 'status',
     notes: 'notes',
     createdAt: 'createdAt'
@@ -6644,10 +6729,13 @@ export namespace Prisma {
     joinDate?: DateTimeFilter<"User"> | Date | string
     isActive?: BoolFilter<"User"> | boolean
     mentorId?: IntNullableFilter<"User"> | number | null
+    lecturerId?: IntNullableFilter<"User"> | number | null
     attendances?: AttendanceListRelationFilter
     helpdeskTickets?: HelpdeskTicketListRelationFilter
     mentor?: XOR<UserNullableRelationFilter, UserWhereInput> | null
-    interns?: UserListRelationFilter
+    internsAsMentor?: UserListRelationFilter
+    lecturer?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+    internsAsLecturer?: UserListRelationFilter
     dailyLogs?: DailyLogListRelationFilter
   }
 
@@ -6668,10 +6756,13 @@ export namespace Prisma {
     joinDate?: SortOrder
     isActive?: SortOrder
     mentorId?: SortOrderInput | SortOrder
+    lecturerId?: SortOrderInput | SortOrder
     attendances?: AttendanceOrderByRelationAggregateInput
     helpdeskTickets?: HelpdeskTicketOrderByRelationAggregateInput
     mentor?: UserOrderByWithRelationInput
-    interns?: UserOrderByRelationAggregateInput
+    internsAsMentor?: UserOrderByRelationAggregateInput
+    lecturer?: UserOrderByWithRelationInput
+    internsAsLecturer?: UserOrderByRelationAggregateInput
     dailyLogs?: DailyLogOrderByRelationAggregateInput
   }
 
@@ -6695,10 +6786,13 @@ export namespace Prisma {
     joinDate?: DateTimeFilter<"User"> | Date | string
     isActive?: BoolFilter<"User"> | boolean
     mentorId?: IntNullableFilter<"User"> | number | null
+    lecturerId?: IntNullableFilter<"User"> | number | null
     attendances?: AttendanceListRelationFilter
     helpdeskTickets?: HelpdeskTicketListRelationFilter
     mentor?: XOR<UserNullableRelationFilter, UserWhereInput> | null
-    interns?: UserListRelationFilter
+    internsAsMentor?: UserListRelationFilter
+    lecturer?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+    internsAsLecturer?: UserListRelationFilter
     dailyLogs?: DailyLogListRelationFilter
   }, "id" | "internCode" | "email">
 
@@ -6719,6 +6813,7 @@ export namespace Prisma {
     joinDate?: SortOrder
     isActive?: SortOrder
     mentorId?: SortOrderInput | SortOrder
+    lecturerId?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -6746,6 +6841,7 @@ export namespace Prisma {
     joinDate?: DateTimeWithAggregatesFilter<"User"> | Date | string
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
     mentorId?: IntNullableWithAggregatesFilter<"User"> | number | null
+    lecturerId?: IntNullableWithAggregatesFilter<"User"> | number | null
   }
 
   export type AttendanceWhereInput = {
@@ -6894,6 +6990,7 @@ export namespace Prisma {
     id?: IntFilter<"DailyLog"> | number
     userId?: IntFilter<"DailyLog"> | number
     activity?: StringFilter<"DailyLog"> | string
+    photoUrl?: StringNullableFilter<"DailyLog"> | string | null
     status?: EnumLogStatusFilter<"DailyLog"> | $Enums.LogStatus
     notes?: StringNullableFilter<"DailyLog"> | string | null
     createdAt?: DateTimeFilter<"DailyLog"> | Date | string
@@ -6904,6 +7001,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     activity?: SortOrder
+    photoUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     notes?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -6917,6 +7015,7 @@ export namespace Prisma {
     NOT?: DailyLogWhereInput | DailyLogWhereInput[]
     userId?: IntFilter<"DailyLog"> | number
     activity?: StringFilter<"DailyLog"> | string
+    photoUrl?: StringNullableFilter<"DailyLog"> | string | null
     status?: EnumLogStatusFilter<"DailyLog"> | $Enums.LogStatus
     notes?: StringNullableFilter<"DailyLog"> | string | null
     createdAt?: DateTimeFilter<"DailyLog"> | Date | string
@@ -6927,6 +7026,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     activity?: SortOrder
+    photoUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     notes?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -6944,6 +7044,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"DailyLog"> | number
     userId?: IntWithAggregatesFilter<"DailyLog"> | number
     activity?: StringWithAggregatesFilter<"DailyLog"> | string
+    photoUrl?: StringNullableWithAggregatesFilter<"DailyLog"> | string | null
     status?: EnumLogStatusWithAggregatesFilter<"DailyLog"> | $Enums.LogStatus
     notes?: StringNullableWithAggregatesFilter<"DailyLog"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"DailyLog"> | Date | string
@@ -7005,8 +7106,10 @@ export namespace Prisma {
     isActive?: boolean
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
-    mentor?: UserCreateNestedOneWithoutInternsInput
-    interns?: UserCreateNestedManyWithoutMentorInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
   }
 
@@ -7027,9 +7130,11 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     mentorId?: number | null
+    lecturerId?: number | null
     attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
-    interns?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -7050,8 +7155,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
-    mentor?: UserUpdateOneWithoutInternsNestedInput
-    interns?: UserUpdateManyWithoutMentorNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
   }
 
@@ -7072,9 +7179,11 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
     attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
-    interns?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -7095,6 +7204,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     mentorId?: number | null
+    lecturerId?: number | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -7131,6 +7241,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type AttendanceCreateInput = {
@@ -7274,6 +7385,7 @@ export namespace Prisma {
 
   export type DailyLogCreateInput = {
     activity: string
+    photoUrl?: string | null
     status?: $Enums.LogStatus
     notes?: string | null
     createdAt?: Date | string
@@ -7284,6 +7396,7 @@ export namespace Prisma {
     id?: number
     userId: number
     activity: string
+    photoUrl?: string | null
     status?: $Enums.LogStatus
     notes?: string | null
     createdAt?: Date | string
@@ -7291,6 +7404,7 @@ export namespace Prisma {
 
   export type DailyLogUpdateInput = {
     activity?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumLogStatusFieldUpdateOperationsInput | $Enums.LogStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7301,6 +7415,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: IntFieldUpdateOperationsInput | number
     activity?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumLogStatusFieldUpdateOperationsInput | $Enums.LogStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7310,6 +7425,7 @@ export namespace Prisma {
     id?: number
     userId: number
     activity: string
+    photoUrl?: string | null
     status?: $Enums.LogStatus
     notes?: string | null
     createdAt?: Date | string
@@ -7317,6 +7433,7 @@ export namespace Prisma {
 
   export type DailyLogUpdateManyMutationInput = {
     activity?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumLogStatusFieldUpdateOperationsInput | $Enums.LogStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7326,6 +7443,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     userId?: IntFieldUpdateOperationsInput | number
     activity?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumLogStatusFieldUpdateOperationsInput | $Enums.LogStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7516,11 +7634,13 @@ export namespace Prisma {
     joinDate?: SortOrder
     isActive?: SortOrder
     mentorId?: SortOrder
+    lecturerId?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
     id?: SortOrder
     mentorId?: SortOrder
+    lecturerId?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -7540,6 +7660,7 @@ export namespace Prisma {
     joinDate?: SortOrder
     isActive?: SortOrder
     mentorId?: SortOrder
+    lecturerId?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -7559,11 +7680,13 @@ export namespace Prisma {
     joinDate?: SortOrder
     isActive?: SortOrder
     mentorId?: SortOrder
+    lecturerId?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
     id?: SortOrder
     mentorId?: SortOrder
+    lecturerId?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -7844,6 +7967,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     activity?: SortOrder
+    photoUrl?: SortOrder
     status?: SortOrder
     notes?: SortOrder
     createdAt?: SortOrder
@@ -7858,6 +7982,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     activity?: SortOrder
+    photoUrl?: SortOrder
     status?: SortOrder
     notes?: SortOrder
     createdAt?: SortOrder
@@ -7867,6 +7992,7 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     activity?: SortOrder
+    photoUrl?: SortOrder
     status?: SortOrder
     notes?: SortOrder
     createdAt?: SortOrder
@@ -7924,9 +8050,9 @@ export namespace Prisma {
     connect?: HelpdeskTicketWhereUniqueInput | HelpdeskTicketWhereUniqueInput[]
   }
 
-  export type UserCreateNestedOneWithoutInternsInput = {
-    create?: XOR<UserCreateWithoutInternsInput, UserUncheckedCreateWithoutInternsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutInternsInput
+  export type UserCreateNestedOneWithoutInternsAsMentorInput = {
+    create?: XOR<UserCreateWithoutInternsAsMentorInput, UserUncheckedCreateWithoutInternsAsMentorInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInternsAsMentorInput
     connect?: UserWhereUniqueInput
   }
 
@@ -7934,6 +8060,19 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutMentorInput, UserUncheckedCreateWithoutMentorInput> | UserCreateWithoutMentorInput[] | UserUncheckedCreateWithoutMentorInput[]
     connectOrCreate?: UserCreateOrConnectWithoutMentorInput | UserCreateOrConnectWithoutMentorInput[]
     createMany?: UserCreateManyMentorInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserCreateNestedOneWithoutInternsAsLecturerInput = {
+    create?: XOR<UserCreateWithoutInternsAsLecturerInput, UserUncheckedCreateWithoutInternsAsLecturerInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInternsAsLecturerInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedManyWithoutLecturerInput = {
+    create?: XOR<UserCreateWithoutLecturerInput, UserUncheckedCreateWithoutLecturerInput> | UserCreateWithoutLecturerInput[] | UserUncheckedCreateWithoutLecturerInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutLecturerInput | UserCreateOrConnectWithoutLecturerInput[]
+    createMany?: UserCreateManyLecturerInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
@@ -7962,6 +8101,13 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutMentorInput, UserUncheckedCreateWithoutMentorInput> | UserCreateWithoutMentorInput[] | UserUncheckedCreateWithoutMentorInput[]
     connectOrCreate?: UserCreateOrConnectWithoutMentorInput | UserCreateOrConnectWithoutMentorInput[]
     createMany?: UserCreateManyMentorInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutLecturerInput = {
+    create?: XOR<UserCreateWithoutLecturerInput, UserUncheckedCreateWithoutLecturerInput> | UserCreateWithoutLecturerInput[] | UserUncheckedCreateWithoutLecturerInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutLecturerInput | UserCreateOrConnectWithoutLecturerInput[]
+    createMany?: UserCreateManyLecturerInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
@@ -8024,14 +8170,14 @@ export namespace Prisma {
     deleteMany?: HelpdeskTicketScalarWhereInput | HelpdeskTicketScalarWhereInput[]
   }
 
-  export type UserUpdateOneWithoutInternsNestedInput = {
-    create?: XOR<UserCreateWithoutInternsInput, UserUncheckedCreateWithoutInternsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutInternsInput
-    upsert?: UserUpsertWithoutInternsInput
+  export type UserUpdateOneWithoutInternsAsMentorNestedInput = {
+    create?: XOR<UserCreateWithoutInternsAsMentorInput, UserUncheckedCreateWithoutInternsAsMentorInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInternsAsMentorInput
+    upsert?: UserUpsertWithoutInternsAsMentorInput
     disconnect?: UserWhereInput | boolean
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutInternsInput, UserUpdateWithoutInternsInput>, UserUncheckedUpdateWithoutInternsInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutInternsAsMentorInput, UserUpdateWithoutInternsAsMentorInput>, UserUncheckedUpdateWithoutInternsAsMentorInput>
   }
 
   export type UserUpdateManyWithoutMentorNestedInput = {
@@ -8045,6 +8191,30 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
     update?: UserUpdateWithWhereUniqueWithoutMentorInput | UserUpdateWithWhereUniqueWithoutMentorInput[]
     updateMany?: UserUpdateManyWithWhereWithoutMentorInput | UserUpdateManyWithWhereWithoutMentorInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserUpdateOneWithoutInternsAsLecturerNestedInput = {
+    create?: XOR<UserCreateWithoutInternsAsLecturerInput, UserUncheckedCreateWithoutInternsAsLecturerInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInternsAsLecturerInput
+    upsert?: UserUpsertWithoutInternsAsLecturerInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutInternsAsLecturerInput, UserUpdateWithoutInternsAsLecturerInput>, UserUncheckedUpdateWithoutInternsAsLecturerInput>
+  }
+
+  export type UserUpdateManyWithoutLecturerNestedInput = {
+    create?: XOR<UserCreateWithoutLecturerInput, UserUncheckedCreateWithoutLecturerInput> | UserCreateWithoutLecturerInput[] | UserUncheckedCreateWithoutLecturerInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutLecturerInput | UserCreateOrConnectWithoutLecturerInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutLecturerInput | UserUpsertWithWhereUniqueWithoutLecturerInput[]
+    createMany?: UserCreateManyLecturerInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutLecturerInput | UserUpdateWithWhereUniqueWithoutLecturerInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutLecturerInput | UserUpdateManyWithWhereWithoutLecturerInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
@@ -8117,6 +8287,20 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
     update?: UserUpdateWithWhereUniqueWithoutMentorInput | UserUpdateWithWhereUniqueWithoutMentorInput[]
     updateMany?: UserUpdateManyWithWhereWithoutMentorInput | UserUpdateManyWithWhereWithoutMentorInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutLecturerNestedInput = {
+    create?: XOR<UserCreateWithoutLecturerInput, UserUncheckedCreateWithoutLecturerInput> | UserCreateWithoutLecturerInput[] | UserUncheckedCreateWithoutLecturerInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutLecturerInput | UserCreateOrConnectWithoutLecturerInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutLecturerInput | UserUpsertWithWhereUniqueWithoutLecturerInput[]
+    createMany?: UserCreateManyLecturerInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutLecturerInput | UserUpdateWithWhereUniqueWithoutLecturerInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutLecturerInput | UserUpdateManyWithWhereWithoutLecturerInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
@@ -8537,7 +8721,7 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type UserCreateWithoutInternsInput = {
+  export type UserCreateWithoutInternsAsMentorInput = {
     internCode?: string | null
     name: string
     email?: string | null
@@ -8554,11 +8738,13 @@ export namespace Prisma {
     isActive?: boolean
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
-    mentor?: UserCreateNestedOneWithoutInternsInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
   }
 
-  export type UserUncheckedCreateWithoutInternsInput = {
+  export type UserUncheckedCreateWithoutInternsAsMentorInput = {
     id?: number
     internCode?: string | null
     name: string
@@ -8575,14 +8761,16 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     mentorId?: number | null
+    lecturerId?: number | null
     attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
   }
 
-  export type UserCreateOrConnectWithoutInternsInput = {
+  export type UserCreateOrConnectWithoutInternsAsMentorInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutInternsInput, UserUncheckedCreateWithoutInternsInput>
+    create: XOR<UserCreateWithoutInternsAsMentorInput, UserUncheckedCreateWithoutInternsAsMentorInput>
   }
 
   export type UserCreateWithoutMentorInput = {
@@ -8602,7 +8790,9 @@ export namespace Prisma {
     isActive?: boolean
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
-    interns?: UserCreateNestedManyWithoutMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
   }
 
@@ -8622,9 +8812,11 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    lecturerId?: number | null
     attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
-    interns?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -8638,8 +8830,118 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type UserCreateWithoutInternsAsLecturerInput = {
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    division: string
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    attendances?: AttendanceCreateNestedManyWithoutUserInput
+    helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutInternsAsLecturerInput = {
+    id?: number
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    division: string
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    mentorId?: number | null
+    lecturerId?: number | null
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutInternsAsLecturerInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutInternsAsLecturerInput, UserUncheckedCreateWithoutInternsAsLecturerInput>
+  }
+
+  export type UserCreateWithoutLecturerInput = {
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    division: string
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    attendances?: AttendanceCreateNestedManyWithoutUserInput
+    helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
+    dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutLecturerInput = {
+    id?: number
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    division: string
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    mentorId?: number | null
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
+    dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutLecturerInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutLecturerInput, UserUncheckedCreateWithoutLecturerInput>
+  }
+
+  export type UserCreateManyLecturerInputEnvelope = {
+    data: UserCreateManyLecturerInput | UserCreateManyLecturerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type DailyLogCreateWithoutUserInput = {
     activity: string
+    photoUrl?: string | null
     status?: $Enums.LogStatus
     notes?: string | null
     createdAt?: Date | string
@@ -8648,6 +8950,7 @@ export namespace Prisma {
   export type DailyLogUncheckedCreateWithoutUserInput = {
     id?: number
     activity: string
+    photoUrl?: string | null
     status?: $Enums.LogStatus
     notes?: string | null
     createdAt?: Date | string
@@ -8722,18 +9025,18 @@ export namespace Prisma {
     userId?: IntFilter<"HelpdeskTicket"> | number
   }
 
-  export type UserUpsertWithoutInternsInput = {
-    update: XOR<UserUpdateWithoutInternsInput, UserUncheckedUpdateWithoutInternsInput>
-    create: XOR<UserCreateWithoutInternsInput, UserUncheckedCreateWithoutInternsInput>
+  export type UserUpsertWithoutInternsAsMentorInput = {
+    update: XOR<UserUpdateWithoutInternsAsMentorInput, UserUncheckedUpdateWithoutInternsAsMentorInput>
+    create: XOR<UserCreateWithoutInternsAsMentorInput, UserUncheckedCreateWithoutInternsAsMentorInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutInternsInput = {
+  export type UserUpdateToOneWithWhereWithoutInternsAsMentorInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutInternsInput, UserUncheckedUpdateWithoutInternsInput>
+    data: XOR<UserUpdateWithoutInternsAsMentorInput, UserUncheckedUpdateWithoutInternsAsMentorInput>
   }
 
-  export type UserUpdateWithoutInternsInput = {
+  export type UserUpdateWithoutInternsAsMentorInput = {
     internCode?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8750,11 +9053,13 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
-    mentor?: UserUpdateOneWithoutInternsNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutInternsInput = {
+  export type UserUncheckedUpdateWithoutInternsAsMentorInput = {
     id?: IntFieldUpdateOperationsInput | number
     internCode?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
@@ -8771,8 +9076,10 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
     attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -8812,6 +9119,81 @@ export namespace Prisma {
     joinDate?: DateTimeFilter<"User"> | Date | string
     isActive?: BoolFilter<"User"> | boolean
     mentorId?: IntNullableFilter<"User"> | number | null
+    lecturerId?: IntNullableFilter<"User"> | number | null
+  }
+
+  export type UserUpsertWithoutInternsAsLecturerInput = {
+    update: XOR<UserUpdateWithoutInternsAsLecturerInput, UserUncheckedUpdateWithoutInternsAsLecturerInput>
+    create: XOR<UserCreateWithoutInternsAsLecturerInput, UserUncheckedCreateWithoutInternsAsLecturerInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutInternsAsLecturerInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutInternsAsLecturerInput, UserUncheckedUpdateWithoutInternsAsLecturerInput>
+  }
+
+  export type UserUpdateWithoutInternsAsLecturerInput = {
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    division?: StringFieldUpdateOperationsInput | string
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    attendances?: AttendanceUpdateManyWithoutUserNestedInput
+    helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutInternsAsLecturerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    division?: StringFieldUpdateOperationsInput | string
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
+    attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutLecturerInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutLecturerInput, UserUncheckedUpdateWithoutLecturerInput>
+    create: XOR<UserCreateWithoutLecturerInput, UserUncheckedCreateWithoutLecturerInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutLecturerInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutLecturerInput, UserUncheckedUpdateWithoutLecturerInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutLecturerInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutLecturerInput>
   }
 
   export type DailyLogUpsertWithWhereUniqueWithoutUserInput = {
@@ -8837,6 +9219,7 @@ export namespace Prisma {
     id?: IntFilter<"DailyLog"> | number
     userId?: IntFilter<"DailyLog"> | number
     activity?: StringFilter<"DailyLog"> | string
+    photoUrl?: StringNullableFilter<"DailyLog"> | string | null
     status?: EnumLogStatusFilter<"DailyLog"> | $Enums.LogStatus
     notes?: StringNullableFilter<"DailyLog"> | string | null
     createdAt?: DateTimeFilter<"DailyLog"> | Date | string
@@ -8858,8 +9241,10 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
-    mentor?: UserCreateNestedOneWithoutInternsInput
-    interns?: UserCreateNestedManyWithoutMentorInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
   }
 
@@ -8880,8 +9265,10 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     mentorId?: number | null
+    lecturerId?: number | null
     helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
-    interns?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -8917,8 +9304,10 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
-    mentor?: UserUpdateOneWithoutInternsNestedInput
-    interns?: UserUpdateManyWithoutMentorNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
   }
 
@@ -8939,8 +9328,10 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
     helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
-    interns?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -8960,8 +9351,10 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     attendances?: AttendanceCreateNestedManyWithoutUserInput
-    mentor?: UserCreateNestedOneWithoutInternsInput
-    interns?: UserCreateNestedManyWithoutMentorInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
   }
 
@@ -8982,8 +9375,10 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     mentorId?: number | null
+    lecturerId?: number | null
     attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
-    interns?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
     dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -9019,8 +9414,10 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
-    mentor?: UserUpdateOneWithoutInternsNestedInput
-    interns?: UserUpdateManyWithoutMentorNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
   }
 
@@ -9041,8 +9438,10 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
     attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
-    interns?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -9063,8 +9462,10 @@ export namespace Prisma {
     isActive?: boolean
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
-    mentor?: UserCreateNestedOneWithoutInternsInput
-    interns?: UserCreateNestedManyWithoutMentorInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
   }
 
   export type UserUncheckedCreateWithoutDailyLogsInput = {
@@ -9084,9 +9485,11 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     mentorId?: number | null
+    lecturerId?: number | null
     attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
-    interns?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
   }
 
   export type UserCreateOrConnectWithoutDailyLogsInput = {
@@ -9122,8 +9525,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
-    mentor?: UserUpdateOneWithoutInternsNestedInput
-    interns?: UserUpdateManyWithoutMentorNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDailyLogsInput = {
@@ -9143,9 +9548,11 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
     attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
-    interns?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
   }
 
   export type AttendanceCreateManyUserInput = {
@@ -9183,11 +9590,32 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    lecturerId?: number | null
+  }
+
+  export type UserCreateManyLecturerInput = {
+    id?: number
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    division: string
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    mentorId?: number | null
   }
 
   export type DailyLogCreateManyUserInput = {
     id?: number
     activity: string
+    photoUrl?: string | null
     status?: $Enums.LogStatus
     notes?: string | null
     createdAt?: Date | string
@@ -9265,7 +9693,9 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
-    interns?: UserUpdateManyWithoutMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
   }
 
@@ -9285,9 +9715,11 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
     attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
-    interns?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
     dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -9307,10 +9739,78 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type UserUpdateWithoutLecturerInput = {
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    division?: StringFieldUpdateOperationsInput | string
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    attendances?: AttendanceUpdateManyWithoutUserNestedInput
+    helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
+    dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutLecturerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    division?: StringFieldUpdateOperationsInput | string
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
+    dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutLecturerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    division?: StringFieldUpdateOperationsInput | string
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    mentorId?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type DailyLogUpdateWithoutUserInput = {
     activity?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumLogStatusFieldUpdateOperationsInput | $Enums.LogStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9319,6 +9819,7 @@ export namespace Prisma {
   export type DailyLogUncheckedUpdateWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
     activity?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumLogStatusFieldUpdateOperationsInput | $Enums.LogStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -9327,6 +9828,7 @@ export namespace Prisma {
   export type DailyLogUncheckedUpdateManyWithoutUserInput = {
     id?: IntFieldUpdateOperationsInput | number
     activity?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumLogStatusFieldUpdateOperationsInput | $Enums.LogStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

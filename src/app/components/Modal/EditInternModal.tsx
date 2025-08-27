@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Menggunakan Fi untuk konsistensi
-import { FiX, FiCalendar  } from 'react-icons/fi'; // Menggunakan Fi untuk konsistensi
-import { InternSummary } from '@/app/types';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FiX, FiCalendar } from 'react-icons/fi';
 import { DayPicker, DateRange } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { format } from 'date-fns';
 import { NotificationState } from '@/app/types';
+import { Role } from '@prisma/client';
 
 // Tipe data untuk props
 interface InternData {
@@ -17,10 +17,12 @@ interface InternData {
   periodStartDate?: string | null;
   periodEndDate?: string | null;
   mentor?: { id: number; name: string } | null;
+  lecturer?: { id: number; name: string } | null; // <-- Ditambahkan
 }
-interface Mentor {
+interface User {
   id: number;
   name: string;
+  role: Role;
 }
 interface EditInternModalProps {
   isOpen: boolean;
@@ -30,16 +32,16 @@ interface EditInternModalProps {
   setNotification: (notification: NotificationState | null) => void;
 }
 
-
 export default function EditInternModal({ isOpen, onClose, onSuccess, internData, setNotification }: EditInternModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [division, setDivision] = useState('');
-  const [period, setPeriod] = useState('');
-  const [password, setPassword] = useState(''); // Untuk reset password
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [mentors, setMentors] = useState<User[]>([]);
+  const [lecturers, setLecturers] = useState<User[]>([]); // <-- State baru
   const [mentorId, setMentorId] = useState<string>('');
+  const [lecturerId, setLecturerId] = useState<string>(''); // <-- State baru
   const [range, setRange] = useState<DateRange | undefined>();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
@@ -49,25 +51,30 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
       setName(internData.name);
       setDivision(internData.division);
       setMentorId(internData.mentor?.id?.toString() || '');
+      setLecturerId(internData.lecturer?.id?.toString() || ''); // <-- Set state dosen
       if (internData.periodStartDate && internData.periodEndDate) {
         setRange({ from: new Date(internData.periodStartDate), to: new Date(internData.periodEndDate) });
       }
+      setPassword('');
+      setShowPassword(false);
     }
   }, [internData]);
 
-  // Ambil daftar mentor saat modal terbuka
+  // Ambil daftar mentor & dosen saat modal terbuka
   useEffect(() => {
     if (isOpen) {
-      const fetchMentors = async () => {
+      const fetchUsers = async () => {
         try {
           const res = await fetch('/api/admin/mentors');
-          if (!res.ok) throw new Error('Gagal memuat mentor');
-          setMentors(await res.json());
+          if (!res.ok) throw new Error('Gagal memuat mentor & dosen');
+          const users: User[] = await res.json();
+          setMentors(users.filter(u => u.role === Role.ADMIN));
+          setLecturers(users.filter(u => u.role === Role.LECTURER));
         } catch (error: any) {
           setNotification({ isOpen: true, title: 'Error', message: error.message, type: 'error' });
         }
       };
-      fetchMentors();
+      fetchUsers();
     }
   }, [isOpen, setNotification]);
 
@@ -82,7 +89,8 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
         division,
         periodStartDate: range?.from,
         periodEndDate: range?.to,
-        mentorId: parseInt(mentorId),
+        mentorId: mentorId ? parseInt(mentorId) : null,
+        lecturerId: lecturerId ? parseInt(lecturerId) : null, // <-- Kirim lecturerId
       };
       if (password) dataToSubmit.password = password;
 
@@ -107,7 +115,7 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
     }
   };
   
-    let displayValue = 'Pilih rentang tanggal...';
+  let displayValue = 'Pilih rentang tanggal...';
   if (range?.from && range.to) {
     displayValue = `${format(range.from, 'd LLL yyyy')} – ${format(range.to, 'd LLL yyyy')}`;
   }
@@ -116,23 +124,21 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md flex flex-col">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
         <div className="flex justify-between items-center p-4 border-b">
-          {/* 3. Judul diubah */}
           <h3 className="text-lg font-bold text-gray-800">Edit Peserta Magang</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4 text-black">
-        <div className="flex-grow space-y-4">
           <div>
             <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-            <input type="text" id="edit-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md"/>
+            <input type="text" id="edit-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full p-2 border border-gray-300 rounded-md"/>
           </div>
           <div>
             <label htmlFor="edit-division" className="block text-sm font-medium text-gray-700">Divisi</label>
-            <input type="text" id="edit-division" value={division} onChange={(e) => setDivision(e.target.value)} className="mt-1 w-full p-2 text-black border border-gray-300 rounded-md"/>
+            <input type="text" id="edit-division" value={division} onChange={(e) => setDivision(e.target.value)} className="mt-1 w-full p-2 border border-gray-300 rounded-md"/>
           </div>
-         <div>
+          <div>
             <label htmlFor="edit-period" className="block text-sm font-medium text-gray-700">Periode Magang</label>
             <div className="relative mt-1" ref={pickerRef}>
               <input
@@ -141,12 +147,12 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
                 readOnly
                 value={displayValue}
                 onClick={() => setIsPickerOpen(true)}
-                className="w-full p-2 text-black border border-gray-300 rounded-md cursor-pointer pr-10"
+                className="w-full p-2 border border-gray-300 rounded-md cursor-pointer pr-10"
               />
               <FiCalendar className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               
               {isPickerOpen && (
-                <div className="absolute -mt-2 bg-white border rounded-md text-black shadow-lg z-10">
+                <div className="absolute -mt-2 bg-white border rounded-md shadow-lg z-10">
                   <DayPicker
                     mode="range"
                     selected={range}
@@ -162,21 +168,34 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
               )}
             </div>
           </div>
-         <div>
-            <label className="block text-sm font-medium text-gray-700">Pilih Mentor</label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Pilih Mentor (Opsional)</label>
             <select
               value={mentorId}
               onChange={(e) => setMentorId(e.target.value)}
-              required
               className="mt-1 w-full p-2 border border-gray-300 rounded-md"
             >
-              <option value="" disabled>-- Tugaskan ke Mentor --</option>
+              <option value="">-- Belum Ditugaskan --</option>
               {mentors.map(mentor => (
                 <option key={mentor.id} value={mentor.id}>{mentor.name}</option>
               ))}
             </select>
           </div>
-          {/* 4. Input untuk reset password */}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Pilih Dosen (Opsional)</label>
+            <select
+              value={lecturerId}
+              onChange={(e) => setLecturerId(e.target.value)}
+              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="">-- Tanpa Dosen Pembimbing --</option>
+              {lecturers.map(lecturer => (
+                <option key={lecturer.id} value={lecturer.id}>{lecturer.name}</option>
+              ))}
+            </select>
+          </div>
+          
           <div>
             <label htmlFor="edit-password" className="block text-sm font-medium text-gray-700">Password Baru (Opsional)</label>
             <div className="relative mt-1">
@@ -185,7 +204,7 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full text-black p-2 pr-10 border border-gray-300 rounded-md"
+                className="block w-full p-2 pr-10 border border-gray-300 rounded-md"
                 placeholder="Kosongkan jika tidak ingin diubah"
               />
               <button
@@ -198,13 +217,11 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
             </div>
           </div>
 
-        </div>
-
-        <div className="p-4 bg-gray-50 border-t flex justify-end">
-          <button type="submit" disabled={isSubmitting} className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400">
+          <div className="pt-2">
+            <button type="submit" disabled={isSubmitting} className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400">
               {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
-        </div>
+          </div>
         </form>
       </div>
     </div>

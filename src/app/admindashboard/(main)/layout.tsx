@@ -8,6 +8,7 @@ import { FiMenu, FiLogOut } from 'react-icons/fi'; // Impor ikon hamburger
 import NotificationModal from '@/app/components/Modal/NotificationModal';
 import { NotificationState } from '@/app/types';
 import { useAuth } from '@/app/hooks/useAuth';
+import { Role } from '@prisma/client';
 
 export default function AdminLayout({
   children,
@@ -35,6 +36,20 @@ export default function AdminLayout({
     router.push('/admindashboard'); // Arahkan ke halaman login admin
   };
 
+  const getRoleDisplayName = (role?: Role) => {
+    if (!role) return '';
+    switch (role) {
+      case Role.SUPER_ADMIN:
+        return '(Utama)';
+      case Role.ADMIN:
+        return '(Mentor)';
+      case Role.LECTURER:
+        return '(Dosen Pembimbing)';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col">
       <header className="h-16 bg-red-600 shadow-lg flex-shrink-0 flex items-center justify-between px-4 sm:px-6 z-20">
@@ -52,7 +67,7 @@ export default function AdminLayout({
             <Image src="/logobsg.jpg" width={38} height={38} alt="Logo" className="rounded-full"/>
           </div>
          <h1 className="text-xl font-bold text-white tracking-wide">
-          Admin Panel {auth?.role === 'SUPER_ADMIN' ? '(Utama)' : '(Mentor)'}
+          Admin Panel {getRoleDisplayName(auth?.role)}
         </h1>
         </div>
          <button 

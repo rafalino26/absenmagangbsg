@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useRef, useEffect  } from 'react';
+import { useState, useRef, useEffect, FormEvent } from 'react';
 import { FaEye, FaEyeSlash, FaCalendar } from 'react-icons/fa'; // Impor ikon mata
 import { FiX } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { DayPicker, DateRange } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { NotificationState } from '@/app/types';
+import { Role } from '@prisma/client';
 
-interface Mentor {
+interface SelectableUser {
   id: number;
   name: string;
+  role: Role;
 }
 
 interface AddInternModalProps {
@@ -26,12 +28,13 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
   // State untuk form
   const [name, setName] = useState('');
   const [division, setDivision] = useState('');
-  const [email, setEmail] = useState(''); // Email tetap opsional
+  const [email, setEmail] = useState(''); 
   const [range, setRange] = useState<DateRange | undefined>();
-  const [mentorId, setMentorId] = useState<string>(''); // State baru untuk menyimpan ID mentor terpilih
-  
-  // State untuk data & UI tambahan
-  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [mentorId, setMentorId] = useState<string>('');
+  const [lecturerId, setLecturerId] = useState<string>(''); 
+
+  const [mentors, setMentors] = useState<SelectableUser[]>([]);
+  const [lecturers, setLecturers] = useState<SelectableUser[]>([]);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -42,23 +45,29 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
       setEmail('');
       setRange(undefined);
       setMentorId('');
-      const fetchMentors = async () => {
+      setLecturerId('');
+
+      const fetchUsers = async () => {
         try {
           const response = await fetch('/api/admin/mentors');
-          if (!response.ok) throw new Error('Gagal memuat daftar mentor.');
-          setMentors(await response.json());
+          if (!response.ok) throw new Error('Gagal memuat daftar mentor & dosen.');
+          const users: SelectableUser[] = await response.json();
+          
+          setMentors(users.filter(user => user.role === Role.ADMIN));
+          setLecturers(users.filter(user => user.role === Role.LECTURER));
+
         } catch (error: any) {
           setNotification({ isOpen: true, title: 'Error', message: error.message, type: 'error' });
         }
       };
-      fetchMentors();
+      fetchUsers();
     }
   }, [isOpen, setNotification]);
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email || !range?.from || !range.to) {
+    if (!name || !division || !email || !range?.from || !range.to) {
       alert("Nama, Divisi, Email, dan Periode wajib diisi.");
       return;
     }
@@ -74,14 +83,13 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
           email,
           periodStartDate: range.from,
           periodEndDate: range.to,
-           mentorId: mentorId ? parseInt(mentorId) : null,
+          mentorId: mentorId ? parseInt(mentorId) : null,
+          lecturerId: lecturerId ? parseInt(lecturerId) : null, // 4. Kirim lecturerId
         }),
       });
 
       const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.error || 'Gagal menambahkan peserta.');
-      }
+      if (!response.ok) throw new Error(result.error || 'Gagal menambahkan peserta.');
       
       setNotification({ isOpen: true, title: 'Berhasil', message: 'Peserta baru berhasil ditambahkan.', type: 'success' });
       onSuccess();
@@ -136,16 +144,21 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
           {/* --- DROPDOWN MENTOR BARU --- */}
            <div>
             <label className="block text-sm font-medium text-gray-700">Pilih Mentor (Opsional)</label>
-            <select
-              value={mentorId}
-              onChange={(e) => setMentorId(e.target.value)}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-            >
+            <select value={mentorId} onChange={(e) => setMentorId(e.target.value)} className="mt-1 w-full p-2 border border-gray-300 rounded-md">
               <option value="">-- Belum Ditugaskan --</option>
               {mentors.map(mentor => (
-                <option key={mentor.id} value={mentor.id}>
-                  {mentor.name}
-                </option>
+                <option key={mentor.id} value={mentor.id}>{mentor.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* --- 5. DROPDOWN DOSEN BARU --- */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Pilih Dosen (Opsional)</label>
+            <select value={lecturerId} onChange={(e) => setLecturerId(e.target.value)} className="mt-1 w-full p-2 border border-gray-300 rounded-md">
+              <option value="">-- Tanpa Dosen Pembimbing --</option>
+              {lecturers.map(lecturer => (
+                <option key={lecturer.id} value={lecturer.id}>{lecturer.name}</option>
               ))}
             </select>
           </div>

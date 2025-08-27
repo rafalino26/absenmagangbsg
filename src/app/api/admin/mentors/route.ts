@@ -24,7 +24,6 @@ async function verifySuperAdmin(req: NextRequest) {
   }
 }
 
-// FUNGSI UNTUK MENGAMBIL DAFTAR SEMUA MENTOR (GET)
 export async function GET(req: NextRequest) {
   const auth = await verifySuperAdmin(req);
   if (auth.error) {
@@ -34,13 +33,16 @@ export async function GET(req: NextRequest) {
   try {
     const mentors = await db.user.findMany({
       where: {
-        role: Role.ADMIN,
+        role: {
+          in: [Role.ADMIN, Role.LECTURER]
+        }
       },
-      select: { // Pilih hanya data yang aman untuk ditampilkan
+      select: { 
         id: true,
         name: true,
         email: true,
         division: true,
+        role: true,
       },
       orderBy: {
         name: 'asc',
@@ -61,11 +63,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, division, password } = await req.json();
+   const { name, division, password, role } = await req.json();
 
-    if (!name || !division || !password) {
+    if (!name || !division || !password || !role) {
       return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
     }
+
+    if (role !== Role.ADMIN && role !== Role.LECTURER) {
+    return NextResponse.json({ error: 'Role tidak valid' }, { status: 400 });
+}
 
     const hashedPassword = await hash(password, 10);
 
@@ -74,7 +80,7 @@ export async function POST(req: NextRequest) {
         name,
         division,
         password: hashedPassword,
-        role: Role.ADMIN, // Set role sebagai ADMIN (Mentor)
+        role: role, // Set role sebagai ADMIN (Mentor)
       },
     });
     

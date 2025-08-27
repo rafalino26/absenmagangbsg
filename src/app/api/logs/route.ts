@@ -12,19 +12,25 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
     const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
 
-    let whereClause: any = {
-        // Nanti bisa ditambahkan filter status, tanggal, dll.
-    };
+    let whereClause: any = {};
 
-    // Jika yang login adalah Mentor, filter hanya untuk peserta bimbingannya
+    // Filter berdasarkan peran
     if (decoded.role === Role.ADMIN) {
       whereClause.user = { mentorId: decoded.userId };
+    } else if (decoded.role === Role.LECTURER) { 
+      whereClause.user = { lecturerId: decoded.userId };
     }
 
     const logs = await db.dailyLog.findMany({
       where: whereClause,
-      include: {
-        user: { // Ambil nama peserta untuk ditampilkan
+      select: { 
+        id: true,
+        activity: true,
+        status: true,
+        notes: true,
+        createdAt: true,
+        photoUrl: true, 
+        user: {
           select: { name: true, division: true }
         }
       },

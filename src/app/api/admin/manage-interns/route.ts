@@ -5,6 +5,7 @@ import { Role } from '@prisma/client';
 import { verify } from 'jsonwebtoken';
 import { hash } from 'bcrypt';
 import nodemailer from 'nodemailer'; // Kita akan butuh ini untuk kirim email
+import { Prisma } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
@@ -43,17 +44,26 @@ async function sendLoginDetailsByEmail(email: string, name: string, internCode: 
 
 // FUNGSI UNTUK MENGAMBIL DAFTAR SEMUA PESERTA (GET)
 export async function GET(req: NextRequest) {
-  const auth = await verifySuperAdmin(req);
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  // 1. Verifikasi token untuk mendapatkan role dan id
+  const token = req.cookies.get('adminAuthToken')?.value;
+  if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
+  const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
+
+  let whereClause: Prisma.UserWhereInput = {
+    role: Role.INTERN,
+    isActive: true,
+  };
+
+  // 2. Tambahkan filter untuk Mentor dan Dosen
+  if (decoded.role === Role.ADMIN) { // Jika Mentor
+    whereClause.mentorId = decoded.userId;
+  } else if (decoded.role === Role.LECTURER) { // Jika Dosen
+    whereClause.lecturerId = decoded.userId;
   }
 
   try {
     const interns = await db.user.findMany({
-      where: {
-        role: Role.INTERN,
-        isActive: true,
-      },
+      where: whereClause,
       select: {
         id: true,
         internCode: true,
@@ -62,12 +72,18 @@ export async function GET(req: NextRequest) {
         periodStartDate: true,
         periodEndDate: true,
         isActive: true,
-        mentor: {
+        mentor: { // Ambil nama mentor
           select: {
             id: true,
             name: true,
           },
         },
+        lecturer: { // Ambil juga nama dosen
+          select: {
+            id: true,
+            name: true,
+          }
+        }
       },
       orderBy: {
         name: 'asc',
@@ -88,23 +104,20 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, division, email, periodStartDate, periodEndDate, mentorId } = await req.json();
+    const { name, division, email, periodStartDate, periodEndDate, mentorId, lecturerId } = await req.json();
 
     if (!name || !division || !periodStartDate || !periodEndDate) { // mentorId bisa opsional
       return NextResponse.json({ error: 'Data tidak lengkap.' }, { status: 400 });
     }
     
-    // --- LOGIKA BARU UNTUK KODE MAGANG ---
-    // 1. Cari peserta dengan internCode tertinggi
     const lastIntern = await db.user.findFirst({
         where: { role: Role.INTERN, internCode: { not: null } },
-        orderBy: { id: 'desc' }, // Cek dari ID terbaru untuk efisiensi
+        orderBy: { id: 'desc' }, 
         select: { internCode: true }
     });
     
     const lastCodeNumber = lastIntern?.internCode ? parseInt(lastIntern.internCode) : 0;
     const newInternCode = String(lastCodeNumber + 1).padStart(3, '0');
-    // --- SELESAI LOGIKA BARU ---
 
     const firstName = name.split(' ')[0].toLowerCase();
     const autoPassword = `${firstName}${newInternCode}`;
@@ -112,7 +125,7 @@ export async function POST(req: NextRequest) {
     
     const newIntern = await db.user.create({
       data: {
-        internCode: newInternCode, // Simpan kode magang baru
+        internCode: newInternCode, 
         name,
         division,
         email,
@@ -121,6 +134,7 @@ export async function POST(req: NextRequest) {
         periodStartDate: new Date(periodStartDate),
         periodEndDate: new Date(periodEndDate),
         mentorId: mentorId ? parseInt(mentorId) : null,
+        lecturerId: lecturerId ? parseInt(lecturerId) : null,
       },
     });
 

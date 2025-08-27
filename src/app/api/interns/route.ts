@@ -49,7 +49,8 @@ function getMonthDateRange(monthString: string) {
 
 export async function GET(req: NextRequest) {
   try {
-     const token = req.cookies.get('adminAuthToken')?.value;
+    // Verifikasi token untuk mendapatkan role dan id
+    const token = req.cookies.get('adminAuthToken')?.value;
     if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
     const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
 
@@ -57,12 +58,16 @@ export async function GET(req: NextRequest) {
     let dateFilter: Prisma.AttendanceWhereInput = {};
     let periodFilter: Prisma.UserWhereInput = {};
     
-    // 2. Buat filter mentor berdasarkan role
-    let mentorFilter: Prisma.UserWhereInput = {};
-    if (decoded.role === Role.ADMIN) { // Jika yang login adalah Mentor
-      mentorFilter = { mentorId: decoded.userId };
+    // Buat filter utama berdasarkan role
+    let mainFilter: Prisma.UserWhereInput = {
+      role: Role.INTERN,
+      isActive: true,
+    };
+    if (decoded.role === Role.ADMIN) {
+      mainFilter.mentorId = decoded.userId;
+    } else if (decoded.role === Role.LECTURER) {
+      mainFilter.lecturerId = decoded.userId;
     }
-
 
     if (month && month !== 'Semua Bulan') {
       const dateRange = getMonthDateRange(month);
@@ -72,16 +77,12 @@ export async function GET(req: NextRequest) {
       }
     }
     
+    // Gabungkan semua filter
     const interns = await db.user.findMany({ 
-          where: { 
-            role: Role.INTERN, 
-            isActive: true, 
-            ...periodFilter,
-            ...mentorFilter
-          },
-          orderBy: { name: 'asc' },
-        });
-
+      where: { ...mainFilter, ...periodFilter },
+      orderBy: { name: 'asc' },
+    });
+    
     const summaryData = await Promise.all(
       interns.map(async (intern: User) => {
         const commonWhere = { userId: intern.id, ...dateFilter };

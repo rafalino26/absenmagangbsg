@@ -2,13 +2,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { FiCheck, FiX, FiTool } from 'react-icons/fi';
+import { FiCheck, FiX, FiTool, FiImage, FiEye } from 'react-icons/fi';
 import SpinnerOverlay from '@/app/components/loading/SpinnerOverlay';
 import NotificationModal from '@/app/components/Modal/NotificationModal';
+import { format } from 'date-fns';
 import { NotificationState } from '@/app/types';
 import { useAuth } from '@/app/hooks/useAuth';
 import { Role, LogStatus } from '@prisma/client';
 import ManageActivitiesModal from '@/app/components/Modal/ManageActivitiesModal'; 
+import LogDetailModal from '@/app/components/Modal/LogDetailModal';
 
 interface DailyLog {
   id: number;
@@ -16,6 +18,7 @@ interface DailyLog {
   status: LogStatus;
   notes: string | null;
   createdAt: string;
+  photoUrl: string | null;
   user: {
     name: string;
     division: string;
@@ -27,6 +30,8 @@ export default function DailyLogsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [isManageActivitiesModalOpen, setManageActivitiesModalOpen] = useState(false);
+  const [isDetailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<DailyLog | null>(null);
   const auth = useAuth(); // Dapatkan role user yang login
 
   const fetchLogs = useCallback(async () => {
@@ -76,6 +81,11 @@ export default function DailyLogsPage() {
     }
   };
 
+  const handleOpenDetailModal = (log: DailyLog) => {
+    setSelectedLog(log);
+    setDetailModalOpen(true);
+  };
+
   return (
     <>
       {isLoading && <SpinnerOverlay />}
@@ -100,7 +110,7 @@ export default function DailyLogsPage() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peserta</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peserta & Tanggal</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktivitas</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -113,6 +123,9 @@ export default function DailyLogsPage() {
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900">{log.user.name}</div>
                     <div className="text-sm text-gray-500">{log.user.division}</div>
+                     <div className="text-xs text-gray-400 mt-1">
+                      {format(new Date(log.createdAt), 'd LLL yyyy, HH:mm')}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700 max-w-sm whitespace-normal">{log.activity}</td>
                   <td className="px-6 py-4 text-sm">
@@ -126,16 +139,25 @@ export default function DailyLogsPage() {
                     {log.status === 'REJECTED' && <p className="text-xs text-red-600 mt-1">Alasan: {log.notes}</p>}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {log.status === 'PENDING' && auth?.role === Role.ADMIN && (
-                      <div className="flex justify-center gap-2">
-                        <button onClick={() => handleApprove(log.id)} className="p-2 text-green-600 hover:bg-green-100 rounded-full" title="Approve">
-                          <FiCheck size={18} />
+                    <div className="flex justify-center items-center gap-2">
+                        {/* Tombol Lihat Detail untuk semua peran */}
+                        <button onClick={() => handleOpenDetailModal(log)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-full" title="Lihat Detail">
+                            <FiEye size={18} />
                         </button>
-                        <button onClick={() => handleReject(log.id)} className="p-2 text-red-600 hover:bg-red-100 rounded-full" title="Reject">
-                          <FiX size={18} />
-                        </button>
-                      </div>
-                    )}
+                        
+                        {/* Tombol Approve/Reject hanya untuk Mentor */}
+                        {log.status === 'PENDING' && auth?.role === Role.ADMIN && (
+                            <>
+                                <span className="text-gray-300">|</span>
+                                <button onClick={() => handleApprove(log.id)} className="p-2 text-green-600 hover:bg-green-100 rounded-full" title="Approve">
+                                    <FiCheck size={18} />
+                                </button>
+                                <button onClick={() => handleReject(log.id)} className="p-2 text-red-600 hover:bg-red-100 rounded-full" title="Reject">
+                                    <FiX size={18} />
+                                </button>
+                            </>
+                        )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -149,6 +171,11 @@ export default function DailyLogsPage() {
           </tbody>
         </table>
       </div>
+      <LogDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        logData={selectedLog}
+      />
 
       <ManageActivitiesModal
         isOpen={isManageActivitiesModalOpen}

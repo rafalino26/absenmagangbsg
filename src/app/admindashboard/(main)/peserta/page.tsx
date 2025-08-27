@@ -24,6 +24,7 @@ interface Intern {
     id: number;
     name: string;
   } | null;
+  lecturer: { id: number; name: string; } | null; 
 }
 
 export default function ManageInternsPage() {
@@ -144,6 +145,7 @@ export default function ManageInternsPage() {
             {/* Kolom lain diberi lebar yang lebih kecil */}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Divisi</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Mentor</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Dosen Pembimbing</th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Aksi</th>
           </tr>
         </thead>
@@ -165,6 +167,7 @@ export default function ManageInternsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">{intern.division}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{intern.mentor?.name || '-'}</td>
+                     <td className="px-6 py-4 text-sm text-gray-500">{intern.lecturer?.name || '-'}</td>
                     <td className="px-6 py-4 text-center relative">
                       <ThreeDotMenu actions={actions} />
                     </td>

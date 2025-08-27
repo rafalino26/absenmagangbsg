@@ -8,32 +8,34 @@ import AddMentorModal from '@/app/components/Modal/AddMentorModal';
 import EditMentorModal from '@/app/components/Modal/EditMentorModal'; // Impor modal edit
 import ThreeDotMenu from '@/app/components/ThreeDotMenu'; // Impor menu titik tiga
 import { NotificationState } from '@/app/types';
+import { Role } from '@prisma/client'; 
 
-interface Mentor {
+interface User{
   id: number;
   name: string;
   division: string;
+  role: Role;
 }
 
 export default function ManageMentorsPage() {
-  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [users, setUsers] = useState<User[]>([]); 
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState<NotificationState | null>(null);
   
   // State untuk kontrol modal
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchMentors = useCallback(async () => {
+  const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/admin/mentors');
       if (response.ok) {
-        setMentors(await response.json());
+        setUsers(await response.json());
       } else {
-        throw new Error('Gagal mengambil data mentor. Pastikan Anda login sebagai Superadmin.');
+        throw new Error('Gagal mengambil data. Pastikan Anda login sebagai Superadmin.');
       }
     } catch (error: any) {
       setNotification({ isOpen: true, title: 'Error', message: error.message, type: 'error' });
@@ -43,23 +45,24 @@ export default function ManageMentorsPage() {
   }, []);
 
   useEffect(() => {
-    fetchMentors();
-  }, [fetchMentors]);
+    fetchUsers();
+  }, [fetchUsers]);
   
   // Handler untuk membuka modal edit
-  const handleOpenEditModal = (mentor: Mentor) => {
-    setSelectedMentor(mentor);
+  const handleOpenEditModal = (user: User) => {
+    setSelectedUser(user);
     setEditModalOpen(true);
   };
 
   // Handler untuk konfirmasi hapus
-  const handleDeleteConfirm = (mentor: Mentor) => {
+  const handleDeleteConfirm = (user: User) => {
+    const userType = user.role === 'ADMIN' ? 'Mentor' : 'Dosen';
     setNotification({
       isOpen: true,
-      title: 'Hapus Mentor?',
-      message: `Anda yakin ingin menghapus ${mentor.name}? Semua peserta yang dibimbing olehnya akan kehilangan mentor.`,
+      title: `Hapus ${userType}?`,
+      message: `Anda yakin ingin menghapus ${user.name}?`,
       type: 'confirm',
-      onConfirm: () => performDelete(mentor.id),
+      onConfirm: () => performDelete(user.id),
     });
   };
 
@@ -76,7 +79,7 @@ export default function ManageMentorsPage() {
       }
 
       setNotification({ isOpen: true, title: 'Berhasil', message: 'Mentor berhasil dihapus.', type: 'success' });
-      fetchMentors(); // Refresh data
+      fetchUsers(); // Refresh data
     } catch (error: any) {
       setNotification({ isOpen: true, title: 'Gagal', message: error.message, type: 'error' });
     } finally {
@@ -84,23 +87,22 @@ export default function ManageMentorsPage() {
     }
   };
 
-  const filteredMentors = useMemo(() => {
-    if (!searchQuery) {
-      return mentors;
-    }
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery) return users;
     const lowercasedQuery = searchQuery.toLowerCase();
-    return mentors.filter(mentor =>
-      mentor.name.toLowerCase().includes(lowercasedQuery) ||
-      mentor.division.toLowerCase().includes(lowercasedQuery) 
+    return users.filter(user =>
+      user.name.toLowerCase().includes(lowercasedQuery) ||
+      user.division.toLowerCase().includes(lowercasedQuery)
     );
-  }, [mentors, searchQuery]);
+  }, [users, searchQuery]);
+
 
   return (
     <>
       {isLoading && <SpinnerOverlay />}
       
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Kelola Akun Mentor</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Kelola Akun Mentor & Dosen</h1>
         <p className="mt-1 text-md text-gray-600">Tambah, lihat, atau hapus akun untuk mentor.</p>
         <button
           onClick={() => setAddModalOpen(true)}
@@ -123,25 +125,28 @@ export default function ManageMentorsPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Divisi</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Divisi/Universitas</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-           {filteredMentors.length > 0 ? (
-              filteredMentors.map((mentor) => {
-                // Definisikan aksi untuk menu
+          {filteredUsers.length > 0 ? (
+              filteredUsers.map((user) => {
                 const actions = [
-                  { label: 'Edit', onClick: () => handleOpenEditModal(mentor) },
-                  { label: 'Hapus', onClick: () => handleDeleteConfirm(mentor), className: 'text-red-600 hover:bg-red-50' },
+                  { label: 'Edit', onClick: () => handleOpenEditModal(user) },
+                  { label: 'Hapus', onClick: () => handleDeleteConfirm(user), className: 'text-red-600 hover:bg-red-50' },
                 ];
-
                 return (
-                  <tr key={mentor.id}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{mentor.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{mentor.division}</td>
+                  <tr key={user.id}>
+                    <td className="px-6 py-4 font-medium text-gray-900">{user.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{user.division}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-indigo-100 text-indigo-800'}`}>
+                        {user.role === 'ADMIN' ? 'Mentor' : 'Dosen'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-center relative">
-                      {/* Gunakan komponen ThreeDotMenu di sini */}
                       <ThreeDotMenu actions={actions} />
                     </td>
                   </tr>
@@ -161,16 +166,15 @@ export default function ManageMentorsPage() {
       <AddMentorModal
         isOpen={isAddModalOpen}
         onClose={() => setAddModalOpen(false)}
-        onSuccess={fetchMentors}
+        onSuccess={fetchUsers}
         setNotification={setNotification}
       />
       
-      {/* Render EditMentorModal */}
       <EditMentorModal
         isOpen={isEditModalOpen}
         onClose={() => setEditModalOpen(false)}
-        onSuccess={fetchMentors}
-        mentorData={selectedMentor}
+        onSuccess={fetchUsers}
+        mentorData={selectedUser}
         setNotification={setNotification}
       />
 

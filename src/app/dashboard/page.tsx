@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef  } from 'react';
-import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiChevronDown, FiDownload, FiHeadphones, FiMoreVertical, FiClipboard  } from 'react-icons/fi';
+import { FiClock, FiEdit3, FiLogOut, FiX, FiCamera, FiEdit, FiChevronDown, FiDownload, FiHeadphones, FiMoreVertical, FiClipboard, FiImage  } from 'react-icons/fi';
 import { CSVLink } from 'react-csv';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -22,6 +22,7 @@ import HelpdeskModal from '../components/Modal/HelpdeskModal';
 import { NotificationState, UserProfile } from '../types';
 import { format } from 'date-fns';
 import ActivityLogModal from '../components/Modal/ActivityLogModal';
+import { LogStatus } from '@prisma/client';
 
 interface HistoryItem {
   id: number;
@@ -34,14 +35,15 @@ interface HistoryItem {
   photoUrl?: string;
 }
 
-interface LocationState {
-  latitude: number;
-  longitude: number;
+// Tipe data baru untuk log harian
+interface DailyLogItem {
+  id: number;
+  activity: string;
+  status: LogStatus;
+  notes: string | null;
+  createdAt: string;
+  photoUrl: string | null;
 }
-
-const LocationMap = dynamic(() => import('../components/Modal/LocationMap'), {
-  ssr: false, 
-});
 
 const isLate = (timeString: string): boolean => {
   try {
@@ -87,6 +89,8 @@ export default function DashboardPage() {
   const [isHelpdeskModalOpen, setHelpdeskModalOpen] = useState(false);
   const [isActivityModalOpen, setActivityModalOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dailyLogs, setDailyLogs] = useState<DailyLogItem[]>([]); // <-- State baru untuk log
+  const [activeTab, setActiveTab] = useState<'absensi' | 'log'>('absensi');
   const menuRef = useRef<HTMLDivElement>(null);
   const closeNotification = () => setNotification(null);
   const router = useRouter();
@@ -97,9 +101,10 @@ export default function DashboardPage() {
 
    const fetchData = useCallback(async () => {
     try {
-      const [userRes, historyRes] = await Promise.all([
+     const [userRes, historyRes, logRes] = await Promise.all([
         fetch('/api/users/me'),
-        fetch('/api/attendances/history')
+        fetch('/api/attendances/history'),
+        fetch('/api/logs/user') 
       ]);
       if (userRes.ok) {
         const userData = await userRes.json();
@@ -124,6 +129,9 @@ export default function DashboardPage() {
       if (historyRes.ok) {
         const historyData = await historyRes.json();
         setHistory(historyData);
+      }
+      if (logRes.ok) {
+        setDailyLogs(await logRes.json());
       }
     } catch (e) {
       console.error("Error mengambil data:", e);
@@ -421,17 +429,17 @@ const handlePhoneSubmit = async (phone: string) => {
     }
   };
 
-const handleActivityLogSubmit = async ({ activities, otherActivity }: { activities: string[], otherActivity: string }) => {
+const handleActivityLogSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     try {
       const response = await fetch('/api/logs/user', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ activities, otherActivity }),
+        body: formData,
       });
       if (!response.ok) throw new Error('Gagal mengirim laporan aktivitas.');
 
       setNotification({ isOpen: true, title: 'Berhasil', message: 'Laporan aktivitas berhasil dikirim.', type: 'success' });
+      fetchData(); // Panggil fetchData untuk refresh semua data, termasuk log baru
     } catch (error: any) {
       setNotification({ isOpen: true, title: 'Gagal', message: error.message, type: 'error' });
     } finally {
@@ -485,7 +493,7 @@ const handleActivityLogSubmit = async ({ activities, otherActivity }: { activiti
     <>
     {isSubmitting && <SpinnerOverlay />}
       <div className="bg-gray-50 min-h-screen">
-<header className="bg-red-600 shadow-sm sticky top-0 z-30">
+      <header className="bg-red-600 shadow-sm sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="flex-shrink-0">
@@ -606,47 +614,56 @@ const handleActivityLogSubmit = async ({ activities, otherActivity }: { activiti
               />
             </div>
             <div className="mt-10">
-               <div 
-                className="flex justify-between items-center cursor-pointer"
-                onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-              >
-                <h2 className="text-xl font-bold text-gray-800">Riwayat Absensi Terkini</h2>
-              <div className="flex items-center gap-4">
-                {isClient && (
-                  // 1. Bungkus CSVLink dengan <span> dan pindahkan onClick ke sini
-                  <span onClick={(e) => e.stopPropagation()}>
-                    <CSVLink
-                      data={csvData}
-                      headers={csvHeaders}
-                      separator={";"}
-                      filename={`Riwayat_Absen_${user?.name}.csv`}
-                      className="flex items-center gap-2 text-sm bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800"
-                    >
-                      <FiDownload size={16} />
-                      <span>Download</span>
-                    </CSVLink>
-                  </span>
-                )}
-                <FiChevronDown 
-                  className={`text-gray-500 transition-transform duration-300 ${isHistoryOpen ? 'rotate-180' : ''}`} 
-                  size={24} 
-                />
+            {/* 1. Tab Navigation */}
+            <div className="border-b border-gray-200">
+              <div className="flex justify-between items-center">
+              <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+                <button
+                  onClick={() => setActiveTab('absensi')}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'absensi'
+                      ? 'border-red-500 text-red-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Riwayat Absensi
+                </button>
+                <button
+                  onClick={() => setActiveTab('log')}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'log'
+                      ? 'border-red-500 text-red-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Riwayat Log Harian
+                </button>
+              </nav>
+              {activeTab === 'absensi' && isClient && (
+                <CSVLink
+                  data={csvData}
+                  headers={csvHeaders}
+                  separator={";"}
+                  filename={`Riwayat_Absen_${user?.name}.csv`}
+                  className="flex items-center gap-2 text-sm bg-black text-white py-1 px-3 rounded-lg hover:bg-gray-800"
+                >
+                  <FiDownload size={16} />
+                  <span>Download</span>
+                </CSVLink>
+              )}
               </div>
-              </div>
-               <div 
-              className={`transition-all duration-500 ease-in-out overflow-hidden 
-                ${isHistoryOpen ? 'max-h-screen mt-4' : 'max-h-0'}`
-              }
-            >
+            </div>
+          {/* 2. Tab Content */}
+          <div className="mt-4">
+            {/* Content for Riwayat Absensi */}
+            {activeTab === 'absensi' && (
               <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
                 <ul className="divide-y divide-gray-200">
                   {history.length === 0 ? (
                     <li className="p-4 text-center text-gray-500">Belum ada riwayat absensi.</li>
                   ) : (
                     history.map((item) => (
-                      // 1. Ganti dari 'flex' menjadi 'grid' dan definisikan 3 kolom
                       <li key={item.id} className="p-4 grid grid-cols-[auto_1fr_auto] items-center gap-4 hover:bg-gray-50">
-                        
                         {/* Kolom 1: Ikon Status */}
                         <span className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full text-white 
                           ${item.type === 'Hadir' ? 'bg-green-500' : item.type === 'Pulang' ? 'bg-orange-500' : 'bg-blue-500'}`}>
@@ -655,7 +672,7 @@ const handleActivityLogSubmit = async ({ activities, otherActivity }: { activiti
                           {item.type === 'Izin' && <FiEdit3 size={20}/>}
                         </span>
                         
-                        {/* Kolom 2: Info Teks (mengisi sisa ruang) */}
+                        {/* Kolom 2: Info Teks */}
                         <div>
                           <p className="font-semibold text-gray-800">{item.title}</p>
                           <p className="text-sm text-gray-600">{item.date}</p>
@@ -685,8 +702,51 @@ const handleActivityLogSubmit = async ({ activities, otherActivity }: { activiti
                   )}
                 </ul>
               </div>
+            )}
+
+            {/* Content for Riwayat Log Harian */}
+            {activeTab === 'log' && (
+              <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
+                <ul className="divide-y divide-gray-200">
+                  {dailyLogs.length === 0 ? (
+                    <li className="p-4 text-center text-gray-500">Belum ada riwayat log harian.</li>
+                  ) : (
+                    dailyLogs.map((log) => (
+                      <li key={log.id} className="p-4 hover:bg-gray-50">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold text-gray-800">{format(new Date(log.createdAt), 'EEEE, d LLL yyyy')}</p>
+                            <p className="text-sm text-gray-600 mt-1">{log.activity}</p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              log.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                              log.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {log.status}
+                            </span>
+                            {log.photoUrl && (
+                              <a href={log.photoUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" title="Lihat Foto Bukti">
+                                <FiImage size={20} />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        {log.status === 'REJECTED' && log.notes && (
+                          <div className="mt-2 p-2 bg-red-50 border-l-4 border-red-400">
+                            <p className="text-sm font-semibold text-red-800">Alasan Penolakan:</p>
+                            <p className="text-sm text-red-700">{log.notes}</p>
+                          </div>
+                        )}
+                      </li>
+                    ))
+                  )}
+                </ul>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
           </div>
         </main>
       </div>

@@ -1,21 +1,23 @@
-// app/components/Modal/EditMentorModal.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { FiX, FiEye, FiEyeOff } from 'react-icons/fi';
 import { NotificationState } from '@/app/types';
+import { Role } from '@prisma/client'; // Impor Role
 
-interface Mentor {
+// Perbarui interface agar lebih generik dan menyertakan role
+interface UserData {
   id: number;
   name: string;
   division: string;
+  role: Role;
 }
 
 interface EditMentorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  mentorData: Mentor | null;
+  mentorData: UserData | null; // Gunakan interface yang sudah diperbarui
   setNotification: (notification: NotificationState | null) => void;
 }
 
@@ -31,7 +33,7 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
     if (mentorData) {
       setName(mentorData.name);
       setDivision(mentorData.division);
-      setPassword(''); // Kosongkan password setiap modal dibuka
+      setPassword('');
       setShowPassword(false);
     }
   }, [mentorData]);
@@ -42,6 +44,7 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
 
     setIsSubmitting(true);
     try {
+      // Logika update tidak perlu mengirim role, karena role tidak diubah di sini
       const dataToUpdate: any = { name, division };
       if (password) {
         dataToUpdate.password = password;
@@ -58,7 +61,7 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
         throw new Error(result.error || 'Gagal menyimpan perubahan.');
       }
 
-      setNotification({ isOpen: true, title: 'Berhasil', message: 'Data mentor berhasil diperbarui.', type: 'success' });
+      setNotification({ isOpen: true, title: 'Berhasil', message: 'Data akun berhasil diperbarui.', type: 'success' });
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -68,13 +71,17 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mentorData) return null;
+
+  // Buat label dan judul dinamis berdasarkan role
+  const userType = mentorData.role === Role.ADMIN ? 'Mentor' : 'Dosen';
+  const divisionLabel = mentorData.role === Role.ADMIN ? 'Divisi' : 'Universitas / Instansi';
 
   return (
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-40">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
         <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-bold text-gray-800">Edit Mentor</h3>
+          <h3 className="text-lg font-bold text-gray-800">Edit {userType}</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 text-black">
@@ -84,7 +91,7 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"/>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Divisi</label>
+              <label className="block text-sm font-medium text-gray-700">{divisionLabel}</label>
               <input type="text" value={division} onChange={(e) => setDivision(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"/>
             </div>
             <div>

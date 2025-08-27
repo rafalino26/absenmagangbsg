@@ -32,8 +32,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
 
+    // 1. Ambil 'lecturerId' dari body
     const body = await req.json();
-    const { name, division, periodStartDate, periodEndDate, password, mentorId, isActive } = body;
+    const { name, division, periodStartDate, periodEndDate, password, mentorId, lecturerId, isActive } = body;
 
     let dataToUpdate: Prisma.UserUpdateInput = {};
 
@@ -42,9 +43,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (periodStartDate !== undefined) dataToUpdate.periodStartDate = new Date(periodStartDate);
     if (periodEndDate !== undefined) dataToUpdate.periodEndDate = new Date(periodEndDate);
     if (isActive !== undefined) dataToUpdate.isActive = isActive;
+    
     if (mentorId !== undefined) {
-      dataToUpdate.mentor = { connect: { id: parseInt(mentorId) } };
+      dataToUpdate.mentor = mentorId ? { connect: { id: parseInt(mentorId) } } : { disconnect: true };
     }
+
+    // 2. Tambahkan logika untuk 'lecturerId'
+    if (lecturerId !== undefined) {
+      dataToUpdate.lecturer = lecturerId ? { connect: { id: parseInt(lecturerId) } } : { disconnect: true };
+    }
+
     if (password) {
       dataToUpdate.password = await hash(password, 10);
     }

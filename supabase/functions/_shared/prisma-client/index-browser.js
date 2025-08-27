@@ -138,7 +138,8 @@ exports.Prisma.UserScalarFieldEnum = {
   phoneNumber: 'phoneNumber',
   joinDate: 'joinDate',
   isActive: 'isActive',
-  mentorId: 'mentorId'
+  mentorId: 'mentorId',
+  lecturerId: 'lecturerId'
 };
 
 exports.Prisma.AttendanceScalarFieldEnum = {
@@ -166,6 +167,7 @@ exports.Prisma.DailyLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   activity: 'activity',
+  photoUrl: 'photoUrl',
   status: 'status',
   notes: 'notes',
   createdAt: 'createdAt'
@@ -193,6 +195,7 @@ exports.Prisma.NullsOrder = {
 exports.Role = exports.$Enums.Role = {
   SUPER_ADMIN: 'SUPER_ADMIN',
   ADMIN: 'ADMIN',
+  LECTURER: 'LECTURER',
   INTERN: 'INTERN'
 };
 
