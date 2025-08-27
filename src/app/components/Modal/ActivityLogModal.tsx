@@ -106,7 +106,7 @@ export default function ActivityLogModal({ isOpen, onClose, onSubmit, isSubmitti
                 value={otherActivity}
                 onChange={(e) => setOtherActivity(e.target.value)}
                 rows={2}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                className="mt-1 block w-full border border-gray-300 text-black rounded-md shadow-sm p-2"
                 placeholder="Jelaskan aktivitas lain..."
               />
             </div>
