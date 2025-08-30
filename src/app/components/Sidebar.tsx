@@ -15,7 +15,7 @@ const navLinks = [
   { name: 'Rekapitulasi', href: '/admindashboard/rekapitulasi', icon: FiGrid },
   { name: 'Riwayat Absensi', href: '/admindashboard/riwayat', icon: FiClock },
   { name: 'Arsip Magang', href: '/admindashboard/arsip', icon: FiArchive, requiredRole: Role.SUPER_ADMIN },
-  { name: 'Helpdesk', href: '/admindashboard/helpdesk', icon: FiMessageSquare }, 
+  { name: 'Helpdesk', href: '/admindashboard/helpdesk', icon: FiMessageSquare, requiredRole: Role.SUPER_ADMIN }, 
   { name: 'Kelola Mentor', href: '/admindashboard/mentors', icon: FiUsers, requiredRole: Role.SUPER_ADMIN },
   { name: 'Kelola Peserta', href: '/admindashboard/peserta', icon: FiUserPlus, requiredRole: Role.SUPER_ADMIN },
   { name: 'Log Harian', href: '/admindashboard/log-harian', icon: FiFileText }, 
