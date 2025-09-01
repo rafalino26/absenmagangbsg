@@ -21,7 +21,9 @@ interface DailyLog {
   photoUrl: string | null;
   user: {
     name: string;
-    division: string;
+   division: { // <-- Diubah menjadi objek
+      name: string;
+    } | null; // Ditambah | null untuk keamanan
   };
 }
 
@@ -122,7 +124,7 @@ export default function DailyLogsPage() {
                 <tr key={log.id}>
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900">{log.user.name}</div>
-                    <div className="text-sm text-gray-500">{log.user.division}</div>
+                    <div className="text-sm text-gray-500">{log.user.division?.name ?? '-'}</div>
                      <div className="text-xs text-gray-400 mt-1">
                       {format(new Date(log.createdAt), 'd LLL yyyy, HH:mm')}
                     </div>

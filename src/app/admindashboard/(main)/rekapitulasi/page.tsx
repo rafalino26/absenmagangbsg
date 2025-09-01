@@ -100,7 +100,8 @@ const displayedData = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
     data = data.filter(intern =>  
       intern.name.toLowerCase().includes(lowercasedQuery) ||
-      formatInternCode(intern.id).includes(lowercasedQuery)
+      formatInternCode(intern.id).includes(lowercasedQuery) ||
+      (intern.division?.name || '').toLowerCase().includes(lowercasedQuery)
     );
   }
     switch (sortBy) {
@@ -134,7 +135,7 @@ const displayedData = useMemo(() => {
 const csvData = displayedData.map((intern, index) => ({
   no: index + 1,
   name: intern.name,
-  division: intern.division,
+  division: intern.division?.name ?? '-',
   accountNumber: intern.bankAccount ? `${intern.bankAccount.bank} - ${intern.bankAccount.number}` : '-',
   hadir: intern.hadir,
   absenDates: intern.absenDates,
@@ -270,7 +271,7 @@ const csvData = displayedData.map((intern, index) => ({
                   <tr key={intern.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">{intern.name}</div>
-                      <div className="text-sm text-gray-500">Kode: {intern.internCode || '-'} | {intern.division}</div>
+                      <div className="text-sm text-gray-500">Kode: {intern.internCode || '-'} | {intern.division?.name ?? '-'}</div>
                        <div className="text-xs text-gray-500 mt-1">
                         {(intern.periodStartDate && intern.periodEndDate)
                           ? `Periode:${format(new Date(intern.periodStartDate), 'd LLL yy')} - ${format(new Date(intern.periodEndDate), 'd LLL yy')}`

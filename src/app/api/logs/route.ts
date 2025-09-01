@@ -30,8 +30,15 @@ export async function GET(req: NextRequest) {
         notes: true,
         createdAt: true,
         photoUrl: true, 
-        user: {
-          select: { name: true, division: true }
+         user: {
+          select: { 
+            name: true, 
+            division: { // <-- Diubah menjadi objek
+              select: { // <-- Ditambahkan select di dalamnya
+                name: true // <-- Hanya ambil namanya saja
+              }
+            } 
+          }
         }
       },
       orderBy: { createdAt: 'desc' },

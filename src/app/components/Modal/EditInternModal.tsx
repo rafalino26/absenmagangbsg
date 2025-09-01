@@ -1,28 +1,34 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, FormEvent, useRef } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { FiX, FiCalendar } from 'react-icons/fi';
+import { FiX, FiCalendar, FiEdit } from 'react-icons/fi';
 import { DayPicker, DateRange } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { format } from 'date-fns';
 import { NotificationState } from '@/app/types';
 import { Role } from '@prisma/client';
+import ManageDivisionsModal from './ManageDivisionsModal'; 
 
-// Tipe data untuk props
-interface InternData {
+// Tipe data yang lebih lengkap
+interface Division {
   id: number;
   name: string;
-  division: string;
-  periodStartDate?: string | null;
-  periodEndDate?: string | null;
-  mentor?: { id: number; name: string } | null;
-  lecturer?: { id: number; name: string } | null; // <-- Ditambahkan
 }
 interface User {
   id: number;
   name: string;
   role: Role;
+  division?: Division | null; // Mentor punya divisi
+}
+interface InternData {
+  id: number;
+  name: string;
+  division: Division | null;
+  periodStartDate?: string | null;
+  periodEndDate?: string | null;
+  mentor?: { id: number; name: string; } | null;
+  lecturer?: { id: number; name: string; } | null;
 }
 interface EditInternModalProps {
   isOpen: boolean;
@@ -34,24 +40,43 @@ interface EditInternModalProps {
 
 export default function EditInternModal({ isOpen, onClose, onSuccess, internData, setNotification }: EditInternModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // State untuk form
   const [name, setName] = useState('');
-  const [division, setDivision] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [mentors, setMentors] = useState<User[]>([]);
-  const [lecturers, setLecturers] = useState<User[]>([]); // <-- State baru
-  const [mentorId, setMentorId] = useState<string>('');
-  const [lecturerId, setLecturerId] = useState<string>(''); // <-- State baru
   const [range, setRange] = useState<DateRange | undefined>();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
 
+  // State baru untuk dropdown dinamis
+  const [divisionId, setDivisionId] = useState<string>('');
+  const [mentorId, setMentorId] = useState<string>('');
+  const [lecturerId, setLecturerId] = useState<string>('');
+  
+  // State untuk menyimpan daftar pilihan
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [allMentors, setAllMentors] = useState<User[]>([]);
+  const [filteredMentors, setFilteredMentors] = useState<User[]>([]);
+  const [lecturers, setLecturers] = useState<User[]>([]);
+  
+  const [isDivisionModalOpen, setDivisionModalOpen] = useState(false);
+
+  // Fungsi untuk mengambil daftar divisi
+  const fetchDivisions = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/divisions');
+      if (res.ok) setDivisions(await res.json());
+    } catch (error) { console.error("Gagal memuat divisi:", error); }
+  }, []);
+
+  // Isi form saat data intern berubah
   useEffect(() => {
     if (internData) {
       setName(internData.name);
-      setDivision(internData.division);
+      setDivisionId(internData.division?.id?.toString() || '');
       setMentorId(internData.mentor?.id?.toString() || '');
-      setLecturerId(internData.lecturer?.id?.toString() || ''); // <-- Set state dosen
+      setLecturerId(internData.lecturer?.id?.toString() || '');
       if (internData.periodStartDate && internData.periodEndDate) {
         setRange({ from: new Date(internData.periodStartDate), to: new Date(internData.periodEndDate) });
       }
@@ -60,15 +85,17 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
     }
   }, [internData]);
 
-  // Ambil daftar mentor & dosen saat modal terbuka
+  // Ambil semua data (divisi, mentor, dosen) saat modal pertama kali dibuka
   useEffect(() => {
     if (isOpen) {
+      fetchDivisions();
+      
       const fetchUsers = async () => {
         try {
           const res = await fetch('/api/admin/mentors');
           if (!res.ok) throw new Error('Gagal memuat mentor & dosen');
           const users: User[] = await res.json();
-          setMentors(users.filter(u => u.role === Role.ADMIN));
+          setAllMentors(users.filter(u => u.role === Role.ADMIN));
           setLecturers(users.filter(u => u.role === Role.LECTURER));
         } catch (error: any) {
           setNotification({ isOpen: true, title: 'Error', message: error.message, type: 'error' });
@@ -76,9 +103,21 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
       };
       fetchUsers();
     }
-  }, [isOpen, setNotification]);
+  }, [isOpen, fetchDivisions, setNotification]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Filter mentor setiap kali divisi berubah
+  useEffect(() => {
+    if (divisionId) {
+      const mentorsInDivision = allMentors.filter(
+        mentor => mentor.division?.id === parseInt(divisionId)
+      );
+      setFilteredMentors(mentorsInDivision);
+    } else {
+      setFilteredMentors([]);
+    }
+  }, [divisionId, allMentors]);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!internData) return;
     
@@ -86,11 +125,11 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
     try {
       const dataToSubmit: any = {
         name,
-        division,
+        divisionId: parseInt(divisionId),
         periodStartDate: range?.from,
         periodEndDate: range?.to,
         mentorId: mentorId ? parseInt(mentorId) : null,
-        lecturerId: lecturerId ? parseInt(lecturerId) : null, // <-- Kirim lecturerId
+        lecturerId: lecturerId ? parseInt(lecturerId) : null,
       };
       if (password) dataToSubmit.password = password;
 
@@ -104,7 +143,6 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
         const result = await response.json();
         throw new Error(result.error || 'Gagal menyimpan perubahan.');
       }
-
       setNotification({ isOpen: true, title: 'Berhasil', message: 'Data peserta berhasil diperbarui.', type: 'success' });
       onSuccess();
       onClose();
@@ -113,7 +151,7 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
   
   let displayValue = 'Pilih rentang tanggal...';
   if (range?.from && range.to) {
@@ -123,6 +161,7 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
   if (!isOpen || !internData) return null;
 
   return (
+    <>
     <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
         <div className="flex justify-between items-center p-4 border-b">
@@ -134,10 +173,25 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
             <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
             <input type="text" id="edit-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full p-2 border border-gray-300 rounded-md"/>
           </div>
-          <div>
-            <label htmlFor="edit-division" className="block text-sm font-medium text-gray-700">Divisi</label>
-            <input type="text" id="edit-division" value={division} onChange={(e) => setDivision(e.target.value)} className="mt-1 w-full p-2 border border-gray-300 rounded-md"/>
-          </div>
+           <div>
+              <label className="flex items-center justify-between text-sm font-medium text-gray-700">
+                <span>Divisi</span>
+                <button type="button" onClick={() => setDivisionModalOpen(true)} className="text-blue-600 hover:text-blue-800" title="Kelola Pilihan Divisi">
+                  <FiEdit size={14} />
+                </button>
+              </label>
+              <select
+                value={divisionId}
+                onChange={(e) => setDivisionId(e.target.value)}
+                required
+                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="" disabled>-- Pilih Divisi --</option>
+                {divisions.map(div => (
+                  <option key={div.id} value={div.id}>{div.name}</option>
+                ))}
+              </select>
+            </div>
           <div>
             <label htmlFor="edit-period" className="block text-sm font-medium text-gray-700">Periode Magang</label>
             <div className="relative mt-1" ref={pickerRef}>
@@ -168,19 +222,20 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
               )}
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Pilih Mentor (Opsional)</label>
-            <select
-              value={mentorId}
-              onChange={(e) => setMentorId(e.target.value)}
-              className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-            >
-              <option value="">-- Belum Ditugaskan --</option>
-              {mentors.map(mentor => (
-                <option key={mentor.id} value={mentor.id}>{mentor.name}</option>
-              ))}
-            </select>
-          </div>
+         <div>
+              <label className="block text-sm font-medium text-gray-700">Pilih Mentor (Opsional)</label>
+              <select
+                value={mentorId}
+                onChange={(e) => setMentorId(e.target.value)}
+                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                disabled={!divisionId || filteredMentors.length === 0}
+              >
+                <option value="">-- Pilih Mentor --</option>
+                {filteredMentors.map(mentor => (
+                  <option key={mentor.id} value={mentor.id}>{mentor.name}</option>
+                ))}
+              </select>
+            </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700">Pilih Dosen (Opsional)</label>
@@ -225,5 +280,12 @@ export default function EditInternModal({ isOpen, onClose, onSuccess, internData
         </form>
       </div>
     </div>
+    <ManageDivisionsModal 
+        isOpen={isDivisionModalOpen}
+        onClose={() => setDivisionModalOpen(false)}
+        setNotification={setNotification}
+        onUpdate={fetchDivisions}
+      />
+      </>
   );
 }

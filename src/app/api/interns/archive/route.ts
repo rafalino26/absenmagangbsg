@@ -1,50 +1,73 @@
-// src/app/api/interns/archive/route.ts
+// src/app/api/interns/archived/route.ts
 import { NextResponse, NextRequest } from 'next/server';
-import { db } from '@/lib/db'; // Menggunakan koneksi Prisma yang sudah ada
+import { db } from '@/lib/db';
+import { Role } from '@prisma/client';
+import { verify } from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+
+async function verifyAdminToken(req: NextRequest) {
+  const token = req.cookies.get('adminAuthToken')?.value;
+  if (!token) return { error: 'Tidak terautentikasi', status: 401 };
+  try {
+    const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
+
+    // --- PERUBAHAN DI SINI ---
+    // Definisikan secara eksplisit peran apa saja yang diizinkan
+    const allowedRoles: Role[] = [Role.SUPER_ADMIN, Role.ADMIN, Role.LECTURER];
+    
+    // Lakukan perbandingan dengan array yang sudah didefinisikan
+    if (!allowedRoles.includes(decoded.role)) {
+      return { error: 'Akses ditolak', status: 403 };
+    }
+    // --- SELESAI PERUBAHAN ---
+
+    return { userId: decoded.userId, role: decoded.role };
+  } catch (error) {
+    return { error: 'Token tidak valid', status: 401 };
+  }
+}
 
 export async function GET(req: NextRequest) {
-  // Pengaman agar hanya cron job yang bisa mengakses
-//   const secret = req.nextUrl.searchParams.get('secret');
-//   if (secret !== process.env.CRON_SECRET) {
-//     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-//   }
+  const auth = await verifyAdminToken(req);
+  if (auth.error) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
 
   try {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0); // Set ke awal hari UTC agar perbandingan akurat
+    let whereClause: any = {
+        role: Role.INTERN,
+        isActive: false,
+    };
 
-    const internsToArchive = await db.user.findMany({
-      where: {
-        role: 'INTERN',
-        isActive: true,
-        periodEndDate: {
-          lt: today, // Kurang dari awal hari ini (kemarin atau sebelumnya)
-        },
-      },
-      select: { id: true }
-    });
-
-    if (internsToArchive.length === 0) {
-      return NextResponse.json({ message: 'Tidak ada peserta yang perlu diarsipkan.' });
+    if (auth.role === Role.ADMIN) {
+        whereClause.mentorId = auth.userId;
+    } else if (auth.role === Role.LECTURER) {
+        whereClause.lecturerId = auth.userId;
     }
 
-    const idsToArchive = internsToArchive.map(intern => intern.id);
-
-    // Update status mereka menjadi tidak aktif
-    const result = await db.user.updateMany({
-      where: {
-        id: { in: idsToArchive },
+    const archivedInterns = await db.user.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        internCode: true,
+        name: true,
+        // INI BAGIAN PALING PENTING:
+        division: {
+            select: { name: true }
+        },
+        periodStartDate: true,
+        periodEndDate: true,
       },
-      data: {
-        isActive: false,
+      orderBy: {
+        periodEndDate: 'desc',
       },
     });
 
-    return NextResponse.json({
-      message: `${result.count} peserta berhasil diarsipkan.`,
-    });
-  } catch (error: any) {
-    console.error('[ARSIP PESERTA ERROR]', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(archivedInterns);
+
+  } catch (error) {
+    console.error("Error mengambil data arsip:", error);
+    return NextResponse.json({ error: 'Gagal mengambil data arsip' }, { status: 500 });
   }
 }

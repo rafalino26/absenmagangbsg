@@ -10,11 +10,14 @@ import ThreeDotMenu from '@/app/components/ThreeDotMenu'; // Impor menu titik ti
 import { NotificationState } from '@/app/types';
 import { Role } from '@prisma/client'; 
 
-interface User{
+interface User {
   id: number;
   name: string;
-  division: string;
   role: Role;
+  division: { // <-- Diubah menjadi objek
+    id: number;
+    name: string;
+  } | null;
 }
 
 export default function ManageMentorsPage() {
@@ -87,14 +90,14 @@ export default function ManageMentorsPage() {
     }
   };
 
-  const filteredUsers = useMemo(() => {
-    if (!searchQuery) return users;
-    const lowercasedQuery = searchQuery.toLowerCase();
-    return users.filter(user =>
-      user.name.toLowerCase().includes(lowercasedQuery) ||
-      user.division.toLowerCase().includes(lowercasedQuery)
-    );
-  }, [users, searchQuery]);
+ const filteredUsers = useMemo(() => {
+  if (!searchQuery) return users;
+  const lowercasedQuery = searchQuery.toLowerCase();
+  return users.filter(user =>
+    user.name.toLowerCase().includes(lowercasedQuery) ||
+    (user.division && user.division.name.toLowerCase().includes(lowercasedQuery))
+  );
+}, [users, searchQuery]);
 
 
   return (
@@ -140,7 +143,7 @@ export default function ManageMentorsPage() {
                 return (
                   <tr key={user.id}>
                     <td className="px-6 py-4 font-medium text-gray-900">{user.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{user.division}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{user.division?.name || '-'}</td>
                     <td className="px-6 py-4 text-sm">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-indigo-100 text-indigo-800'}`}>
                         {user.role === 'ADMIN' ? 'Mentor' : 'Dosen'}

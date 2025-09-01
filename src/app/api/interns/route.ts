@@ -49,7 +49,6 @@ function getMonthDateRange(monthString: string) {
 
 export async function GET(req: NextRequest) {
   try {
-    // Verifikasi token untuk mendapatkan role dan id
     const token = req.cookies.get('adminAuthToken')?.value;
     if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
     const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
@@ -58,7 +57,6 @@ export async function GET(req: NextRequest) {
     let dateFilter: Prisma.AttendanceWhereInput = {};
     let periodFilter: Prisma.UserWhereInput = {};
     
-    // Buat filter utama berdasarkan role
     let mainFilter: Prisma.UserWhereInput = {
       role: Role.INTERN,
       isActive: true,
@@ -77,18 +75,21 @@ export async function GET(req: NextRequest) {
       }
     }
     
-    // Gabungkan semua filter
     const interns = await db.user.findMany({ 
       where: { ...mainFilter, ...periodFilter },
       orderBy: { name: 'asc' },
+      include: { 
+        division: true, 
+      }
+
     });
     
     const summaryData = await Promise.all(
-      interns.map(async (intern: User) => {
+      interns.map(async (intern) => {
         const commonWhere = { userId: intern.id, ...dateFilter };
         
-        // Gunakan enum untuk tipe absensi
-         const hadir = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Hadir } });
+    
+        const hadir = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Hadir } });
         const izin = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Izin } });
         const terlambat = await db.attendance.count({ where: { ...commonWhere, type: AttendanceType.Hadir, isLate: true } });
         const absen = 0;
@@ -97,7 +98,7 @@ export async function GET(req: NextRequest) {
           id: intern.id,
           internCode: intern.internCode,
           name: intern.name,
-          division: intern.division,
+          division: intern.division?.name || '-', 
           periodStartDate: intern.periodStartDate?.toISOString(),
           periodEndDate: intern.periodEndDate?.toISOString(),
           joinDate: intern.joinDate.toISOString(),

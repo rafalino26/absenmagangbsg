@@ -1,6 +1,8 @@
 export interface UserProfile {
   name: string;
-  division: string;
+  division: { 
+    name: string; 
+  } | null;
   periodStartDate?: string | null;
   periodEndDate?: string | null;
   profilePicUrl?: string;
@@ -27,7 +29,9 @@ export interface InternSummary {
   id: number;
   internCode: string | null;
   name: string;
-  division: string;
+  division: { 
+    name: string; 
+  } | null;
   periodStartDate: string | null; 
   periodEndDate: string | null;
   hadir: number;

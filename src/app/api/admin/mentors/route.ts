@@ -25,33 +25,33 @@ async function verifySuperAdmin(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const auth = await verifySuperAdmin(req);
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  const { searchParams } = new URL(req.url);
+  const divisionId = searchParams.get('divisionId');
+
+  let whereClause: any = {
+    role: { in: [Role.ADMIN, Role.LECTURER] }
+  };
+
+  // Jika ada filter divisionId, tambahkan ke query
+  if (divisionId) {
+    whereClause.divisionId = parseInt(divisionId);
   }
 
   try {
-    const mentors = await db.user.findMany({
-      where: {
-        role: {
-          in: [Role.ADMIN, Role.LECTURER]
-        }
-      },
-      select: { 
+    const users = await db.user.findMany({
+      where: whereClause,
+      select: {
         id: true,
         name: true,
-        email: true,
-        division: true,
         role: true,
+        division: { select: { id: true, name: true } },
       },
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: { name: 'asc' },
     });
-    return NextResponse.json(mentors);
+    return NextResponse.json(users);
   } catch (error) {
-    console.error('[GET MENTORS ERROR]', error);
-    return NextResponse.json({ error: 'Gagal mengambil data mentor' }, { status: 500 });
+    console.error('[GET MENTORS/LECTURERS ERROR]', error);
+    return NextResponse.json({ error: 'Gagal mengambil data' }, { status: 500 });
   }
 }
 

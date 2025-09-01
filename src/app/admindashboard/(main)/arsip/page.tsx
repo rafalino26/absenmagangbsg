@@ -9,6 +9,8 @@ import { format } from 'date-fns';
 import NotificationModal from '@/app/components/Modal/NotificationModal';
 import SpinnerOverlay from '@/app/components/loading/SpinnerOverlay';
 
+
+
 export default function ArchivePage() {
   const [archivedInterns, setArchivedInterns] = useState<InternSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +20,7 @@ export default function ArchivePage() {
   const fetchArchivedInterns = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/interns/archived');
+      const response = await fetch('/api/interns/archive');
       if (response.ok) {
         setArchivedInterns(await response.json());
       }
@@ -121,7 +123,7 @@ export default function ArchivePage() {
                   <tr key={intern.id}>
                   <td className="px-6 py-4">
                     <div className="font-medium text-gray-900">{intern.name}</div>
-                    <div className="text-sm text-gray-500">Kode: {String(intern.id).padStart(3, '0')} | {intern.division}</div>
+                    <div className="text-sm text-gray-500">Kode: {intern.internCode} | {intern.division?.name ?? 'Tanpa Divisi'}</div>
                   </td>
                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {(intern.periodStartDate && intern.periodEndDate)

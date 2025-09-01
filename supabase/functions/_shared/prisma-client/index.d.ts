@@ -38,6 +38,11 @@ export type DailyLog = $Result.DefaultSelection<Prisma.$DailyLogPayload>
  * 
  */
 export type PredefinedActivity = $Result.DefaultSelection<Prisma.$PredefinedActivityPayload>
+/**
+ * Model Division
+ * 
+ */
+export type Division = $Result.DefaultSelection<Prisma.$DivisionPayload>
 
 /**
  * Enums
@@ -269,6 +274,16 @@ export class PrismaClient<
     * ```
     */
   get predefinedActivity(): Prisma.PredefinedActivityDelegate<ExtArgs>;
+
+  /**
+   * `prisma.division`: Exposes CRUD operations for the **Division** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Divisions
+    * const divisions = await prisma.division.findMany()
+    * ```
+    */
+  get division(): Prisma.DivisionDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -714,7 +729,8 @@ export namespace Prisma {
     Attendance: 'Attendance',
     HelpdeskTicket: 'HelpdeskTicket',
     DailyLog: 'DailyLog',
-    PredefinedActivity: 'PredefinedActivity'
+    PredefinedActivity: 'PredefinedActivity',
+    Division: 'Division'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -730,7 +746,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "attendance" | "helpdeskTicket" | "dailyLog" | "predefinedActivity"
+      modelProps: "user" | "attendance" | "helpdeskTicket" | "dailyLog" | "predefinedActivity" | "division"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1084,6 +1100,76 @@ export namespace Prisma {
           }
         }
       }
+      Division: {
+        payload: Prisma.$DivisionPayload<ExtArgs>
+        fields: Prisma.DivisionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DivisionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DivisionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload>
+          }
+          findFirst: {
+            args: Prisma.DivisionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DivisionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload>
+          }
+          findMany: {
+            args: Prisma.DivisionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload>[]
+          }
+          create: {
+            args: Prisma.DivisionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload>
+          }
+          createMany: {
+            args: Prisma.DivisionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DivisionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload>[]
+          }
+          delete: {
+            args: Prisma.DivisionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload>
+          }
+          update: {
+            args: Prisma.DivisionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload>
+          }
+          deleteMany: {
+            args: Prisma.DivisionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DivisionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.DivisionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DivisionPayload>
+          }
+          aggregate: {
+            args: Prisma.DivisionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDivision>
+          }
+          groupBy: {
+            args: Prisma.DivisionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DivisionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DivisionCountArgs<ExtArgs>
+            result: $Utils.Optional<DivisionCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1312,6 +1398,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type DivisionCountOutputType
+   */
+
+  export type DivisionCountOutputType = {
+    users: number
+  }
+
+  export type DivisionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | DivisionCountOutputTypeCountUsersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * DivisionCountOutputType without action
+   */
+  export type DivisionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DivisionCountOutputType
+     */
+    select?: DivisionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * DivisionCountOutputType without action
+   */
+  export type DivisionCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+
+  /**
    * Models
    */
 
@@ -1329,12 +1446,14 @@ export namespace Prisma {
 
   export type UserAvgAggregateOutputType = {
     id: number | null
+    divisionId: number | null
     mentorId: number | null
     lecturerId: number | null
   }
 
   export type UserSumAggregateOutputType = {
     id: number | null
+    divisionId: number | null
     mentorId: number | null
     lecturerId: number | null
   }
@@ -1346,7 +1465,7 @@ export namespace Prisma {
     email: string | null
     password: string | null
     role: $Enums.Role | null
-    division: string | null
+    divisionId: number | null
     periodStartDate: Date | null
     periodEndDate: Date | null
     bankName: string | null
@@ -1366,7 +1485,7 @@ export namespace Prisma {
     email: string | null
     password: string | null
     role: $Enums.Role | null
-    division: string | null
+    divisionId: number | null
     periodStartDate: Date | null
     periodEndDate: Date | null
     bankName: string | null
@@ -1386,7 +1505,7 @@ export namespace Prisma {
     email: number
     password: number
     role: number
-    division: number
+    divisionId: number
     periodStartDate: number
     periodEndDate: number
     bankName: number
@@ -1403,12 +1522,14 @@ export namespace Prisma {
 
   export type UserAvgAggregateInputType = {
     id?: true
+    divisionId?: true
     mentorId?: true
     lecturerId?: true
   }
 
   export type UserSumAggregateInputType = {
     id?: true
+    divisionId?: true
     mentorId?: true
     lecturerId?: true
   }
@@ -1420,7 +1541,7 @@ export namespace Prisma {
     email?: true
     password?: true
     role?: true
-    division?: true
+    divisionId?: true
     periodStartDate?: true
     periodEndDate?: true
     bankName?: true
@@ -1440,7 +1561,7 @@ export namespace Prisma {
     email?: true
     password?: true
     role?: true
-    division?: true
+    divisionId?: true
     periodStartDate?: true
     periodEndDate?: true
     bankName?: true
@@ -1460,7 +1581,7 @@ export namespace Prisma {
     email?: true
     password?: true
     role?: true
-    division?: true
+    divisionId?: true
     periodStartDate?: true
     periodEndDate?: true
     bankName?: true
@@ -1567,7 +1688,7 @@ export namespace Prisma {
     email: string | null
     password: string
     role: $Enums.Role
-    division: string
+    divisionId: number | null
     periodStartDate: Date | null
     periodEndDate: Date | null
     bankName: string | null
@@ -1606,7 +1727,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
-    division?: boolean
+    divisionId?: boolean
     periodStartDate?: boolean
     periodEndDate?: boolean
     bankName?: boolean
@@ -1617,6 +1738,7 @@ export namespace Prisma {
     isActive?: boolean
     mentorId?: boolean
     lecturerId?: boolean
+    division?: boolean | User$divisionArgs<ExtArgs>
     attendances?: boolean | User$attendancesArgs<ExtArgs>
     helpdeskTickets?: boolean | User$helpdeskTicketsArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
@@ -1634,7 +1756,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
-    division?: boolean
+    divisionId?: boolean
     periodStartDate?: boolean
     periodEndDate?: boolean
     bankName?: boolean
@@ -1645,6 +1767,7 @@ export namespace Prisma {
     isActive?: boolean
     mentorId?: boolean
     lecturerId?: boolean
+    division?: boolean | User$divisionArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
     lecturer?: boolean | User$lecturerArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -1656,7 +1779,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
-    division?: boolean
+    divisionId?: boolean
     periodStartDate?: boolean
     periodEndDate?: boolean
     bankName?: boolean
@@ -1670,6 +1793,7 @@ export namespace Prisma {
   }
 
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    division?: boolean | User$divisionArgs<ExtArgs>
     attendances?: boolean | User$attendancesArgs<ExtArgs>
     helpdeskTickets?: boolean | User$helpdeskTicketsArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
@@ -1680,6 +1804,7 @@ export namespace Prisma {
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    division?: boolean | User$divisionArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
     lecturer?: boolean | User$lecturerArgs<ExtArgs>
   }
@@ -1687,6 +1812,7 @@ export namespace Prisma {
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
+      division: Prisma.$DivisionPayload<ExtArgs> | null
       attendances: Prisma.$AttendancePayload<ExtArgs>[]
       helpdeskTickets: Prisma.$HelpdeskTicketPayload<ExtArgs>[]
       mentor: Prisma.$UserPayload<ExtArgs> | null
@@ -1702,7 +1828,7 @@ export namespace Prisma {
       email: string | null
       password: string
       role: $Enums.Role
-      division: string
+      divisionId: number | null
       periodStartDate: Date | null
       periodEndDate: Date | null
       bankName: string | null
@@ -2077,6 +2203,7 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    division<T extends User$divisionArgs<ExtArgs> = {}>(args?: Subset<T, User$divisionArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     attendances<T extends User$attendancesArgs<ExtArgs> = {}>(args?: Subset<T, User$attendancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany"> | Null>
     helpdeskTickets<T extends User$helpdeskTicketsArgs<ExtArgs> = {}>(args?: Subset<T, User$helpdeskTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HelpdeskTicketPayload<ExtArgs>, T, "findMany"> | Null>
     mentor<T extends User$mentorArgs<ExtArgs> = {}>(args?: Subset<T, User$mentorArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
@@ -2119,7 +2246,7 @@ export namespace Prisma {
     readonly email: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'Role'>
-    readonly division: FieldRef<"User", 'String'>
+    readonly divisionId: FieldRef<"User", 'Int'>
     readonly periodStartDate: FieldRef<"User", 'DateTime'>
     readonly periodEndDate: FieldRef<"User", 'DateTime'>
     readonly bankName: FieldRef<"User", 'String'>
@@ -2445,6 +2572,21 @@ export namespace Prisma {
      * Filter which Users to delete
      */
     where?: UserWhereInput
+  }
+
+  /**
+   * User.division
+   */
+  export type User$divisionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    where?: DivisionWhereInput
   }
 
   /**
@@ -6474,6 +6616,952 @@ export namespace Prisma {
 
 
   /**
+   * Model Division
+   */
+
+  export type AggregateDivision = {
+    _count: DivisionCountAggregateOutputType | null
+    _avg: DivisionAvgAggregateOutputType | null
+    _sum: DivisionSumAggregateOutputType | null
+    _min: DivisionMinAggregateOutputType | null
+    _max: DivisionMaxAggregateOutputType | null
+  }
+
+  export type DivisionAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type DivisionSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type DivisionMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+  }
+
+  export type DivisionMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+  }
+
+  export type DivisionCountAggregateOutputType = {
+    id: number
+    name: number
+    _all: number
+  }
+
+
+  export type DivisionAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type DivisionSumAggregateInputType = {
+    id?: true
+  }
+
+  export type DivisionMinAggregateInputType = {
+    id?: true
+    name?: true
+  }
+
+  export type DivisionMaxAggregateInputType = {
+    id?: true
+    name?: true
+  }
+
+  export type DivisionCountAggregateInputType = {
+    id?: true
+    name?: true
+    _all?: true
+  }
+
+  export type DivisionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Division to aggregate.
+     */
+    where?: DivisionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Divisions to fetch.
+     */
+    orderBy?: DivisionOrderByWithRelationInput | DivisionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DivisionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Divisions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Divisions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Divisions
+    **/
+    _count?: true | DivisionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: DivisionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: DivisionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DivisionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DivisionMaxAggregateInputType
+  }
+
+  export type GetDivisionAggregateType<T extends DivisionAggregateArgs> = {
+        [P in keyof T & keyof AggregateDivision]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDivision[P]>
+      : GetScalarType<T[P], AggregateDivision[P]>
+  }
+
+
+
+
+  export type DivisionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DivisionWhereInput
+    orderBy?: DivisionOrderByWithAggregationInput | DivisionOrderByWithAggregationInput[]
+    by: DivisionScalarFieldEnum[] | DivisionScalarFieldEnum
+    having?: DivisionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DivisionCountAggregateInputType | true
+    _avg?: DivisionAvgAggregateInputType
+    _sum?: DivisionSumAggregateInputType
+    _min?: DivisionMinAggregateInputType
+    _max?: DivisionMaxAggregateInputType
+  }
+
+  export type DivisionGroupByOutputType = {
+    id: number
+    name: string
+    _count: DivisionCountAggregateOutputType | null
+    _avg: DivisionAvgAggregateOutputType | null
+    _sum: DivisionSumAggregateOutputType | null
+    _min: DivisionMinAggregateOutputType | null
+    _max: DivisionMaxAggregateOutputType | null
+  }
+
+  type GetDivisionGroupByPayload<T extends DivisionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DivisionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DivisionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DivisionGroupByOutputType[P]>
+            : GetScalarType<T[P], DivisionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DivisionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    users?: boolean | Division$usersArgs<ExtArgs>
+    _count?: boolean | DivisionCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["division"]>
+
+  export type DivisionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+  }, ExtArgs["result"]["division"]>
+
+  export type DivisionSelectScalar = {
+    id?: boolean
+    name?: boolean
+  }
+
+  export type DivisionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | Division$usersArgs<ExtArgs>
+    _count?: boolean | DivisionCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type DivisionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $DivisionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Division"
+    objects: {
+      users: Prisma.$UserPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+    }, ExtArgs["result"]["division"]>
+    composites: {}
+  }
+
+  type DivisionGetPayload<S extends boolean | null | undefined | DivisionDefaultArgs> = $Result.GetResult<Prisma.$DivisionPayload, S>
+
+  type DivisionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<DivisionFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: DivisionCountAggregateInputType | true
+    }
+
+  export interface DivisionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Division'], meta: { name: 'Division' } }
+    /**
+     * Find zero or one Division that matches the filter.
+     * @param {DivisionFindUniqueArgs} args - Arguments to find a Division
+     * @example
+     * // Get one Division
+     * const division = await prisma.division.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DivisionFindUniqueArgs>(args: SelectSubset<T, DivisionFindUniqueArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one Division that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {DivisionFindUniqueOrThrowArgs} args - Arguments to find a Division
+     * @example
+     * // Get one Division
+     * const division = await prisma.division.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DivisionFindUniqueOrThrowArgs>(args: SelectSubset<T, DivisionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first Division that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DivisionFindFirstArgs} args - Arguments to find a Division
+     * @example
+     * // Get one Division
+     * const division = await prisma.division.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DivisionFindFirstArgs>(args?: SelectSubset<T, DivisionFindFirstArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first Division that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DivisionFindFirstOrThrowArgs} args - Arguments to find a Division
+     * @example
+     * // Get one Division
+     * const division = await prisma.division.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DivisionFindFirstOrThrowArgs>(args?: SelectSubset<T, DivisionFindFirstOrThrowArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Divisions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DivisionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Divisions
+     * const divisions = await prisma.division.findMany()
+     * 
+     * // Get first 10 Divisions
+     * const divisions = await prisma.division.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const divisionWithIdOnly = await prisma.division.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DivisionFindManyArgs>(args?: SelectSubset<T, DivisionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a Division.
+     * @param {DivisionCreateArgs} args - Arguments to create a Division.
+     * @example
+     * // Create one Division
+     * const Division = await prisma.division.create({
+     *   data: {
+     *     // ... data to create a Division
+     *   }
+     * })
+     * 
+     */
+    create<T extends DivisionCreateArgs>(args: SelectSubset<T, DivisionCreateArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Divisions.
+     * @param {DivisionCreateManyArgs} args - Arguments to create many Divisions.
+     * @example
+     * // Create many Divisions
+     * const division = await prisma.division.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DivisionCreateManyArgs>(args?: SelectSubset<T, DivisionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Divisions and returns the data saved in the database.
+     * @param {DivisionCreateManyAndReturnArgs} args - Arguments to create many Divisions.
+     * @example
+     * // Create many Divisions
+     * const division = await prisma.division.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Divisions and only return the `id`
+     * const divisionWithIdOnly = await prisma.division.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DivisionCreateManyAndReturnArgs>(args?: SelectSubset<T, DivisionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a Division.
+     * @param {DivisionDeleteArgs} args - Arguments to delete one Division.
+     * @example
+     * // Delete one Division
+     * const Division = await prisma.division.delete({
+     *   where: {
+     *     // ... filter to delete one Division
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DivisionDeleteArgs>(args: SelectSubset<T, DivisionDeleteArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one Division.
+     * @param {DivisionUpdateArgs} args - Arguments to update one Division.
+     * @example
+     * // Update one Division
+     * const division = await prisma.division.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DivisionUpdateArgs>(args: SelectSubset<T, DivisionUpdateArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Divisions.
+     * @param {DivisionDeleteManyArgs} args - Arguments to filter Divisions to delete.
+     * @example
+     * // Delete a few Divisions
+     * const { count } = await prisma.division.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DivisionDeleteManyArgs>(args?: SelectSubset<T, DivisionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Divisions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DivisionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Divisions
+     * const division = await prisma.division.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DivisionUpdateManyArgs>(args: SelectSubset<T, DivisionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one Division.
+     * @param {DivisionUpsertArgs} args - Arguments to update or create a Division.
+     * @example
+     * // Update or create a Division
+     * const division = await prisma.division.upsert({
+     *   create: {
+     *     // ... data to create a Division
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Division we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DivisionUpsertArgs>(args: SelectSubset<T, DivisionUpsertArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Divisions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DivisionCountArgs} args - Arguments to filter Divisions to count.
+     * @example
+     * // Count the number of Divisions
+     * const count = await prisma.division.count({
+     *   where: {
+     *     // ... the filter for the Divisions we want to count
+     *   }
+     * })
+    **/
+    count<T extends DivisionCountArgs>(
+      args?: Subset<T, DivisionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DivisionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Division.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DivisionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DivisionAggregateArgs>(args: Subset<T, DivisionAggregateArgs>): Prisma.PrismaPromise<GetDivisionAggregateType<T>>
+
+    /**
+     * Group by Division.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DivisionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DivisionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DivisionGroupByArgs['orderBy'] }
+        : { orderBy?: DivisionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DivisionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDivisionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Division model
+   */
+  readonly fields: DivisionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Division.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DivisionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    users<T extends Division$usersArgs<ExtArgs> = {}>(args?: Subset<T, Division$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Division model
+   */ 
+  interface DivisionFieldRefs {
+    readonly id: FieldRef<"Division", 'Int'>
+    readonly name: FieldRef<"Division", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Division findUnique
+   */
+  export type DivisionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * Filter, which Division to fetch.
+     */
+    where: DivisionWhereUniqueInput
+  }
+
+  /**
+   * Division findUniqueOrThrow
+   */
+  export type DivisionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * Filter, which Division to fetch.
+     */
+    where: DivisionWhereUniqueInput
+  }
+
+  /**
+   * Division findFirst
+   */
+  export type DivisionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * Filter, which Division to fetch.
+     */
+    where?: DivisionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Divisions to fetch.
+     */
+    orderBy?: DivisionOrderByWithRelationInput | DivisionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Divisions.
+     */
+    cursor?: DivisionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Divisions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Divisions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Divisions.
+     */
+    distinct?: DivisionScalarFieldEnum | DivisionScalarFieldEnum[]
+  }
+
+  /**
+   * Division findFirstOrThrow
+   */
+  export type DivisionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * Filter, which Division to fetch.
+     */
+    where?: DivisionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Divisions to fetch.
+     */
+    orderBy?: DivisionOrderByWithRelationInput | DivisionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Divisions.
+     */
+    cursor?: DivisionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Divisions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Divisions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Divisions.
+     */
+    distinct?: DivisionScalarFieldEnum | DivisionScalarFieldEnum[]
+  }
+
+  /**
+   * Division findMany
+   */
+  export type DivisionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * Filter, which Divisions to fetch.
+     */
+    where?: DivisionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Divisions to fetch.
+     */
+    orderBy?: DivisionOrderByWithRelationInput | DivisionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Divisions.
+     */
+    cursor?: DivisionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Divisions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Divisions.
+     */
+    skip?: number
+    distinct?: DivisionScalarFieldEnum | DivisionScalarFieldEnum[]
+  }
+
+  /**
+   * Division create
+   */
+  export type DivisionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Division.
+     */
+    data: XOR<DivisionCreateInput, DivisionUncheckedCreateInput>
+  }
+
+  /**
+   * Division createMany
+   */
+  export type DivisionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Divisions.
+     */
+    data: DivisionCreateManyInput | DivisionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Division createManyAndReturn
+   */
+  export type DivisionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Divisions.
+     */
+    data: DivisionCreateManyInput | DivisionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Division update
+   */
+  export type DivisionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Division.
+     */
+    data: XOR<DivisionUpdateInput, DivisionUncheckedUpdateInput>
+    /**
+     * Choose, which Division to update.
+     */
+    where: DivisionWhereUniqueInput
+  }
+
+  /**
+   * Division updateMany
+   */
+  export type DivisionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Divisions.
+     */
+    data: XOR<DivisionUpdateManyMutationInput, DivisionUncheckedUpdateManyInput>
+    /**
+     * Filter which Divisions to update
+     */
+    where?: DivisionWhereInput
+  }
+
+  /**
+   * Division upsert
+   */
+  export type DivisionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Division to update in case it exists.
+     */
+    where: DivisionWhereUniqueInput
+    /**
+     * In case the Division found by the `where` argument doesn't exist, create a new Division with this data.
+     */
+    create: XOR<DivisionCreateInput, DivisionUncheckedCreateInput>
+    /**
+     * In case the Division was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DivisionUpdateInput, DivisionUncheckedUpdateInput>
+  }
+
+  /**
+   * Division delete
+   */
+  export type DivisionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+    /**
+     * Filter which Division to delete.
+     */
+    where: DivisionWhereUniqueInput
+  }
+
+  /**
+   * Division deleteMany
+   */
+  export type DivisionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Divisions to delete
+     */
+    where?: DivisionWhereInput
+  }
+
+  /**
+   * Division.users
+   */
+  export type Division$usersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * Division without action
+   */
+  export type DivisionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Division
+     */
+    select?: DivisionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DivisionInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -6494,7 +7582,7 @@ export namespace Prisma {
     email: 'email',
     password: 'password',
     role: 'role',
-    division: 'division',
+    divisionId: 'divisionId',
     periodStartDate: 'periodStartDate',
     periodEndDate: 'periodEndDate',
     bankName: 'bankName',
@@ -6556,6 +7644,14 @@ export namespace Prisma {
   };
 
   export type PredefinedActivityScalarFieldEnum = (typeof PredefinedActivityScalarFieldEnum)[keyof typeof PredefinedActivityScalarFieldEnum]
+
+
+  export const DivisionScalarFieldEnum: {
+    id: 'id',
+    name: 'name'
+  };
+
+  export type DivisionScalarFieldEnum = (typeof DivisionScalarFieldEnum)[keyof typeof DivisionScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -6719,7 +7815,7 @@ export namespace Prisma {
     email?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
-    division?: StringFilter<"User"> | string
+    divisionId?: IntNullableFilter<"User"> | number | null
     periodStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
     periodEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
     bankName?: StringNullableFilter<"User"> | string | null
@@ -6730,6 +7826,7 @@ export namespace Prisma {
     isActive?: BoolFilter<"User"> | boolean
     mentorId?: IntNullableFilter<"User"> | number | null
     lecturerId?: IntNullableFilter<"User"> | number | null
+    division?: XOR<DivisionNullableRelationFilter, DivisionWhereInput> | null
     attendances?: AttendanceListRelationFilter
     helpdeskTickets?: HelpdeskTicketListRelationFilter
     mentor?: XOR<UserNullableRelationFilter, UserWhereInput> | null
@@ -6746,7 +7843,7 @@ export namespace Prisma {
     email?: SortOrderInput | SortOrder
     password?: SortOrder
     role?: SortOrder
-    division?: SortOrder
+    divisionId?: SortOrderInput | SortOrder
     periodStartDate?: SortOrderInput | SortOrder
     periodEndDate?: SortOrderInput | SortOrder
     bankName?: SortOrderInput | SortOrder
@@ -6757,6 +7854,7 @@ export namespace Prisma {
     isActive?: SortOrder
     mentorId?: SortOrderInput | SortOrder
     lecturerId?: SortOrderInput | SortOrder
+    division?: DivisionOrderByWithRelationInput
     attendances?: AttendanceOrderByRelationAggregateInput
     helpdeskTickets?: HelpdeskTicketOrderByRelationAggregateInput
     mentor?: UserOrderByWithRelationInput
@@ -6776,7 +7874,7 @@ export namespace Prisma {
     name?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
-    division?: StringFilter<"User"> | string
+    divisionId?: IntNullableFilter<"User"> | number | null
     periodStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
     periodEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
     bankName?: StringNullableFilter<"User"> | string | null
@@ -6787,6 +7885,7 @@ export namespace Prisma {
     isActive?: BoolFilter<"User"> | boolean
     mentorId?: IntNullableFilter<"User"> | number | null
     lecturerId?: IntNullableFilter<"User"> | number | null
+    division?: XOR<DivisionNullableRelationFilter, DivisionWhereInput> | null
     attendances?: AttendanceListRelationFilter
     helpdeskTickets?: HelpdeskTicketListRelationFilter
     mentor?: XOR<UserNullableRelationFilter, UserWhereInput> | null
@@ -6803,7 +7902,7 @@ export namespace Prisma {
     email?: SortOrderInput | SortOrder
     password?: SortOrder
     role?: SortOrder
-    division?: SortOrder
+    divisionId?: SortOrderInput | SortOrder
     periodStartDate?: SortOrderInput | SortOrder
     periodEndDate?: SortOrderInput | SortOrder
     bankName?: SortOrderInput | SortOrder
@@ -6831,7 +7930,7 @@ export namespace Prisma {
     email?: StringNullableWithAggregatesFilter<"User"> | string | null
     password?: StringWithAggregatesFilter<"User"> | string
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
-    division?: StringWithAggregatesFilter<"User"> | string
+    divisionId?: IntNullableWithAggregatesFilter<"User"> | number | null
     periodStartDate?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     periodEndDate?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     bankName?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -7089,13 +8188,54 @@ export namespace Prisma {
     task?: StringWithAggregatesFilter<"PredefinedActivity"> | string
   }
 
+  export type DivisionWhereInput = {
+    AND?: DivisionWhereInput | DivisionWhereInput[]
+    OR?: DivisionWhereInput[]
+    NOT?: DivisionWhereInput | DivisionWhereInput[]
+    id?: IntFilter<"Division"> | number
+    name?: StringFilter<"Division"> | string
+    users?: UserListRelationFilter
+  }
+
+  export type DivisionOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    users?: UserOrderByRelationAggregateInput
+  }
+
+  export type DivisionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    name?: string
+    AND?: DivisionWhereInput | DivisionWhereInput[]
+    OR?: DivisionWhereInput[]
+    NOT?: DivisionWhereInput | DivisionWhereInput[]
+    users?: UserListRelationFilter
+  }, "id" | "name">
+
+  export type DivisionOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    _count?: DivisionCountOrderByAggregateInput
+    _avg?: DivisionAvgOrderByAggregateInput
+    _max?: DivisionMaxOrderByAggregateInput
+    _min?: DivisionMinOrderByAggregateInput
+    _sum?: DivisionSumOrderByAggregateInput
+  }
+
+  export type DivisionScalarWhereWithAggregatesInput = {
+    AND?: DivisionScalarWhereWithAggregatesInput | DivisionScalarWhereWithAggregatesInput[]
+    OR?: DivisionScalarWhereWithAggregatesInput[]
+    NOT?: DivisionScalarWhereWithAggregatesInput | DivisionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"Division"> | number
+    name?: StringWithAggregatesFilter<"Division"> | string
+  }
+
   export type UserCreateInput = {
     internCode?: string | null
     name: string
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -7104,6 +8244,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -7120,7 +8261,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -7144,7 +8285,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7153,6 +8293,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -7169,7 +8310,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7194,7 +8335,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -7213,7 +8354,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7231,7 +8371,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -7481,6 +8621,42 @@ export namespace Prisma {
     task?: StringFieldUpdateOperationsInput | string
   }
 
+  export type DivisionCreateInput = {
+    name: string
+    users?: UserCreateNestedManyWithoutDivisionInput
+  }
+
+  export type DivisionUncheckedCreateInput = {
+    id?: number
+    name: string
+    users?: UserUncheckedCreateNestedManyWithoutDivisionInput
+  }
+
+  export type DivisionUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    users?: UserUpdateManyWithoutDivisionNestedInput
+  }
+
+  export type DivisionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    users?: UserUncheckedUpdateManyWithoutDivisionNestedInput
+  }
+
+  export type DivisionCreateManyInput = {
+    id?: number
+    name: string
+  }
+
+  export type DivisionUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type DivisionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -7529,6 +8705,17 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -7556,15 +8743,9 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  export type DivisionNullableRelationFilter = {
+    is?: DivisionWhereInput | null
+    isNot?: DivisionWhereInput | null
   }
 
   export type AttendanceListRelationFilter = {
@@ -7624,7 +8805,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
-    division?: SortOrder
+    divisionId?: SortOrder
     periodStartDate?: SortOrder
     periodEndDate?: SortOrder
     bankName?: SortOrder
@@ -7639,6 +8820,7 @@ export namespace Prisma {
 
   export type UserAvgOrderByAggregateInput = {
     id?: SortOrder
+    divisionId?: SortOrder
     mentorId?: SortOrder
     lecturerId?: SortOrder
   }
@@ -7650,7 +8832,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
-    division?: SortOrder
+    divisionId?: SortOrder
     periodStartDate?: SortOrder
     periodEndDate?: SortOrder
     bankName?: SortOrder
@@ -7670,7 +8852,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
-    division?: SortOrder
+    divisionId?: SortOrder
     periodStartDate?: SortOrder
     periodEndDate?: SortOrder
     bankName?: SortOrder
@@ -7685,6 +8867,7 @@ export namespace Prisma {
 
   export type UserSumOrderByAggregateInput = {
     id?: SortOrder
+    divisionId?: SortOrder
     mentorId?: SortOrder
     lecturerId?: SortOrder
   }
@@ -7751,6 +8934,22 @@ export namespace Prisma {
     _max?: NestedEnumRoleFilter<$PrismaModel>
   }
 
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -7785,22 +8984,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type EnumAttendanceTypeFilter<$PrismaModel = never> = {
@@ -8036,6 +9219,35 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type DivisionCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+  }
+
+  export type DivisionAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type DivisionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+  }
+
+  export type DivisionMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+  }
+
+  export type DivisionSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type DivisionCreateNestedOneWithoutUsersInput = {
+    create?: XOR<DivisionCreateWithoutUsersInput, DivisionUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: DivisionCreateOrConnectWithoutUsersInput
+    connect?: DivisionWhereUniqueInput
+  }
+
   export type AttendanceCreateNestedManyWithoutUserInput = {
     create?: XOR<AttendanceCreateWithoutUserInput, AttendanceUncheckedCreateWithoutUserInput> | AttendanceCreateWithoutUserInput[] | AttendanceUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AttendanceCreateOrConnectWithoutUserInput | AttendanceCreateOrConnectWithoutUserInput[]
@@ -8140,6 +9352,16 @@ export namespace Prisma {
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
+  }
+
+  export type DivisionUpdateOneWithoutUsersNestedInput = {
+    create?: XOR<DivisionCreateWithoutUsersInput, DivisionUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: DivisionCreateOrConnectWithoutUsersInput
+    upsert?: DivisionUpsertWithoutUsersInput
+    disconnect?: DivisionWhereInput | boolean
+    delete?: DivisionWhereInput | boolean
+    connect?: DivisionWhereUniqueInput
+    update?: XOR<XOR<DivisionUpdateToOneWithWhereWithoutUsersInput, DivisionUpdateWithoutUsersInput>, DivisionUncheckedUpdateWithoutUsersInput>
   }
 
   export type AttendanceUpdateManyWithoutUserNestedInput = {
@@ -8380,6 +9602,48 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDailyLogsInput, UserUpdateWithoutDailyLogsInput>, UserUncheckedUpdateWithoutDailyLogsInput>
   }
 
+  export type UserCreateNestedManyWithoutDivisionInput = {
+    create?: XOR<UserCreateWithoutDivisionInput, UserUncheckedCreateWithoutDivisionInput> | UserCreateWithoutDivisionInput[] | UserUncheckedCreateWithoutDivisionInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutDivisionInput | UserCreateOrConnectWithoutDivisionInput[]
+    createMany?: UserCreateManyDivisionInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutDivisionInput = {
+    create?: XOR<UserCreateWithoutDivisionInput, UserUncheckedCreateWithoutDivisionInput> | UserCreateWithoutDivisionInput[] | UserUncheckedCreateWithoutDivisionInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutDivisionInput | UserCreateOrConnectWithoutDivisionInput[]
+    createMany?: UserCreateManyDivisionInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserUpdateManyWithoutDivisionNestedInput = {
+    create?: XOR<UserCreateWithoutDivisionInput, UserUncheckedCreateWithoutDivisionInput> | UserCreateWithoutDivisionInput[] | UserUncheckedCreateWithoutDivisionInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutDivisionInput | UserCreateOrConnectWithoutDivisionInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutDivisionInput | UserUpsertWithWhereUniqueWithoutDivisionInput[]
+    createMany?: UserCreateManyDivisionInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutDivisionInput | UserUpdateWithWhereUniqueWithoutDivisionInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutDivisionInput | UserUpdateManyWithWhereWithoutDivisionInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutDivisionNestedInput = {
+    create?: XOR<UserCreateWithoutDivisionInput, UserUncheckedCreateWithoutDivisionInput> | UserCreateWithoutDivisionInput[] | UserUncheckedCreateWithoutDivisionInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutDivisionInput | UserCreateOrConnectWithoutDivisionInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutDivisionInput | UserUpsertWithWhereUniqueWithoutDivisionInput[]
+    createMany?: UserCreateManyDivisionInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutDivisionInput | UserUpdateWithWhereUniqueWithoutDivisionInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutDivisionInput | UserUpdateManyWithWhereWithoutDivisionInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -8426,6 +9690,17 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -8451,17 +9726,6 @@ export namespace Prisma {
   export type NestedBoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -8535,6 +9799,33 @@ export namespace Prisma {
     _max?: NestedEnumRoleFilter<$PrismaModel>
   }
 
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -8569,33 +9860,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
-  }
-
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedEnumAttendanceTypeFilter<$PrismaModel = never> = {
@@ -8665,6 +9929,20 @@ export namespace Prisma {
     _max?: NestedEnumLogStatusFilter<$PrismaModel>
   }
 
+  export type DivisionCreateWithoutUsersInput = {
+    name: string
+  }
+
+  export type DivisionUncheckedCreateWithoutUsersInput = {
+    id?: number
+    name: string
+  }
+
+  export type DivisionCreateOrConnectWithoutUsersInput = {
+    where: DivisionWhereUniqueInput
+    create: XOR<DivisionCreateWithoutUsersInput, DivisionUncheckedCreateWithoutUsersInput>
+  }
+
   export type AttendanceCreateWithoutUserInput = {
     type: $Enums.AttendanceType
     timestamp?: Date | string
@@ -8727,7 +10005,6 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8736,6 +10013,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -8751,7 +10029,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8779,7 +10057,6 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8788,6 +10065,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     internsAsMentor?: UserCreateNestedManyWithoutMentorInput
@@ -8803,7 +10081,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8836,7 +10114,6 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8845,6 +10122,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -8860,7 +10138,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8888,7 +10166,6 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8897,6 +10174,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -8912,7 +10190,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8964,6 +10242,26 @@ export namespace Prisma {
   export type DailyLogCreateManyUserInputEnvelope = {
     data: DailyLogCreateManyUserInput | DailyLogCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type DivisionUpsertWithoutUsersInput = {
+    update: XOR<DivisionUpdateWithoutUsersInput, DivisionUncheckedUpdateWithoutUsersInput>
+    create: XOR<DivisionCreateWithoutUsersInput, DivisionUncheckedCreateWithoutUsersInput>
+    where?: DivisionWhereInput
+  }
+
+  export type DivisionUpdateToOneWithWhereWithoutUsersInput = {
+    where?: DivisionWhereInput
+    data: XOR<DivisionUpdateWithoutUsersInput, DivisionUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type DivisionUpdateWithoutUsersInput = {
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type DivisionUncheckedUpdateWithoutUsersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
   }
 
   export type AttendanceUpsertWithWhereUniqueWithoutUserInput = {
@@ -9042,7 +10340,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9051,6 +10348,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -9066,7 +10364,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9109,7 +10407,7 @@ export namespace Prisma {
     email?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
-    division?: StringFilter<"User"> | string
+    divisionId?: IntNullableFilter<"User"> | number | null
     periodStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
     periodEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
     bankName?: StringNullableFilter<"User"> | string | null
@@ -9139,7 +10437,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9148,6 +10445,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -9163,7 +10461,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9231,7 +10529,6 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -9240,6 +10537,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
     internsAsMentor?: UserCreateNestedManyWithoutMentorInput
@@ -9255,7 +10553,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -9294,7 +10592,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9303,6 +10600,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
     internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
@@ -9318,7 +10616,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9341,7 +10639,6 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -9350,6 +10647,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
     internsAsMentor?: UserCreateNestedManyWithoutMentorInput
@@ -9365,7 +10663,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -9404,7 +10702,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9413,6 +10710,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
     internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
@@ -9428,7 +10726,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9451,7 +10749,6 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -9460,6 +10757,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -9475,7 +10773,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -9514,7 +10812,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9523,6 +10820,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -9538,7 +10836,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9553,6 +10851,79 @@ export namespace Prisma {
     helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
     internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
     internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
+  }
+
+  export type UserCreateWithoutDivisionInput = {
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    attendances?: AttendanceCreateNestedManyWithoutUserInput
+    helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
+    dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDivisionInput = {
+    id?: number
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    mentorId?: number | null
+    lecturerId?: number | null
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
+    dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDivisionInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDivisionInput, UserUncheckedCreateWithoutDivisionInput>
+  }
+
+  export type UserCreateManyDivisionInputEnvelope = {
+    data: UserCreateManyDivisionInput | UserCreateManyDivisionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutDivisionInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutDivisionInput, UserUncheckedUpdateWithoutDivisionInput>
+    create: XOR<UserCreateWithoutDivisionInput, UserUncheckedCreateWithoutDivisionInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutDivisionInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutDivisionInput, UserUncheckedUpdateWithoutDivisionInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutDivisionInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutDivisionInput>
   }
 
   export type AttendanceCreateManyUserInput = {
@@ -9581,7 +10952,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -9600,7 +10971,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
-    division: string
+    divisionId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -9682,7 +11053,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9691,6 +11061,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
@@ -9706,7 +11077,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9730,7 +11101,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9748,7 +11119,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9757,6 +11127,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -9772,7 +11143,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9796,7 +11167,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    division?: StringFieldUpdateOperationsInput | string
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -9834,6 +11205,91 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserCreateManyDivisionInput = {
+    id?: number
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    mentorId?: number | null
+    lecturerId?: number | null
+  }
+
+  export type UserUpdateWithoutDivisionInput = {
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    attendances?: AttendanceUpdateManyWithoutUserNestedInput
+    helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
+    dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDivisionInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
+    attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
+    dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutDivisionInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
 
 
   /**
@@ -9843,6 +11299,10 @@ export namespace Prisma {
      * @deprecated Use UserCountOutputTypeDefaultArgs instead
      */
     export type UserCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use DivisionCountOutputTypeDefaultArgs instead
+     */
+    export type DivisionCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DivisionCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use UserDefaultArgs instead
      */
@@ -9863,6 +11323,10 @@ export namespace Prisma {
      * @deprecated Use PredefinedActivityDefaultArgs instead
      */
     export type PredefinedActivityArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = PredefinedActivityDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use DivisionDefaultArgs instead
+     */
+    export type DivisionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DivisionDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

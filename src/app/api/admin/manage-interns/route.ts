@@ -49,18 +49,18 @@ export async function GET(req: NextRequest) {
   if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
   const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
 
-  let whereClause: Prisma.UserWhereInput = {
+  let whereClause: any = {
     role: Role.INTERN,
     isActive: true,
   };
 
   // 2. Tambahkan filter untuk Mentor dan Dosen
-  if (decoded.role === Role.ADMIN) { // Jika Mentor
+  if (decoded.role === Role.ADMIN) {
     whereClause.mentorId = decoded.userId;
-  } else if (decoded.role === Role.LECTURER) { // Jika Dosen
+  } else if (decoded.role === Role.LECTURER) {
     whereClause.lecturerId = decoded.userId;
   }
-
+  
   try {
     const interns = await db.user.findMany({
       where: whereClause,
@@ -68,17 +68,22 @@ export async function GET(req: NextRequest) {
         id: true,
         internCode: true,
         name: true,
-        division: true,
         periodStartDate: true,
         periodEndDate: true,
         isActive: true,
-        mentor: { // Ambil nama mentor
+        division: { 
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        mentor: {
           select: {
             id: true,
             name: true,
           },
         },
-        lecturer: { // Ambil juga nama dosen
+        lecturer: {
           select: {
             id: true,
             name: true,
@@ -96,6 +101,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
+
 // FUNGSI UNTUK MEMBUAT PESERTA BARU (POST)
 export async function POST(req: NextRequest) {
   const auth = await verifySuperAdmin(req);
@@ -104,9 +110,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, division, email, periodStartDate, periodEndDate, mentorId, lecturerId } = await req.json();
+    const { name, divisionId, email, periodStartDate, periodEndDate, mentorId, lecturerId } = await req.json();
 
-    if (!name || !division || !periodStartDate || !periodEndDate) { // mentorId bisa opsional
+    if (!name || !divisionId  || !periodStartDate || !periodEndDate) { // mentorId bisa opsional
       return NextResponse.json({ error: 'Data tidak lengkap.' }, { status: 400 });
     }
     
@@ -127,7 +133,7 @@ export async function POST(req: NextRequest) {
       data: {
         internCode: newInternCode, 
         name,
-        division,
+        divisionId: parseInt(divisionId),
         email,
         password: hashedPassword,
         role: Role.INTERN,

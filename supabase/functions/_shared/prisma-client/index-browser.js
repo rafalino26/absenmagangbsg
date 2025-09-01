@@ -129,7 +129,7 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   role: 'role',
-  division: 'division',
+  divisionId: 'divisionId',
   periodStartDate: 'periodStartDate',
   periodEndDate: 'periodEndDate',
   bankName: 'bankName',
@@ -178,6 +178,11 @@ exports.Prisma.PredefinedActivityScalarFieldEnum = {
   task: 'task'
 };
 
+exports.Prisma.DivisionScalarFieldEnum = {
+  id: 'id',
+  name: 'name'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -222,7 +227,8 @@ exports.Prisma.ModelName = {
   Attendance: 'Attendance',
   HelpdeskTicket: 'HelpdeskTicket',
   DailyLog: 'DailyLog',
-  PredefinedActivity: 'PredefinedActivity'
+  PredefinedActivity: 'PredefinedActivity',
+  Division: 'Division'
 };
 
 /**

@@ -560,7 +560,7 @@ const handleActivityLogSubmit = async (formData: FormData) => {
               </div>
               <div className="flex-grow pt-2">
               <h1 className="text-lg md:text-3xl font-bold text-gray-900">Halo, {user?.name}!</h1>
-              <p className="mt-1 text-sm md:text-base text-gray-600">{user?.division} | Periode: {periodDisplay}</p>              
+              <p className="mt-1 text-sm md:text-base text-gray-600">{user?.division?.name ?? 'Tanpa Divisi'} | Periode: {periodDisplay}</p>             
               <div className="flex items-center gap-2">
                 <p className="text-xs md:text-sm text-gray-600">
                   No. Rekening: 

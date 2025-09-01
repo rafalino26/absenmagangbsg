@@ -16,7 +16,10 @@ interface Intern {
   id: number;
   internCode: string | null;
   name: string;
-  division: string;
+  division: { 
+    id: number;
+    name: string;
+  } | null;
   isActive: boolean;
   periodStartDate: string | null;
   periodEndDate: string | null;
@@ -101,16 +104,16 @@ export default function ManageInternsPage() {
   };
 
   const filteredInterns = useMemo(() => {
-    if (!searchQuery) {
-      return interns; // Jika tidak ada pencarian, tampilkan semua
-    }
-    const lowercasedQuery = searchQuery.toLowerCase();
-    return interns.filter(intern =>
-      intern.name.toLowerCase().includes(lowercasedQuery) ||
-      intern.internCode?.toLowerCase().includes(lowercasedQuery) ||
-      intern.division.toLowerCase().includes(lowercasedQuery)
-    );
-  }, [interns, searchQuery]);
+  if (!searchQuery) {
+    return interns;
+  }
+  const lowercasedQuery = searchQuery.toLowerCase();
+  return interns.filter(intern =>
+    intern.name.toLowerCase().includes(lowercasedQuery) ||
+    intern.internCode?.toLowerCase().includes(lowercasedQuery) ||
+    (intern.division && intern.division.name.toLowerCase().includes(lowercasedQuery))
+  );
+}, [interns, searchQuery]);
 
   return (
     <>
@@ -165,7 +168,7 @@ export default function ManageInternsPage() {
                         Kode: {intern.internCode}| Periode: {intern.periodStartDate && intern.periodEndDate ? `${format(new Date(intern.periodStartDate), 'd LLL yy')} - ${format(new Date(intern.periodEndDate), 'd LLL yy')}` : '-'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{intern.division}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{intern.division?.name || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">{intern.mentor?.name || '-'}</td>
                      <td className="px-6 py-4 text-sm text-gray-500">{intern.lecturer?.name || '-'}</td>
                     <td className="px-6 py-4 text-center relative">

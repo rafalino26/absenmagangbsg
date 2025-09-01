@@ -3,6 +3,8 @@ import { db } from '@/lib/db';
 import { Prisma } from '@prisma/client'; 
 import { hash } from 'bcrypt';
 
+// Ganti seluruh fungsi PATCH Anda dengan ini
+
 export async function PATCH(req: NextRequest) {
   try {
     const id = req.nextUrl.searchParams.get('id');
@@ -14,19 +16,37 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     let dataToUpdate: Prisma.UserUpdateInput = {};
 
+    // Bagian ini sudah benar, tidak perlu diubah
     if (body.action === 'archive') {
       dataToUpdate.isActive = false;
     } else if (body.action === 'restore') { 
       dataToUpdate.isActive = true;
     } else {
-      const { name, division, periodStartDate, periodEndDate, password } = body;
+      // 👇 PERBAIKAN DIMULAI DARI SINI
+      // 1. Terima 'divisionId' (angka), bukan 'division' (string)
+      const { name, divisionId, periodStartDate, periodEndDate, password } = body;
+      
       if (name) dataToUpdate.name = name;
-      if (division) dataToUpdate.division = division;
       if (periodStartDate) dataToUpdate.periodStartDate = new Date(periodStartDate);
       if (periodEndDate) dataToUpdate.periodEndDate = new Date(periodEndDate);
+      
+      // 2. Gunakan logika 'connect'/'disconnect' yang aman
+      if (divisionId !== undefined) {
+        if (divisionId) { // Jika divisionId ada isinya (bukan null)
+          dataToUpdate.division = {
+            connect: { id: parseInt(divisionId) }
+          };
+        } else { // Jika divisionId dikirim sebagai null
+          dataToUpdate.division = {
+            disconnect: true
+          };
+        }
+      }
+
       if (password) {
         dataToUpdate.password = await hash(password, 10);
       }
+      // 👆 PERBAIKAN SELESAI
     }
 
     const updatedUser = await db.user.update({

@@ -24,7 +24,8 @@ model User {
   email           String?   @unique
   password        String
   role            Role      @default(INTERN)
-  division        String
+  divisionId      Int?
+  division        Division? @relation(fields: [divisionId], references: [id])
   periodStartDate DateTime?
   periodEndDate   DateTime?
   bankName        String?
@@ -78,13 +79,19 @@ model DailyLog {
   activity  String    @db.Text
   photoUrl  String?
   status    LogStatus @default(PENDING)
-  notes     String? // Catatan dari mentor saat mereview
+  notes     String?
   createdAt DateTime  @default(now())
 }
 
 model PredefinedActivity {
   id   Int    @id @default(autoincrement())
-  task String @unique // Nama tugas/aktivitasnya
+  task String @unique
+}
+
+model Division {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
 }
 
 enum Role {

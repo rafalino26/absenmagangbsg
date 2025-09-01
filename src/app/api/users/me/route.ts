@@ -8,7 +8,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 const userProfileSelect = Prisma.validator<Prisma.UserSelect>()({
   id: true,
   name: true,
-  division: true,
+  division: { // <-- Pastikan ini ada
+      select: {
+        name: true
+      }
+    },
   periodStartDate: true,
   periodEndDate: true,
   profilePicUrl: true,

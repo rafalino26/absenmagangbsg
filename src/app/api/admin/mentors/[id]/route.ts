@@ -34,12 +34,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (isNaN(id)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
 
     const body = await req.json();
-    const { name, division, password } = body;
+    const { name, divisionId, password } = body;
 
     let dataToUpdate: Prisma.UserUpdateInput = {};
 
     if (name !== undefined) dataToUpdate.name = name;
-    if (division !== undefined) dataToUpdate.division = division;
+  
+    if (divisionId !== undefined) {
+      dataToUpdate.division = {
+        connect: {
+          id: parseInt(divisionId)
+        }
+      };
+    }
+
     if (password) {
       dataToUpdate.password = await hash(password, 10);
     }

@@ -1,13 +1,19 @@
 'use client';
 
-import { useState, useRef, useEffect, FormEvent } from 'react';
+import { useState, useRef, useEffect, FormEvent, useCallback } from 'react';
 import { FaEye, FaEyeSlash, FaCalendar } from 'react-icons/fa'; // Impor ikon mata
-import { FiX } from 'react-icons/fi';
+import { FiX, FiEdit } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { DayPicker, DateRange } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { NotificationState } from '@/app/types';
 import { Role } from '@prisma/client';
+import ManageDivisionsModal from './ManageDivisionsModal'; 
+
+interface Division {
+  id: number;
+  name: string;
+}
 
 interface SelectableUser {
   id: number;
@@ -33,41 +39,74 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
   const [mentorId, setMentorId] = useState<string>('');
   const [lecturerId, setLecturerId] = useState<string>(''); 
 
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [divisionId, setDivisionId] = useState('');
   const [mentors, setMentors] = useState<SelectableUser[]>([]);
+  const [isDivisionModalOpen, setDivisionModalOpen] = useState(false);
   const [lecturers, setLecturers] = useState<SelectableUser[]>([]);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
+  const [allMentors, setAllMentors] = useState<SelectableUser[]>([]); // Menyimpan semua mentor
+  const [filteredMentors, setFilteredMentors] = useState<SelectableUser[]>([]);
 
-  useEffect(() => {
+  const fetchDivisions = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/divisions');
+      if (response.ok) setDivisions(await response.json());
+    } catch (error) { console.error("Gagal memuat divisi:", error); }
+  }, []);
+
+useEffect(() => {
     if (isOpen) {
+      // Reset form
       setName('');
-      setDivision('');
       setEmail('');
       setRange(undefined);
+      setDivisionId('');
       setMentorId('');
       setLecturerId('');
+
+      fetchDivisions();
 
       const fetchUsers = async () => {
         try {
           const response = await fetch('/api/admin/mentors');
           if (!response.ok) throw new Error('Gagal memuat daftar mentor & dosen.');
           const users: SelectableUser[] = await response.json();
-          
-          setMentors(users.filter(user => user.role === Role.ADMIN));
+          setAllMentors(users.filter(user => user.role === Role.ADMIN));
           setLecturers(users.filter(user => user.role === Role.LECTURER));
-
         } catch (error: any) {
           setNotification({ isOpen: true, title: 'Error', message: error.message, type: 'error' });
         }
       };
       fetchUsers();
     }
-  }, [isOpen, setNotification]);
+  }, [isOpen, fetchDivisions, setNotification]);
 
+  // Ambil daftar divisi saat modal utama dibuka
+  useEffect(() => {
+    if (isOpen) {
+      fetchDivisions();
+    }
+  }, [isOpen, fetchDivisions]);
+
+ useEffect(() => {
+    if (divisionId) {
+      // Filter mentor dari daftar yang sudah ada di state
+      const mentorsInDivision = allMentors.filter(
+        // @ts-ignore
+        (mentor) => mentor.division?.id === parseInt(divisionId)
+      );
+      setFilteredMentors(mentorsInDivision);
+      setMentorId(''); // Reset pilihan mentor saat divisi berubah
+    } else {
+      setFilteredMentors([]); // Kosongkan jika tidak ada divisi
+    }
+  }, [divisionId, allMentors]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!name || !division || !email || !range?.from || !range.to) {
+    if (!name || !divisionId || !email || !range?.from || !range.to) {
       alert("Nama, Divisi, Email, dan Periode wajib diisi.");
       return;
     }
@@ -79,12 +118,12 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name,
-          division,
+          divisionId: parseInt(divisionId), // Kirim ID divisi
           email,
           periodStartDate: range.from,
           periodEndDate: range.to,
           mentorId: mentorId ? parseInt(mentorId) : null,
-          lecturerId: lecturerId ? parseInt(lecturerId) : null, // 4. Kirim lecturerId
+          lecturerId: lecturerId ? parseInt(lecturerId) : null,
         }),
       });
 
@@ -124,6 +163,7 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
   }
 
   return (
+    <>
 <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
         <div className="flex justify-between items-center p-4 border-b">
@@ -136,21 +176,39 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
             <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 w-full p-2 border border-gray-300 rounded-md"/>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Divisi</label>
-            <input type="text" value={division} onChange={(e) => setDivision(e.target.value)} required className="mt-1 w-full p-2 border border-gray-300 rounded-md"/>
-          </div>
+           <div>
+              <label className="flex items-center justify-between text-sm font-medium text-gray-700">
+                <span>Divisi</span>
+                <button type="button" onClick={() => setDivisionModalOpen(true)} className="text-blue-600 hover:text-blue-800" title="Kelola Pilihan">
+                  <FiEdit size={14} />
+                </button>
+              </label>
+              <select 
+                value={divisionId} 
+                onChange={(e) => setDivisionId(e.target.value)} 
+                required 
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              >
+                <option value="" disabled>-- Pilih Divisi --</option>
+                {divisions.map(div => <option key={div.id} value={div.id}>{div.name}</option>)}
+              </select>
+            </div>
           
           {/* --- DROPDOWN MENTOR BARU --- */}
-           <div>
-            <label className="block text-sm font-medium text-gray-700">Pilih Mentor (Opsional)</label>
-            <select value={mentorId} onChange={(e) => setMentorId(e.target.value)} className="mt-1 w-full p-2 border border-gray-300 rounded-md">
-              <option value="">-- Belum Ditugaskan --</option>
-              {mentors.map(mentor => (
-                <option key={mentor.id} value={mentor.id}>{mentor.name}</option>
-              ))}
-            </select>
-          </div>
+          <div>
+              <label className="block text-sm font-medium text-gray-700">Pilih Mentor (Opsional)</label>
+              <select 
+                value={mentorId} 
+                onChange={(e) => setMentorId(e.target.value)} 
+                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                disabled={!divisionId || filteredMentors.length === 0} // Nonaktif jika tidak ada divisi atau mentor
+              >
+                <option value="">-- Pilih Mentor --</option>
+                {filteredMentors.map(mentor => (
+                  <option key={mentor.id} value={mentor.id}>{mentor.name}</option>
+                ))}
+              </select>
+            </div>
 
           {/* --- 5. DROPDOWN DOSEN BARU --- */}
           <div>
@@ -178,7 +236,7 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
               
               {/* Pop-up Kalender */}
               {isPickerOpen && (
-                <div className="absolute -mt-12 text-black bg-white border rounded-md shadow-lg z-10">
+                <div className="absolute -mt-36 text-black bg-white border rounded-md shadow-lg z-10">
                     <DayPicker
                   mode="range"
                   selected={range}
@@ -207,6 +265,13 @@ export default function AddInternModal({ isOpen, onClose, onSuccess, setNotifica
         </form>
       </div>
     </div>
+     <ManageDivisionsModal 
+        isOpen={isDivisionModalOpen}
+        onClose={() => setDivisionModalOpen(false)}
+        setNotification={setNotification}
+        onUpdate={fetchDivisions}
+      />
+    </>
   );
 }
 

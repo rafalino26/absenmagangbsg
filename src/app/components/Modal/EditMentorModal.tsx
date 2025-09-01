@@ -1,54 +1,76 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { FiX, FiEye, FiEyeOff } from 'react-icons/fi';
+import { useState, useEffect, useCallback, FormEvent } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FiX, FiEdit } from 'react-icons/fi';
 import { NotificationState } from '@/app/types';
-import { Role } from '@prisma/client'; // Impor Role
+import { Role } from '@prisma/client';
+import ManageDivisionsModal from './ManageDivisionsModal'; // Impor modal manage divisi
 
-// Perbarui interface agar lebih generik dan menyertakan role
+// Tipe data yang lebih lengkap
+interface Division {
+  id: number;
+  name: string;
+}
 interface UserData {
   id: number;
   name: string;
-  division: string;
+  division: Division | null; // Diubah menjadi objek
   role: Role;
 }
-
 interface EditMentorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  mentorData: UserData | null; // Gunakan interface yang sudah diperbarui
+  mentorData: UserData | null;
   setNotification: (notification: NotificationState | null) => void;
 }
 
 export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData, setNotification }: EditMentorModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // State untuk form
   const [name, setName] = useState('');
-  const [division, setDivision] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [divisionId, setDivisionId] = useState<string>('');
+  
+  // State untuk data & UI
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [isDivisionModalOpen, setDivisionModalOpen] = useState(false);
 
+  // Fungsi untuk mengambil daftar divisi
+  const fetchDivisions = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/divisions');
+      if (res.ok) setDivisions(await res.json());
+    } catch (error) { console.error("Gagal memuat divisi:", error); }
+  }, []);
+
+  // Isi form saat data mentor berubah & ambil data divisi
   useEffect(() => {
-    if (mentorData) {
-      setName(mentorData.name);
-      setDivision(mentorData.division);
-      setPassword('');
-      setShowPassword(false);
+    if (isOpen) {
+      fetchDivisions();
+      if (mentorData) {
+        setName(mentorData.name);
+        setDivisionId(mentorData.division?.id?.toString() || '');
+        setPassword('');
+        setShowPassword(false);
+      }
     }
-  }, [mentorData]);
+  }, [isOpen, mentorData, fetchDivisions]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!mentorData) return;
-
+    
     setIsSubmitting(true);
     try {
-      // Logika update tidak perlu mengirim role, karena role tidak diubah di sini
-      const dataToUpdate: any = { name, division };
-      if (password) {
-        dataToUpdate.password = password;
-      }
+      const dataToUpdate: any = { 
+        name,
+        divisionId: parseInt(divisionId)
+      };
+      if (password) dataToUpdate.password = password;
 
       const response = await fetch(`/api/admin/mentors/${mentorData.id}`, {
         method: 'PATCH',
@@ -60,7 +82,6 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
         const result = await response.json();
         throw new Error(result.error || 'Gagal menyimpan perubahan.');
       }
-
       setNotification({ isOpen: true, title: 'Berhasil', message: 'Data akun berhasil diperbarui.', type: 'success' });
       onSuccess();
       onClose();
@@ -73,26 +94,40 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
 
   if (!isOpen || !mentorData) return null;
 
-  // Buat label dan judul dinamis berdasarkan role
   const userType = mentorData.role === Role.ADMIN ? 'Mentor' : 'Dosen';
   const divisionLabel = mentorData.role === Role.ADMIN ? 'Divisi' : 'Universitas / Instansi';
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-40">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-bold text-gray-800">Edit {userType}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
-        </div>
-        <form onSubmit={handleSubmit} className="p-6 text-black">
-          <div className="space-y-4">
+    <>
+      <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
+          <div className="flex justify-between items-center p-4 border-b">
+            <h3 className="text-lg font-bold text-gray-800">Edit {userType}</h3>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
+          </div>
+          <form onSubmit={handleSubmit} className="p-6 space-y-4 text-black">
             <div>
               <label className="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"/>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 w-full p-2 border border-gray-300 rounded-md"/>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">{divisionLabel}</label>
-              <input type="text" value={division} onChange={(e) => setDivision(e.target.value)} required className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"/>
+              <label className="flex items-center justify-between text-sm font-medium text-gray-700">
+                <span>{divisionLabel}</span>
+                <button type="button" onClick={() => setDivisionModalOpen(true)} className="text-blue-600 hover:text-blue-800" title="Kelola Pilihan">
+                  <FiEdit size={14} />
+                </button>
+              </label>
+              <select
+                value={divisionId}
+                onChange={(e) => setDivisionId(e.target.value)}
+                required
+                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="" disabled>-- Pilih {divisionLabel} --</option>
+                {divisions.map(div => (
+                  <option key={div.id} value={div.id}>{div.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Password Baru (Opsional)</label>
@@ -101,26 +136,32 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Kosongkan jika tidak diubah"
-                  className="block w-full border border-gray-300 rounded-md shadow-sm p-2 pr-10"
+                  className="block w-full p-2 pr-10 border border-gray-300 rounded-md"
+                  placeholder="Kosongkan jika tidak ingin diubah"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
                 </button>
               </div>
             </div>
-          </div>
-          <div className="mt-6">
-            <button type="submit" disabled={isSubmitting} className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400">
-              {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
-            </button>
-          </div>
-        </form>
+            <div className="pt-2">
+              <button type="submit" disabled={isSubmitting} className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400">
+                {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+      <ManageDivisionsModal 
+        isOpen={isDivisionModalOpen}
+        onClose={() => setDivisionModalOpen(false)}
+        setNotification={setNotification}
+        onUpdate={fetchDivisions}
+      />
+    </>
   );
 }
