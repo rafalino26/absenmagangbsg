@@ -120,7 +120,6 @@ export default function ArchivePage() {
           <p className="mt-1 text-md text-gray-600">Daftar peserta yang telah menyelesaikan periode magang atau dinonaktifkan.</p>
         </div>
         
-        {/* PERBAIKAN: Tambahkan Search Bar */}
         <div className="mb-4">
           <input
             type="text"
