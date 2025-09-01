@@ -32,9 +32,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
 
-    // 1. Baca 'divisionId' dari body, bukan 'division'
+    // 1. Baca 'universityId' juga dari body
     const body = await req.json();
-    const { name, divisionId, periodStartDate, periodEndDate, password, mentorId, lecturerId, isActive } = body;
+    const { name, divisionId, universityId, periodStartDate, periodEndDate, password, mentorId, lecturerId, isActive } = body;
 
     let dataToUpdate: Prisma.UserUpdateInput = {};
 
@@ -43,13 +43,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (periodEndDate !== undefined) dataToUpdate.periodEndDate = new Date(periodEndDate);
     if (isActive !== undefined) dataToUpdate.isActive = isActive;
     
-    // 2. Gunakan metode 'connect' untuk meng-update relasi divisi
+    // Logika untuk menghubungkan atau memutuskan relasi
     if (divisionId !== undefined) {
-      dataToUpdate.division = {
-        connect: {
-          id: parseInt(divisionId)
-        }
-      };
+      dataToUpdate.division = divisionId ? { connect: { id: parseInt(divisionId) } } : { disconnect: true };
+    }
+
+    // 2. Tambahkan logika yang sama untuk universitas
+    if (universityId !== undefined) {
+      dataToUpdate.university = universityId ? { connect: { id: parseInt(universityId) } } : { disconnect: true };
     }
     
     if (mentorId !== undefined) {

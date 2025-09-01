@@ -32,6 +32,7 @@ export interface InternSummary {
   division: { 
     name: string; 
   } | null;
+  university: { name: string; } | null; 
   periodStartDate: string | null; 
   periodEndDate: string | null;
   hadir: number;

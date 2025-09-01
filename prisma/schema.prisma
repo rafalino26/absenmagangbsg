@@ -25,6 +25,8 @@ datasource db {
   role            Role     @default(INTERN)
   divisionId      Int? 
   division        Division? @relation(fields: [divisionId], references: [id])
+  universityId    Int?
+  university      University? @relation(fields: [universityId], references: [id])
   periodStartDate DateTime?
   periodEndDate   DateTime?
   bankName        String?
@@ -91,6 +93,12 @@ model Division {
   id    Int    @id @default(autoincrement())
   name  String @unique
   users User[] 
+}
+
+model University {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
 }
 
 enum Role {

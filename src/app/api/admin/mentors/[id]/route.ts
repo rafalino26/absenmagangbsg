@@ -7,7 +7,7 @@ import { hash } from 'bcrypt';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
-// Fungsi bantuan untuk verifikasi Superadmin
+// Fungsi bantuan untuk verifikasi Superadmin (tidak diubah)
 async function verifySuperAdmin(req: NextRequest) {
   const token = req.cookies.get('adminAuthToken')?.value;
   if (!token) return { error: 'Tidak terautentikasi', status: 401 };
@@ -22,7 +22,9 @@ async function verifySuperAdmin(req: NextRequest) {
   }
 }
 
-// FUNGSI UNTUK MENGEDIT DATA MENTOR (PATCH)
+/**
+ * FUNGSI UNTUK MENGEDIT DATA MENTOR ATAU DOSEN (PATCH)
+ */
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await verifySuperAdmin(req);
   if (auth.error) {
@@ -33,40 +35,53 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
 
-    const body = await req.json();
-    const { name, divisionId, password } = body;
+    // 1. Ambil data user yang akan di-update untuk mengetahui rolenya
+    const userToUpdate = await db.user.findUnique({ where: { id } });
+    if (!userToUpdate) {
+      return NextResponse.json({ error: 'Akun tidak ditemukan' }, { status: 404 });
+    }
 
+    const body = await req.json();
+    const { name, password, divisionId, universityId } = body;
+
+    // 2. Siapkan data yang akan di-update secara dinamis
     let dataToUpdate: Prisma.UserUpdateInput = {};
 
     if (name !== undefined) dataToUpdate.name = name;
-  
-    if (divisionId !== undefined) {
-      dataToUpdate.division = {
-        connect: {
-          id: parseInt(divisionId)
-        }
-      };
-    }
-
     if (password) {
       dataToUpdate.password = await hash(password, 10);
     }
 
-    const updatedMentor = await db.user.update({
+    // 3. Terapkan logika berdasarkan role user yang ada di database
+    if (userToUpdate.role === Role.ADMIN) {
+      if (divisionId !== undefined) {
+        // Jika divisionId dikirim, hubungkan. Jika null, putuskan.
+        dataToUpdate.division = divisionId ? { connect: { id: parseInt(divisionId) } } : { disconnect: true };
+      }
+    } else if (userToUpdate.role === Role.LECTURER) {
+      if (universityId !== undefined) {
+        // Jika universityId dikirim, hubungkan. Jika null, putuskan.
+        dataToUpdate.university = universityId ? { connect: { id: parseInt(universityId) } } : { disconnect: true };
+      }
+    }
+
+    const updatedUser = await db.user.update({
       where: { id },
       data: dataToUpdate,
     });
 
-    const { password: _, ...mentorData } = updatedMentor;
-    return NextResponse.json(mentorData);
+    const { password: _, ...userData } = updatedUser;
+    return NextResponse.json(userData);
 
   } catch (error) {
-    console.error('[UPDATE MENTOR ERROR]', error);
-    return NextResponse.json({ error: 'Gagal memperbarui data mentor' }, { status: 500 });
+    console.error('[UPDATE USER ERROR]', error);
+    return NextResponse.json({ error: 'Gagal memperbarui data akun' }, { status: 500 });
   }
 }
 
-// FUNGSI UNTUK MENGHAPUS MENTOR (DELETE)
+/**
+ * FUNGSI UNTUK MENGHAPUS MENTOR ATAU DOSEN (DELETE)
+ */
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await verifySuperAdmin(req);
   if (auth.error) {
@@ -76,13 +91,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   try {
     const id = parseInt(params.id);
     if (isNaN(id)) return NextResponse.json({ error: 'Format ID tidak valid' }, { status: 400 });
+    
     await db.user.delete({
       where: { id },
     });
 
-    return NextResponse.json({ message: 'Mentor berhasil dihapus' });
+    return NextResponse.json({ message: 'Akun berhasil dihapus' });
   } catch (error) {
-    console.error('[DELETE MENTOR ERROR]', error);
-    return NextResponse.json({ error: 'Gagal menghapus mentor' }, { status: 500 });
+    console.error('[DELETE USER ERROR]', error);
+    return NextResponse.json({ error: 'Gagal menghapus akun' }, { status: 500 });
   }
 }

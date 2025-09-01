@@ -5,19 +5,24 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { FiX, FiEdit } from 'react-icons/fi';
 import { NotificationState } from '@/app/types';
 import { Role } from '@prisma/client';
-import ManageDivisionsModal from './ManageDivisionsModal'; // Impor modal manage divisi
+import ManageDivisionsModal from './ManageDivisionsModal';
+import ManageUniversitiesModal from './ManageUniversitiesModal'; // PERBAIKAN 1: Impor modal universitas
 
-// Tipe data yang lebih lengkap
-interface Division {
+// Interface generik untuk dropdown
+interface Option {
   id: number;
   name: string;
 }
+
+// PERBAIKAN 2: Perbarui UserData untuk menyertakan university
 interface UserData {
   id: number;
   name: string;
-  division: Division | null; // Diubah menjadi objek
+  division: Option | null;
+  university: Option | null; // Tambahkan university
   role: Role;
 }
+
 interface EditMentorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -33,32 +38,46 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [divisionId, setDivisionId] = useState<string>('');
   
-  // State untuk data & UI
-  const [divisions, setDivisions] = useState<Division[]>([]);
+  // PERBAIKAN 3: Pisahkan state untuk Divisi dan Universitas
+  const [divisionId, setDivisionId] = useState<string>('');
+  const [universityId, setUniversityId] = useState<string>('');
+  const [divisions, setDivisions] = useState<Option[]>([]);
+  const [universities, setUniversities] = useState<Option[]>([]);
   const [isDivisionModalOpen, setDivisionModalOpen] = useState(false);
+  const [isUniversityModalOpen, setUniversityModalOpen] = useState(false);
 
-  // Fungsi untuk mengambil daftar divisi
-  const fetchDivisions = useCallback(async () => {
+  // Fungsi untuk mengambil daftar divisi & universitas
+  const fetchOptions = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/divisions');
-      if (res.ok) setDivisions(await res.json());
-    } catch (error) { console.error("Gagal memuat divisi:", error); }
+      const [divisionsRes, universitiesRes] = await Promise.all([
+        fetch('/api/admin/divisions'),
+        fetch('/api/admin/universities')
+      ]);
+      if (divisionsRes.ok) setDivisions(await divisionsRes.json());
+      if (universitiesRes.ok) setUniversities(await universitiesRes.json());
+    } catch (error) { console.error("Gagal memuat pilihan:", error); }
   }, []);
 
-  // Isi form saat data mentor berubah & ambil data divisi
+  // Isi form saat data mentor berubah & ambil data
   useEffect(() => {
     if (isOpen) {
-      fetchDivisions();
+      fetchOptions();
       if (mentorData) {
         setName(mentorData.name);
-        setDivisionId(mentorData.division?.id?.toString() || '');
         setPassword('');
         setShowPassword(false);
+        // PERBAIKAN 4: Isi state yang sesuai berdasarkan peran
+        if (mentorData.role === Role.ADMIN) {
+          setDivisionId(mentorData.division?.id?.toString() || '');
+          setUniversityId('');
+        } else if (mentorData.role === Role.LECTURER) {
+          setUniversityId(mentorData.university?.id?.toString() || '');
+          setDivisionId('');
+        }
       }
     }
-  }, [isOpen, mentorData, fetchDivisions]);
+  }, [isOpen, mentorData, fetchOptions]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -66,13 +85,19 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
     
     setIsSubmitting(true);
     try {
-      const dataToUpdate: any = { 
-        name,
-        divisionId: parseInt(divisionId)
-      };
-      if (password) dataToUpdate.password = password;
+      // PERBAIKAN 5: Buat payload update secara dinamis
+      const dataToUpdate: any = { name };
+      if (password) {
+        dataToUpdate.password = password;
+      }
 
-      const response = await fetch(`/api/admin/mentors/${mentorData.id}`, {
+      if (mentorData.role === Role.ADMIN) {
+        dataToUpdate.divisionId = parseInt(divisionId);
+      } else if (mentorData.role === Role.LECTURER) {
+        dataToUpdate.universityId = parseInt(universityId);
+      }
+
+      const response = await fetch(`/api/admin/mentors/${mentorData.id}`, { // Gunakan endpoint user generik
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToUpdate),
@@ -94,15 +119,20 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
 
   if (!isOpen || !mentorData) return null;
 
-  const userType = mentorData.role === Role.ADMIN ? 'Mentor' : 'Dosen';
-  const divisionLabel = mentorData.role === Role.ADMIN ? 'Divisi' : 'Universitas / Instansi';
+  // PERBAIKAN 6: Variabel dinamis untuk dropdown
+  const isMentor = mentorData.role === Role.ADMIN;
+  const label = isMentor ? 'Divisi' : 'Universitas';
+  const options = isMentor ? divisions : universities;
+  const selectedId = isMentor ? divisionId : universityId;
+  const setSelectedId = isMentor ? setDivisionId : setUniversityId;
+  const openManageModal = isMentor ? () => setDivisionModalOpen(true) : () => setUniversityModalOpen(true);
 
   return (
     <>
       <div className="fixed inset-0 bg-black/60 flex justify-center items-center p-4 z-50">
         <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
           <div className="flex justify-between items-center p-4 border-b">
-            <h3 className="text-lg font-bold text-gray-800">Edit {userType}</h3>
+            <h3 className="text-lg font-bold text-gray-800">Edit {isMentor ? 'Mentor' : 'Dosen'}</h3>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><FiX size={24}/></button>
           </div>
           <form onSubmit={handleSubmit} className="p-6 space-y-4 text-black">
@@ -112,20 +142,20 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
             </div>
             <div>
               <label className="flex items-center justify-between text-sm font-medium text-gray-700">
-                <span>{divisionLabel}</span>
-                <button type="button" onClick={() => setDivisionModalOpen(true)} className="text-blue-600 hover:text-blue-800" title="Kelola Pilihan">
+                <span>{label}</span>
+                <button type="button" onClick={openManageModal} className="text-blue-600 hover:text-blue-800" title={`Kelola Pilihan ${label}`}>
                   <FiEdit size={14} />
                 </button>
               </label>
               <select
-                value={divisionId}
-                onChange={(e) => setDivisionId(e.target.value)}
+                value={selectedId}
+                onChange={(e) => setSelectedId(e.target.value)}
                 required
                 className="mt-1 w-full p-2 border border-gray-300 rounded-md"
               >
-                <option value="" disabled>-- Pilih {divisionLabel} --</option>
-                {divisions.map(div => (
-                  <option key={div.id} value={div.id}>{div.name}</option>
+                <option value="" disabled>-- Pilih {label} --</option>
+                {options.map(opt => (
+                  <option key={opt.id} value={opt.id}>{opt.name}</option>
                 ))}
               </select>
             </div>
@@ -156,11 +186,19 @@ export default function EditMentorModal({ isOpen, onClose, onSuccess, mentorData
           </form>
         </div>
       </div>
+      
+      {/* PERBAIKAN 7: Sertakan kedua modal manage */}
       <ManageDivisionsModal 
         isOpen={isDivisionModalOpen}
         onClose={() => setDivisionModalOpen(false)}
         setNotification={setNotification}
-        onUpdate={fetchDivisions}
+        onUpdate={fetchOptions}
+      />
+      <ManageUniversitiesModal
+        isOpen={isUniversityModalOpen}
+        onClose={() => setUniversityModalOpen(false)}
+        setNotification={setNotification}
+        onUpdate={fetchOptions}
       />
     </>
   );

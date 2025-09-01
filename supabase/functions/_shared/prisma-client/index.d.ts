@@ -43,6 +43,11 @@ export type PredefinedActivity = $Result.DefaultSelection<Prisma.$PredefinedActi
  * 
  */
 export type Division = $Result.DefaultSelection<Prisma.$DivisionPayload>
+/**
+ * Model University
+ * 
+ */
+export type University = $Result.DefaultSelection<Prisma.$UniversityPayload>
 
 /**
  * Enums
@@ -284,6 +289,16 @@ export class PrismaClient<
     * ```
     */
   get division(): Prisma.DivisionDelegate<ExtArgs>;
+
+  /**
+   * `prisma.university`: Exposes CRUD operations for the **University** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Universities
+    * const universities = await prisma.university.findMany()
+    * ```
+    */
+  get university(): Prisma.UniversityDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -730,7 +745,8 @@ export namespace Prisma {
     HelpdeskTicket: 'HelpdeskTicket',
     DailyLog: 'DailyLog',
     PredefinedActivity: 'PredefinedActivity',
-    Division: 'Division'
+    Division: 'Division',
+    University: 'University'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -746,7 +762,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "attendance" | "helpdeskTicket" | "dailyLog" | "predefinedActivity" | "division"
+      modelProps: "user" | "attendance" | "helpdeskTicket" | "dailyLog" | "predefinedActivity" | "division" | "university"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1170,6 +1186,76 @@ export namespace Prisma {
           }
         }
       }
+      University: {
+        payload: Prisma.$UniversityPayload<ExtArgs>
+        fields: Prisma.UniversityFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UniversityFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UniversityFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload>
+          }
+          findFirst: {
+            args: Prisma.UniversityFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UniversityFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload>
+          }
+          findMany: {
+            args: Prisma.UniversityFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload>[]
+          }
+          create: {
+            args: Prisma.UniversityCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload>
+          }
+          createMany: {
+            args: Prisma.UniversityCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UniversityCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload>[]
+          }
+          delete: {
+            args: Prisma.UniversityDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload>
+          }
+          update: {
+            args: Prisma.UniversityUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload>
+          }
+          deleteMany: {
+            args: Prisma.UniversityDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UniversityUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.UniversityUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UniversityPayload>
+          }
+          aggregate: {
+            args: Prisma.UniversityAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUniversity>
+          }
+          groupBy: {
+            args: Prisma.UniversityGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UniversityGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UniversityCountArgs<ExtArgs>
+            result: $Utils.Optional<UniversityCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1429,6 +1515,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type UniversityCountOutputType
+   */
+
+  export type UniversityCountOutputType = {
+    users: number
+  }
+
+  export type UniversityCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | UniversityCountOutputTypeCountUsersArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * UniversityCountOutputType without action
+   */
+  export type UniversityCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UniversityCountOutputType
+     */
+    select?: UniversityCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UniversityCountOutputType without action
+   */
+  export type UniversityCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+  }
+
+
+  /**
    * Models
    */
 
@@ -1447,6 +1564,7 @@ export namespace Prisma {
   export type UserAvgAggregateOutputType = {
     id: number | null
     divisionId: number | null
+    universityId: number | null
     mentorId: number | null
     lecturerId: number | null
   }
@@ -1454,6 +1572,7 @@ export namespace Prisma {
   export type UserSumAggregateOutputType = {
     id: number | null
     divisionId: number | null
+    universityId: number | null
     mentorId: number | null
     lecturerId: number | null
   }
@@ -1466,6 +1585,7 @@ export namespace Prisma {
     password: string | null
     role: $Enums.Role | null
     divisionId: number | null
+    universityId: number | null
     periodStartDate: Date | null
     periodEndDate: Date | null
     bankName: string | null
@@ -1486,6 +1606,7 @@ export namespace Prisma {
     password: string | null
     role: $Enums.Role | null
     divisionId: number | null
+    universityId: number | null
     periodStartDate: Date | null
     periodEndDate: Date | null
     bankName: string | null
@@ -1506,6 +1627,7 @@ export namespace Prisma {
     password: number
     role: number
     divisionId: number
+    universityId: number
     periodStartDate: number
     periodEndDate: number
     bankName: number
@@ -1523,6 +1645,7 @@ export namespace Prisma {
   export type UserAvgAggregateInputType = {
     id?: true
     divisionId?: true
+    universityId?: true
     mentorId?: true
     lecturerId?: true
   }
@@ -1530,6 +1653,7 @@ export namespace Prisma {
   export type UserSumAggregateInputType = {
     id?: true
     divisionId?: true
+    universityId?: true
     mentorId?: true
     lecturerId?: true
   }
@@ -1542,6 +1666,7 @@ export namespace Prisma {
     password?: true
     role?: true
     divisionId?: true
+    universityId?: true
     periodStartDate?: true
     periodEndDate?: true
     bankName?: true
@@ -1562,6 +1687,7 @@ export namespace Prisma {
     password?: true
     role?: true
     divisionId?: true
+    universityId?: true
     periodStartDate?: true
     periodEndDate?: true
     bankName?: true
@@ -1582,6 +1708,7 @@ export namespace Prisma {
     password?: true
     role?: true
     divisionId?: true
+    universityId?: true
     periodStartDate?: true
     periodEndDate?: true
     bankName?: true
@@ -1689,6 +1816,7 @@ export namespace Prisma {
     password: string
     role: $Enums.Role
     divisionId: number | null
+    universityId: number | null
     periodStartDate: Date | null
     periodEndDate: Date | null
     bankName: string | null
@@ -1728,6 +1856,7 @@ export namespace Prisma {
     password?: boolean
     role?: boolean
     divisionId?: boolean
+    universityId?: boolean
     periodStartDate?: boolean
     periodEndDate?: boolean
     bankName?: boolean
@@ -1739,6 +1868,7 @@ export namespace Prisma {
     mentorId?: boolean
     lecturerId?: boolean
     division?: boolean | User$divisionArgs<ExtArgs>
+    university?: boolean | User$universityArgs<ExtArgs>
     attendances?: boolean | User$attendancesArgs<ExtArgs>
     helpdeskTickets?: boolean | User$helpdeskTicketsArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
@@ -1757,6 +1887,7 @@ export namespace Prisma {
     password?: boolean
     role?: boolean
     divisionId?: boolean
+    universityId?: boolean
     periodStartDate?: boolean
     periodEndDate?: boolean
     bankName?: boolean
@@ -1768,6 +1899,7 @@ export namespace Prisma {
     mentorId?: boolean
     lecturerId?: boolean
     division?: boolean | User$divisionArgs<ExtArgs>
+    university?: boolean | User$universityArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
     lecturer?: boolean | User$lecturerArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -1780,6 +1912,7 @@ export namespace Prisma {
     password?: boolean
     role?: boolean
     divisionId?: boolean
+    universityId?: boolean
     periodStartDate?: boolean
     periodEndDate?: boolean
     bankName?: boolean
@@ -1794,6 +1927,7 @@ export namespace Prisma {
 
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     division?: boolean | User$divisionArgs<ExtArgs>
+    university?: boolean | User$universityArgs<ExtArgs>
     attendances?: boolean | User$attendancesArgs<ExtArgs>
     helpdeskTickets?: boolean | User$helpdeskTicketsArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
@@ -1805,6 +1939,7 @@ export namespace Prisma {
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     division?: boolean | User$divisionArgs<ExtArgs>
+    university?: boolean | User$universityArgs<ExtArgs>
     mentor?: boolean | User$mentorArgs<ExtArgs>
     lecturer?: boolean | User$lecturerArgs<ExtArgs>
   }
@@ -1813,6 +1948,7 @@ export namespace Prisma {
     name: "User"
     objects: {
       division: Prisma.$DivisionPayload<ExtArgs> | null
+      university: Prisma.$UniversityPayload<ExtArgs> | null
       attendances: Prisma.$AttendancePayload<ExtArgs>[]
       helpdeskTickets: Prisma.$HelpdeskTicketPayload<ExtArgs>[]
       mentor: Prisma.$UserPayload<ExtArgs> | null
@@ -1829,6 +1965,7 @@ export namespace Prisma {
       password: string
       role: $Enums.Role
       divisionId: number | null
+      universityId: number | null
       periodStartDate: Date | null
       periodEndDate: Date | null
       bankName: string | null
@@ -2204,6 +2341,7 @@ export namespace Prisma {
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     division<T extends User$divisionArgs<ExtArgs> = {}>(args?: Subset<T, User$divisionArgs<ExtArgs>>): Prisma__DivisionClient<$Result.GetResult<Prisma.$DivisionPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    university<T extends User$universityArgs<ExtArgs> = {}>(args?: Subset<T, User$universityArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     attendances<T extends User$attendancesArgs<ExtArgs> = {}>(args?: Subset<T, User$attendancesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttendancePayload<ExtArgs>, T, "findMany"> | Null>
     helpdeskTickets<T extends User$helpdeskTicketsArgs<ExtArgs> = {}>(args?: Subset<T, User$helpdeskTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HelpdeskTicketPayload<ExtArgs>, T, "findMany"> | Null>
     mentor<T extends User$mentorArgs<ExtArgs> = {}>(args?: Subset<T, User$mentorArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
@@ -2247,6 +2385,7 @@ export namespace Prisma {
     readonly password: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'Role'>
     readonly divisionId: FieldRef<"User", 'Int'>
+    readonly universityId: FieldRef<"User", 'Int'>
     readonly periodStartDate: FieldRef<"User", 'DateTime'>
     readonly periodEndDate: FieldRef<"User", 'DateTime'>
     readonly bankName: FieldRef<"User", 'String'>
@@ -2587,6 +2726,21 @@ export namespace Prisma {
      */
     include?: DivisionInclude<ExtArgs> | null
     where?: DivisionWhereInput
+  }
+
+  /**
+   * User.university
+   */
+  export type User$universityArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    where?: UniversityWhereInput
   }
 
   /**
@@ -7562,6 +7716,952 @@ export namespace Prisma {
 
 
   /**
+   * Model University
+   */
+
+  export type AggregateUniversity = {
+    _count: UniversityCountAggregateOutputType | null
+    _avg: UniversityAvgAggregateOutputType | null
+    _sum: UniversitySumAggregateOutputType | null
+    _min: UniversityMinAggregateOutputType | null
+    _max: UniversityMaxAggregateOutputType | null
+  }
+
+  export type UniversityAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type UniversitySumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type UniversityMinAggregateOutputType = {
+    id: number | null
+    name: string | null
+  }
+
+  export type UniversityMaxAggregateOutputType = {
+    id: number | null
+    name: string | null
+  }
+
+  export type UniversityCountAggregateOutputType = {
+    id: number
+    name: number
+    _all: number
+  }
+
+
+  export type UniversityAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type UniversitySumAggregateInputType = {
+    id?: true
+  }
+
+  export type UniversityMinAggregateInputType = {
+    id?: true
+    name?: true
+  }
+
+  export type UniversityMaxAggregateInputType = {
+    id?: true
+    name?: true
+  }
+
+  export type UniversityCountAggregateInputType = {
+    id?: true
+    name?: true
+    _all?: true
+  }
+
+  export type UniversityAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which University to aggregate.
+     */
+    where?: UniversityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Universities to fetch.
+     */
+    orderBy?: UniversityOrderByWithRelationInput | UniversityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UniversityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Universities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Universities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Universities
+    **/
+    _count?: true | UniversityCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: UniversityAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: UniversitySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UniversityMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UniversityMaxAggregateInputType
+  }
+
+  export type GetUniversityAggregateType<T extends UniversityAggregateArgs> = {
+        [P in keyof T & keyof AggregateUniversity]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUniversity[P]>
+      : GetScalarType<T[P], AggregateUniversity[P]>
+  }
+
+
+
+
+  export type UniversityGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UniversityWhereInput
+    orderBy?: UniversityOrderByWithAggregationInput | UniversityOrderByWithAggregationInput[]
+    by: UniversityScalarFieldEnum[] | UniversityScalarFieldEnum
+    having?: UniversityScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UniversityCountAggregateInputType | true
+    _avg?: UniversityAvgAggregateInputType
+    _sum?: UniversitySumAggregateInputType
+    _min?: UniversityMinAggregateInputType
+    _max?: UniversityMaxAggregateInputType
+  }
+
+  export type UniversityGroupByOutputType = {
+    id: number
+    name: string
+    _count: UniversityCountAggregateOutputType | null
+    _avg: UniversityAvgAggregateOutputType | null
+    _sum: UniversitySumAggregateOutputType | null
+    _min: UniversityMinAggregateOutputType | null
+    _max: UniversityMaxAggregateOutputType | null
+  }
+
+  type GetUniversityGroupByPayload<T extends UniversityGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UniversityGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UniversityGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UniversityGroupByOutputType[P]>
+            : GetScalarType<T[P], UniversityGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UniversitySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    users?: boolean | University$usersArgs<ExtArgs>
+    _count?: boolean | UniversityCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["university"]>
+
+  export type UniversitySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+  }, ExtArgs["result"]["university"]>
+
+  export type UniversitySelectScalar = {
+    id?: boolean
+    name?: boolean
+  }
+
+  export type UniversityInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | University$usersArgs<ExtArgs>
+    _count?: boolean | UniversityCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type UniversityIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $UniversityPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "University"
+    objects: {
+      users: Prisma.$UserPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      name: string
+    }, ExtArgs["result"]["university"]>
+    composites: {}
+  }
+
+  type UniversityGetPayload<S extends boolean | null | undefined | UniversityDefaultArgs> = $Result.GetResult<Prisma.$UniversityPayload, S>
+
+  type UniversityCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<UniversityFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: UniversityCountAggregateInputType | true
+    }
+
+  export interface UniversityDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['University'], meta: { name: 'University' } }
+    /**
+     * Find zero or one University that matches the filter.
+     * @param {UniversityFindUniqueArgs} args - Arguments to find a University
+     * @example
+     * // Get one University
+     * const university = await prisma.university.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UniversityFindUniqueArgs>(args: SelectSubset<T, UniversityFindUniqueArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one University that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {UniversityFindUniqueOrThrowArgs} args - Arguments to find a University
+     * @example
+     * // Get one University
+     * const university = await prisma.university.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UniversityFindUniqueOrThrowArgs>(args: SelectSubset<T, UniversityFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first University that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UniversityFindFirstArgs} args - Arguments to find a University
+     * @example
+     * // Get one University
+     * const university = await prisma.university.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UniversityFindFirstArgs>(args?: SelectSubset<T, UniversityFindFirstArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first University that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UniversityFindFirstOrThrowArgs} args - Arguments to find a University
+     * @example
+     * // Get one University
+     * const university = await prisma.university.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UniversityFindFirstOrThrowArgs>(args?: SelectSubset<T, UniversityFindFirstOrThrowArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more Universities that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UniversityFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Universities
+     * const universities = await prisma.university.findMany()
+     * 
+     * // Get first 10 Universities
+     * const universities = await prisma.university.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const universityWithIdOnly = await prisma.university.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UniversityFindManyArgs>(args?: SelectSubset<T, UniversityFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a University.
+     * @param {UniversityCreateArgs} args - Arguments to create a University.
+     * @example
+     * // Create one University
+     * const University = await prisma.university.create({
+     *   data: {
+     *     // ... data to create a University
+     *   }
+     * })
+     * 
+     */
+    create<T extends UniversityCreateArgs>(args: SelectSubset<T, UniversityCreateArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many Universities.
+     * @param {UniversityCreateManyArgs} args - Arguments to create many Universities.
+     * @example
+     * // Create many Universities
+     * const university = await prisma.university.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UniversityCreateManyArgs>(args?: SelectSubset<T, UniversityCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Universities and returns the data saved in the database.
+     * @param {UniversityCreateManyAndReturnArgs} args - Arguments to create many Universities.
+     * @example
+     * // Create many Universities
+     * const university = await prisma.university.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Universities and only return the `id`
+     * const universityWithIdOnly = await prisma.university.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UniversityCreateManyAndReturnArgs>(args?: SelectSubset<T, UniversityCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a University.
+     * @param {UniversityDeleteArgs} args - Arguments to delete one University.
+     * @example
+     * // Delete one University
+     * const University = await prisma.university.delete({
+     *   where: {
+     *     // ... filter to delete one University
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UniversityDeleteArgs>(args: SelectSubset<T, UniversityDeleteArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one University.
+     * @param {UniversityUpdateArgs} args - Arguments to update one University.
+     * @example
+     * // Update one University
+     * const university = await prisma.university.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UniversityUpdateArgs>(args: SelectSubset<T, UniversityUpdateArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more Universities.
+     * @param {UniversityDeleteManyArgs} args - Arguments to filter Universities to delete.
+     * @example
+     * // Delete a few Universities
+     * const { count } = await prisma.university.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UniversityDeleteManyArgs>(args?: SelectSubset<T, UniversityDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Universities.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UniversityUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Universities
+     * const university = await prisma.university.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UniversityUpdateManyArgs>(args: SelectSubset<T, UniversityUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one University.
+     * @param {UniversityUpsertArgs} args - Arguments to update or create a University.
+     * @example
+     * // Update or create a University
+     * const university = await prisma.university.upsert({
+     *   create: {
+     *     // ... data to create a University
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the University we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UniversityUpsertArgs>(args: SelectSubset<T, UniversityUpsertArgs<ExtArgs>>): Prisma__UniversityClient<$Result.GetResult<Prisma.$UniversityPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of Universities.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UniversityCountArgs} args - Arguments to filter Universities to count.
+     * @example
+     * // Count the number of Universities
+     * const count = await prisma.university.count({
+     *   where: {
+     *     // ... the filter for the Universities we want to count
+     *   }
+     * })
+    **/
+    count<T extends UniversityCountArgs>(
+      args?: Subset<T, UniversityCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UniversityCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a University.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UniversityAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UniversityAggregateArgs>(args: Subset<T, UniversityAggregateArgs>): Prisma.PrismaPromise<GetUniversityAggregateType<T>>
+
+    /**
+     * Group by University.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UniversityGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UniversityGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UniversityGroupByArgs['orderBy'] }
+        : { orderBy?: UniversityGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UniversityGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUniversityGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the University model
+   */
+  readonly fields: UniversityFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for University.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UniversityClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    users<T extends University$usersArgs<ExtArgs> = {}>(args?: Subset<T, University$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the University model
+   */ 
+  interface UniversityFieldRefs {
+    readonly id: FieldRef<"University", 'Int'>
+    readonly name: FieldRef<"University", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * University findUnique
+   */
+  export type UniversityFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * Filter, which University to fetch.
+     */
+    where: UniversityWhereUniqueInput
+  }
+
+  /**
+   * University findUniqueOrThrow
+   */
+  export type UniversityFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * Filter, which University to fetch.
+     */
+    where: UniversityWhereUniqueInput
+  }
+
+  /**
+   * University findFirst
+   */
+  export type UniversityFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * Filter, which University to fetch.
+     */
+    where?: UniversityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Universities to fetch.
+     */
+    orderBy?: UniversityOrderByWithRelationInput | UniversityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Universities.
+     */
+    cursor?: UniversityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Universities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Universities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Universities.
+     */
+    distinct?: UniversityScalarFieldEnum | UniversityScalarFieldEnum[]
+  }
+
+  /**
+   * University findFirstOrThrow
+   */
+  export type UniversityFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * Filter, which University to fetch.
+     */
+    where?: UniversityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Universities to fetch.
+     */
+    orderBy?: UniversityOrderByWithRelationInput | UniversityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Universities.
+     */
+    cursor?: UniversityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Universities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Universities.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Universities.
+     */
+    distinct?: UniversityScalarFieldEnum | UniversityScalarFieldEnum[]
+  }
+
+  /**
+   * University findMany
+   */
+  export type UniversityFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * Filter, which Universities to fetch.
+     */
+    where?: UniversityWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Universities to fetch.
+     */
+    orderBy?: UniversityOrderByWithRelationInput | UniversityOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Universities.
+     */
+    cursor?: UniversityWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Universities from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Universities.
+     */
+    skip?: number
+    distinct?: UniversityScalarFieldEnum | UniversityScalarFieldEnum[]
+  }
+
+  /**
+   * University create
+   */
+  export type UniversityCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * The data needed to create a University.
+     */
+    data: XOR<UniversityCreateInput, UniversityUncheckedCreateInput>
+  }
+
+  /**
+   * University createMany
+   */
+  export type UniversityCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Universities.
+     */
+    data: UniversityCreateManyInput | UniversityCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * University createManyAndReturn
+   */
+  export type UniversityCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many Universities.
+     */
+    data: UniversityCreateManyInput | UniversityCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * University update
+   */
+  export type UniversityUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * The data needed to update a University.
+     */
+    data: XOR<UniversityUpdateInput, UniversityUncheckedUpdateInput>
+    /**
+     * Choose, which University to update.
+     */
+    where: UniversityWhereUniqueInput
+  }
+
+  /**
+   * University updateMany
+   */
+  export type UniversityUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Universities.
+     */
+    data: XOR<UniversityUpdateManyMutationInput, UniversityUncheckedUpdateManyInput>
+    /**
+     * Filter which Universities to update
+     */
+    where?: UniversityWhereInput
+  }
+
+  /**
+   * University upsert
+   */
+  export type UniversityUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * The filter to search for the University to update in case it exists.
+     */
+    where: UniversityWhereUniqueInput
+    /**
+     * In case the University found by the `where` argument doesn't exist, create a new University with this data.
+     */
+    create: XOR<UniversityCreateInput, UniversityUncheckedCreateInput>
+    /**
+     * In case the University was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UniversityUpdateInput, UniversityUncheckedUpdateInput>
+  }
+
+  /**
+   * University delete
+   */
+  export type UniversityDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+    /**
+     * Filter which University to delete.
+     */
+    where: UniversityWhereUniqueInput
+  }
+
+  /**
+   * University deleteMany
+   */
+  export type UniversityDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Universities to delete
+     */
+    where?: UniversityWhereInput
+  }
+
+  /**
+   * University.users
+   */
+  export type University$usersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    cursor?: UserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * University without action
+   */
+  export type UniversityDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the University
+     */
+    select?: UniversitySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UniversityInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -7583,6 +8683,7 @@ export namespace Prisma {
     password: 'password',
     role: 'role',
     divisionId: 'divisionId',
+    universityId: 'universityId',
     periodStartDate: 'periodStartDate',
     periodEndDate: 'periodEndDate',
     bankName: 'bankName',
@@ -7652,6 +8753,14 @@ export namespace Prisma {
   };
 
   export type DivisionScalarFieldEnum = (typeof DivisionScalarFieldEnum)[keyof typeof DivisionScalarFieldEnum]
+
+
+  export const UniversityScalarFieldEnum: {
+    id: 'id',
+    name: 'name'
+  };
+
+  export type UniversityScalarFieldEnum = (typeof UniversityScalarFieldEnum)[keyof typeof UniversityScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -7816,6 +8925,7 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
     divisionId?: IntNullableFilter<"User"> | number | null
+    universityId?: IntNullableFilter<"User"> | number | null
     periodStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
     periodEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
     bankName?: StringNullableFilter<"User"> | string | null
@@ -7827,6 +8937,7 @@ export namespace Prisma {
     mentorId?: IntNullableFilter<"User"> | number | null
     lecturerId?: IntNullableFilter<"User"> | number | null
     division?: XOR<DivisionNullableRelationFilter, DivisionWhereInput> | null
+    university?: XOR<UniversityNullableRelationFilter, UniversityWhereInput> | null
     attendances?: AttendanceListRelationFilter
     helpdeskTickets?: HelpdeskTicketListRelationFilter
     mentor?: XOR<UserNullableRelationFilter, UserWhereInput> | null
@@ -7844,6 +8955,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     divisionId?: SortOrderInput | SortOrder
+    universityId?: SortOrderInput | SortOrder
     periodStartDate?: SortOrderInput | SortOrder
     periodEndDate?: SortOrderInput | SortOrder
     bankName?: SortOrderInput | SortOrder
@@ -7855,6 +8967,7 @@ export namespace Prisma {
     mentorId?: SortOrderInput | SortOrder
     lecturerId?: SortOrderInput | SortOrder
     division?: DivisionOrderByWithRelationInput
+    university?: UniversityOrderByWithRelationInput
     attendances?: AttendanceOrderByRelationAggregateInput
     helpdeskTickets?: HelpdeskTicketOrderByRelationAggregateInput
     mentor?: UserOrderByWithRelationInput
@@ -7875,6 +8988,7 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
     divisionId?: IntNullableFilter<"User"> | number | null
+    universityId?: IntNullableFilter<"User"> | number | null
     periodStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
     periodEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
     bankName?: StringNullableFilter<"User"> | string | null
@@ -7886,6 +9000,7 @@ export namespace Prisma {
     mentorId?: IntNullableFilter<"User"> | number | null
     lecturerId?: IntNullableFilter<"User"> | number | null
     division?: XOR<DivisionNullableRelationFilter, DivisionWhereInput> | null
+    university?: XOR<UniversityNullableRelationFilter, UniversityWhereInput> | null
     attendances?: AttendanceListRelationFilter
     helpdeskTickets?: HelpdeskTicketListRelationFilter
     mentor?: XOR<UserNullableRelationFilter, UserWhereInput> | null
@@ -7903,6 +9018,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     divisionId?: SortOrderInput | SortOrder
+    universityId?: SortOrderInput | SortOrder
     periodStartDate?: SortOrderInput | SortOrder
     periodEndDate?: SortOrderInput | SortOrder
     bankName?: SortOrderInput | SortOrder
@@ -7931,6 +9047,7 @@ export namespace Prisma {
     password?: StringWithAggregatesFilter<"User"> | string
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     divisionId?: IntNullableWithAggregatesFilter<"User"> | number | null
+    universityId?: IntNullableWithAggregatesFilter<"User"> | number | null
     periodStartDate?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     periodEndDate?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     bankName?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -8230,6 +9347,48 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Division"> | string
   }
 
+  export type UniversityWhereInput = {
+    AND?: UniversityWhereInput | UniversityWhereInput[]
+    OR?: UniversityWhereInput[]
+    NOT?: UniversityWhereInput | UniversityWhereInput[]
+    id?: IntFilter<"University"> | number
+    name?: StringFilter<"University"> | string
+    users?: UserListRelationFilter
+  }
+
+  export type UniversityOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    users?: UserOrderByRelationAggregateInput
+  }
+
+  export type UniversityWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    name?: string
+    AND?: UniversityWhereInput | UniversityWhereInput[]
+    OR?: UniversityWhereInput[]
+    NOT?: UniversityWhereInput | UniversityWhereInput[]
+    users?: UserListRelationFilter
+  }, "id" | "name">
+
+  export type UniversityOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    _count?: UniversityCountOrderByAggregateInput
+    _avg?: UniversityAvgOrderByAggregateInput
+    _max?: UniversityMaxOrderByAggregateInput
+    _min?: UniversityMinOrderByAggregateInput
+    _sum?: UniversitySumOrderByAggregateInput
+  }
+
+  export type UniversityScalarWhereWithAggregatesInput = {
+    AND?: UniversityScalarWhereWithAggregatesInput | UniversityScalarWhereWithAggregatesInput[]
+    OR?: UniversityScalarWhereWithAggregatesInput[]
+    NOT?: UniversityScalarWhereWithAggregatesInput | UniversityScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"University"> | number
+    name?: StringWithAggregatesFilter<"University"> | string
+  }
+
   export type UserCreateInput = {
     internCode?: string | null
     name: string
@@ -8245,6 +9404,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     division?: DivisionCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -8262,6 +9422,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8294,6 +9455,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     division?: DivisionUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -8311,6 +9473,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8336,6 +9499,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -8372,6 +9536,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8657,6 +9822,42 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
   }
 
+  export type UniversityCreateInput = {
+    name: string
+    users?: UserCreateNestedManyWithoutUniversityInput
+  }
+
+  export type UniversityUncheckedCreateInput = {
+    id?: number
+    name: string
+    users?: UserUncheckedCreateNestedManyWithoutUniversityInput
+  }
+
+  export type UniversityUpdateInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    users?: UserUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type UniversityUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    users?: UserUncheckedUpdateManyWithoutUniversityNestedInput
+  }
+
+  export type UniversityCreateManyInput = {
+    id?: number
+    name: string
+  }
+
+  export type UniversityUpdateManyMutationInput = {
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type UniversityUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -8748,6 +9949,11 @@ export namespace Prisma {
     isNot?: DivisionWhereInput | null
   }
 
+  export type UniversityNullableRelationFilter = {
+    is?: UniversityWhereInput | null
+    isNot?: UniversityWhereInput | null
+  }
+
   export type AttendanceListRelationFilter = {
     every?: AttendanceWhereInput
     some?: AttendanceWhereInput
@@ -8806,6 +10012,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     divisionId?: SortOrder
+    universityId?: SortOrder
     periodStartDate?: SortOrder
     periodEndDate?: SortOrder
     bankName?: SortOrder
@@ -8821,6 +10028,7 @@ export namespace Prisma {
   export type UserAvgOrderByAggregateInput = {
     id?: SortOrder
     divisionId?: SortOrder
+    universityId?: SortOrder
     mentorId?: SortOrder
     lecturerId?: SortOrder
   }
@@ -8833,6 +10041,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     divisionId?: SortOrder
+    universityId?: SortOrder
     periodStartDate?: SortOrder
     periodEndDate?: SortOrder
     bankName?: SortOrder
@@ -8853,6 +10062,7 @@ export namespace Prisma {
     password?: SortOrder
     role?: SortOrder
     divisionId?: SortOrder
+    universityId?: SortOrder
     periodStartDate?: SortOrder
     periodEndDate?: SortOrder
     bankName?: SortOrder
@@ -8868,6 +10078,7 @@ export namespace Prisma {
   export type UserSumOrderByAggregateInput = {
     id?: SortOrder
     divisionId?: SortOrder
+    universityId?: SortOrder
     mentorId?: SortOrder
     lecturerId?: SortOrder
   }
@@ -9242,10 +10453,39 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type UniversityCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+  }
+
+  export type UniversityAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type UniversityMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+  }
+
+  export type UniversityMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+  }
+
+  export type UniversitySumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
   export type DivisionCreateNestedOneWithoutUsersInput = {
     create?: XOR<DivisionCreateWithoutUsersInput, DivisionUncheckedCreateWithoutUsersInput>
     connectOrCreate?: DivisionCreateOrConnectWithoutUsersInput
     connect?: DivisionWhereUniqueInput
+  }
+
+  export type UniversityCreateNestedOneWithoutUsersInput = {
+    create?: XOR<UniversityCreateWithoutUsersInput, UniversityUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: UniversityCreateOrConnectWithoutUsersInput
+    connect?: UniversityWhereUniqueInput
   }
 
   export type AttendanceCreateNestedManyWithoutUserInput = {
@@ -9362,6 +10602,16 @@ export namespace Prisma {
     delete?: DivisionWhereInput | boolean
     connect?: DivisionWhereUniqueInput
     update?: XOR<XOR<DivisionUpdateToOneWithWhereWithoutUsersInput, DivisionUpdateWithoutUsersInput>, DivisionUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type UniversityUpdateOneWithoutUsersNestedInput = {
+    create?: XOR<UniversityCreateWithoutUsersInput, UniversityUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: UniversityCreateOrConnectWithoutUsersInput
+    upsert?: UniversityUpsertWithoutUsersInput
+    disconnect?: UniversityWhereInput | boolean
+    delete?: UniversityWhereInput | boolean
+    connect?: UniversityWhereUniqueInput
+    update?: XOR<XOR<UniversityUpdateToOneWithWhereWithoutUsersInput, UniversityUpdateWithoutUsersInput>, UniversityUncheckedUpdateWithoutUsersInput>
   }
 
   export type AttendanceUpdateManyWithoutUserNestedInput = {
@@ -9641,6 +10891,48 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
     update?: UserUpdateWithWhereUniqueWithoutDivisionInput | UserUpdateWithWhereUniqueWithoutDivisionInput[]
     updateMany?: UserUpdateManyWithWhereWithoutDivisionInput | UserUpdateManyWithWhereWithoutDivisionInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserCreateNestedManyWithoutUniversityInput = {
+    create?: XOR<UserCreateWithoutUniversityInput, UserUncheckedCreateWithoutUniversityInput> | UserCreateWithoutUniversityInput[] | UserUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutUniversityInput | UserCreateOrConnectWithoutUniversityInput[]
+    createMany?: UserCreateManyUniversityInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserUncheckedCreateNestedManyWithoutUniversityInput = {
+    create?: XOR<UserCreateWithoutUniversityInput, UserUncheckedCreateWithoutUniversityInput> | UserCreateWithoutUniversityInput[] | UserUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutUniversityInput | UserCreateOrConnectWithoutUniversityInput[]
+    createMany?: UserCreateManyUniversityInputEnvelope
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type UserUpdateManyWithoutUniversityNestedInput = {
+    create?: XOR<UserCreateWithoutUniversityInput, UserUncheckedCreateWithoutUniversityInput> | UserCreateWithoutUniversityInput[] | UserUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutUniversityInput | UserCreateOrConnectWithoutUniversityInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutUniversityInput | UserUpsertWithWhereUniqueWithoutUniversityInput[]
+    createMany?: UserCreateManyUniversityInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutUniversityInput | UserUpdateWithWhereUniqueWithoutUniversityInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutUniversityInput | UserUpdateManyWithWhereWithoutUniversityInput[]
+    deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type UserUncheckedUpdateManyWithoutUniversityNestedInput = {
+    create?: XOR<UserCreateWithoutUniversityInput, UserUncheckedCreateWithoutUniversityInput> | UserCreateWithoutUniversityInput[] | UserUncheckedCreateWithoutUniversityInput[]
+    connectOrCreate?: UserCreateOrConnectWithoutUniversityInput | UserCreateOrConnectWithoutUniversityInput[]
+    upsert?: UserUpsertWithWhereUniqueWithoutUniversityInput | UserUpsertWithWhereUniqueWithoutUniversityInput[]
+    createMany?: UserCreateManyUniversityInputEnvelope
+    set?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    disconnect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    delete?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+    update?: UserUpdateWithWhereUniqueWithoutUniversityInput | UserUpdateWithWhereUniqueWithoutUniversityInput[]
+    updateMany?: UserUpdateManyWithWhereWithoutUniversityInput | UserUpdateManyWithWhereWithoutUniversityInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
@@ -9943,6 +11235,20 @@ export namespace Prisma {
     create: XOR<DivisionCreateWithoutUsersInput, DivisionUncheckedCreateWithoutUsersInput>
   }
 
+  export type UniversityCreateWithoutUsersInput = {
+    name: string
+  }
+
+  export type UniversityUncheckedCreateWithoutUsersInput = {
+    id?: number
+    name: string
+  }
+
+  export type UniversityCreateOrConnectWithoutUsersInput = {
+    where: UniversityWhereUniqueInput
+    create: XOR<UniversityCreateWithoutUsersInput, UniversityUncheckedCreateWithoutUsersInput>
+  }
+
   export type AttendanceCreateWithoutUserInput = {
     type: $Enums.AttendanceType
     timestamp?: Date | string
@@ -10014,6 +11320,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     division?: DivisionCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -10030,6 +11337,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10066,6 +11374,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     division?: DivisionCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     internsAsMentor?: UserCreateNestedManyWithoutMentorInput
@@ -10082,6 +11391,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10123,6 +11433,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     division?: DivisionCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -10139,6 +11450,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10175,6 +11487,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     division?: DivisionCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -10191,6 +11504,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10260,6 +11574,26 @@ export namespace Prisma {
   }
 
   export type DivisionUncheckedUpdateWithoutUsersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type UniversityUpsertWithoutUsersInput = {
+    update: XOR<UniversityUpdateWithoutUsersInput, UniversityUncheckedUpdateWithoutUsersInput>
+    create: XOR<UniversityCreateWithoutUsersInput, UniversityUncheckedCreateWithoutUsersInput>
+    where?: UniversityWhereInput
+  }
+
+  export type UniversityUpdateToOneWithWhereWithoutUsersInput = {
+    where?: UniversityWhereInput
+    data: XOR<UniversityUpdateWithoutUsersInput, UniversityUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type UniversityUpdateWithoutUsersInput = {
+    name?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type UniversityUncheckedUpdateWithoutUsersInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
   }
@@ -10349,6 +11683,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     division?: DivisionUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -10365,6 +11700,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10408,6 +11744,7 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
     divisionId?: IntNullableFilter<"User"> | number | null
+    universityId?: IntNullableFilter<"User"> | number | null
     periodStartDate?: DateTimeNullableFilter<"User"> | Date | string | null
     periodEndDate?: DateTimeNullableFilter<"User"> | Date | string | null
     bankName?: StringNullableFilter<"User"> | string | null
@@ -10446,6 +11783,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     division?: DivisionUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -10462,6 +11800,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10538,6 +11877,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     division?: DivisionCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
     internsAsMentor?: UserCreateNestedManyWithoutMentorInput
@@ -10554,6 +11894,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10601,6 +11942,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     division?: DivisionUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
     internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
@@ -10617,6 +11959,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10648,6 +11991,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     division?: DivisionCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
     internsAsMentor?: UserCreateNestedManyWithoutMentorInput
@@ -10664,6 +12008,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10711,6 +12056,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     division?: DivisionUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
     internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
@@ -10727,6 +12073,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10758,6 +12105,7 @@ export namespace Prisma {
     joinDate?: Date | string
     isActive?: boolean
     division?: DivisionCreateNestedOneWithoutUsersInput
+    university?: UniversityCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -10774,6 +12122,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10821,6 +12170,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     division?: DivisionUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -10837,6 +12187,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -10867,6 +12218,7 @@ export namespace Prisma {
     phoneNumber?: string | null
     joinDate?: Date | string
     isActive?: boolean
+    university?: UniversityCreateNestedOneWithoutUsersInput
     attendances?: AttendanceCreateNestedManyWithoutUserInput
     helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
     mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
@@ -10883,6 +12235,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10926,6 +12279,81 @@ export namespace Prisma {
     data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutDivisionInput>
   }
 
+  export type UserCreateWithoutUniversityInput = {
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    division?: DivisionCreateNestedOneWithoutUsersInput
+    attendances?: AttendanceCreateNestedManyWithoutUserInput
+    helpdeskTickets?: HelpdeskTicketCreateNestedManyWithoutUserInput
+    mentor?: UserCreateNestedOneWithoutInternsAsMentorInput
+    internsAsMentor?: UserCreateNestedManyWithoutMentorInput
+    lecturer?: UserCreateNestedOneWithoutInternsAsLecturerInput
+    internsAsLecturer?: UserCreateNestedManyWithoutLecturerInput
+    dailyLogs?: DailyLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutUniversityInput = {
+    id?: number
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    divisionId?: number | null
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    mentorId?: number | null
+    lecturerId?: number | null
+    attendances?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    helpdeskTickets?: HelpdeskTicketUncheckedCreateNestedManyWithoutUserInput
+    internsAsMentor?: UserUncheckedCreateNestedManyWithoutMentorInput
+    internsAsLecturer?: UserUncheckedCreateNestedManyWithoutLecturerInput
+    dailyLogs?: DailyLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutUniversityInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutUniversityInput, UserUncheckedCreateWithoutUniversityInput>
+  }
+
+  export type UserCreateManyUniversityInputEnvelope = {
+    data: UserCreateManyUniversityInput | UserCreateManyUniversityInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithWhereUniqueWithoutUniversityInput = {
+    where: UserWhereUniqueInput
+    update: XOR<UserUpdateWithoutUniversityInput, UserUncheckedUpdateWithoutUniversityInput>
+    create: XOR<UserCreateWithoutUniversityInput, UserUncheckedCreateWithoutUniversityInput>
+  }
+
+  export type UserUpdateWithWhereUniqueWithoutUniversityInput = {
+    where: UserWhereUniqueInput
+    data: XOR<UserUpdateWithoutUniversityInput, UserUncheckedUpdateWithoutUniversityInput>
+  }
+
+  export type UserUpdateManyWithWhereWithoutUniversityInput = {
+    where: UserScalarWhereInput
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutUniversityInput>
+  }
+
   export type AttendanceCreateManyUserInput = {
     id?: number
     type: $Enums.AttendanceType
@@ -10953,6 +12381,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -10972,6 +12401,7 @@ export namespace Prisma {
     password: string
     role?: $Enums.Role
     divisionId?: number | null
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -11062,6 +12492,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     division?: DivisionUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
@@ -11078,6 +12509,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11102,6 +12534,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11128,6 +12561,7 @@ export namespace Prisma {
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     division?: DivisionUpdateOneWithoutUsersNestedInput
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -11144,6 +12578,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11168,6 +12603,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11212,6 +12648,7 @@ export namespace Prisma {
     email?: string | null
     password: string
     role?: $Enums.Role
+    universityId?: number | null
     periodStartDate?: Date | string | null
     periodEndDate?: Date | string | null
     bankName?: string | null
@@ -11238,6 +12675,7 @@ export namespace Prisma {
     phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
     joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    university?: UniversityUpdateOneWithoutUsersNestedInput
     attendances?: AttendanceUpdateManyWithoutUserNestedInput
     helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
     mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
@@ -11254,6 +12692,7 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11278,6 +12717,96 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    universityId?: NullableIntFieldUpdateOperationsInput | number | null
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type UserCreateManyUniversityInput = {
+    id?: number
+    internCode?: string | null
+    name: string
+    email?: string | null
+    password: string
+    role?: $Enums.Role
+    divisionId?: number | null
+    periodStartDate?: Date | string | null
+    periodEndDate?: Date | string | null
+    bankName?: string | null
+    accountNumber?: string | null
+    profilePicUrl?: string | null
+    phoneNumber?: string | null
+    joinDate?: Date | string
+    isActive?: boolean
+    mentorId?: number | null
+    lecturerId?: number | null
+  }
+
+  export type UserUpdateWithoutUniversityInput = {
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    division?: DivisionUpdateOneWithoutUsersNestedInput
+    attendances?: AttendanceUpdateManyWithoutUserNestedInput
+    helpdeskTickets?: HelpdeskTicketUpdateManyWithoutUserNestedInput
+    mentor?: UserUpdateOneWithoutInternsAsMentorNestedInput
+    internsAsMentor?: UserUpdateManyWithoutMentorNestedInput
+    lecturer?: UserUpdateOneWithoutInternsAsLecturerNestedInput
+    internsAsLecturer?: UserUpdateManyWithoutLecturerNestedInput
+    dailyLogs?: DailyLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutUniversityInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
+    periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    bankName?: NullableStringFieldUpdateOperationsInput | string | null
+    accountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    phoneNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    joinDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    mentorId?: NullableIntFieldUpdateOperationsInput | number | null
+    lecturerId?: NullableIntFieldUpdateOperationsInput | number | null
+    attendances?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    helpdeskTickets?: HelpdeskTicketUncheckedUpdateManyWithoutUserNestedInput
+    internsAsMentor?: UserUncheckedUpdateManyWithoutMentorNestedInput
+    internsAsLecturer?: UserUncheckedUpdateManyWithoutLecturerNestedInput
+    dailyLogs?: DailyLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateManyWithoutUniversityInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    internCode?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    divisionId?: NullableIntFieldUpdateOperationsInput | number | null
     periodStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     periodEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bankName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11304,6 +12833,10 @@ export namespace Prisma {
      */
     export type DivisionCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DivisionCountOutputTypeDefaultArgs<ExtArgs>
     /**
+     * @deprecated Use UniversityCountOutputTypeDefaultArgs instead
+     */
+    export type UniversityCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UniversityCountOutputTypeDefaultArgs<ExtArgs>
+    /**
      * @deprecated Use UserDefaultArgs instead
      */
     export type UserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserDefaultArgs<ExtArgs>
@@ -11327,6 +12860,10 @@ export namespace Prisma {
      * @deprecated Use DivisionDefaultArgs instead
      */
     export type DivisionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DivisionDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use UniversityDefaultArgs instead
+     */
+    export type UniversityArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UniversityDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

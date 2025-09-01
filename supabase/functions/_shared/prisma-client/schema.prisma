@@ -18,22 +18,24 @@ datasource db {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  internCode      String?   @unique
+  id              Int         @id @default(autoincrement())
+  internCode      String?     @unique
   name            String
-  email           String?   @unique
+  email           String?     @unique
   password        String
-  role            Role      @default(INTERN)
+  role            Role        @default(INTERN)
   divisionId      Int?
-  division        Division? @relation(fields: [divisionId], references: [id])
+  division        Division?   @relation(fields: [divisionId], references: [id])
+  universityId    Int?
+  university      University? @relation(fields: [universityId], references: [id])
   periodStartDate DateTime?
   periodEndDate   DateTime?
   bankName        String?
   accountNumber   String?
   profilePicUrl   String?
   phoneNumber     String?
-  joinDate        DateTime  @default(now())
-  isActive        Boolean   @default(true)
+  joinDate        DateTime    @default(now())
+  isActive        Boolean     @default(true)
 
   attendances     Attendance[]
   helpdeskTickets HelpdeskTicket[]
@@ -89,6 +91,12 @@ model PredefinedActivity {
 }
 
 model Division {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+model University {
   id    Int    @id @default(autoincrement())
   name  String @unique
   users User[]

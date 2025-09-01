@@ -7,7 +7,7 @@ import { hash } from 'bcrypt';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
-// Fungsi untuk verifikasi token dan role SUPER_ADMIN
+// Fungsi untuk verifikasi token dan role SUPER_ADMIN (tidak perlu diubah)
 async function verifySuperAdmin(req: NextRequest) {
   const token = req.cookies.get('adminAuthToken')?.value;
   if (!token) {
@@ -18,33 +18,42 @@ async function verifySuperAdmin(req: NextRequest) {
     if (decoded.role !== Role.SUPER_ADMIN) {
       return { error: 'Akses ditolak', status: 403 };
     }
-    return { userId: decoded.userId }; // Sukses
+    return { userId: decoded.userId };
   } catch (error) {
     return { error: 'Token tidak valid', status: 401 };
   }
 }
 
+/**
+ * FUNGSI GET: Mengambil daftar SEMUA Mentor (ADMIN) dan Dosen (LECTURER)
+ */
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const divisionId = searchParams.get('divisionId');
-
-  let whereClause: any = {
-    role: { in: [Role.ADMIN, Role.LECTURER] }
-  };
-
-  // Jika ada filter divisionId, tambahkan ke query
-  if (divisionId) {
-    whereClause.divisionId = parseInt(divisionId);
-  }
-
   try {
     const users = await db.user.findMany({
-      where: whereClause,
+      // 1. Ambil semua user dengan peran ADMIN atau LECTURER
+      where: {
+        OR: [
+          { role: Role.ADMIN },
+          { role: Role.LECTURER }
+        ]
+      },
+      // 2. Sertakan data relasi untuk division DAN university
       select: {
         id: true,
         name: true,
         role: true,
-        division: { select: { id: true, name: true } },
+        division: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        university: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
       },
       orderBy: { name: 'asc' },
     });
@@ -55,7 +64,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// FUNGSI UNTUK MEMBUAT MENTOR BARU (POST)
+/**
+ * FUNGSI POST: Membuat akun baru untuk Mentor ATAU Dosen
+ */
 export async function POST(req: NextRequest) {
   const auth = await verifySuperAdmin(req);
   if (auth.error) {
@@ -63,37 +74,47 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-   const { name, division, password, role } = await req.json();
+    // 1. Ambil data baru, termasuk divisionId dan universityId
+    const { name, password, role, divisionId, universityId } = await req.json();
 
-    if (!name || !division || !password || !role) {
-      return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
+    if (!name || !password || !role) {
+      return NextResponse.json({ error: 'Nama, password, dan role wajib diisi.' }, { status: 400 });
+    }
+    if (role !== Role.ADMIN && role !== Role.LECTURER) {
+      return NextResponse.json({ error: 'Role tidak valid. Harus ADMIN atau LECTURER.' }, { status: 400 });
     }
 
-    if (role !== Role.ADMIN && role !== Role.LECTURER) {
-    return NextResponse.json({ error: 'Role tidak valid' }, { status: 400 });
-}
-
     const hashedPassword = await hash(password, 10);
+    
+    // 2. Siapkan data untuk disimpan ke database secara dinamis
+    const dataToCreate: any = {
+      name,
+      password: hashedPassword,
+      role,
+    };
 
-    const newMentor = await db.user.create({
-      data: {
-        name,
-        division,
-        password: hashedPassword,
-        role: role, // Set role sebagai ADMIN (Mentor)
-      },
+    if (role === Role.ADMIN) {
+      if (!divisionId) {
+        return NextResponse.json({ error: 'Mentor harus memiliki divisi.' }, { status: 400 });
+      }
+      dataToCreate.divisionId = divisionId;
+    } else if (role === Role.LECTURER) {
+      if (!universityId) {
+        return NextResponse.json({ error: 'Dosen harus memiliki universitas.' }, { status: 400 });
+      }
+      dataToCreate.universityId = universityId;
+    }
+
+    const newUser = await db.user.create({
+      data: dataToCreate,
     });
     
     // Jangan kirim password kembali ke client
-    const { password: _, ...mentorData } = newMentor;
+    const { password: _, ...userData } = newUser;
 
-    return NextResponse.json(mentorData, { status: 201 });
+    return NextResponse.json(userData, { status: 201 });
   } catch (error: any) {
-    // Handle error jika email sudah ada
-    if (error.code === 'P2002') {
-      return NextResponse.json({ error: 'Email ini sudah terdaftar.' }, { status: 409 });
-    }
-    console.error('[CREATE MENTOR ERROR]', error);
-    return NextResponse.json({ error: 'Gagal membuat mentor baru' }, { status: 500 });
+    console.error('[CREATE USER ERROR]', error);
+    return NextResponse.json({ error: 'Gagal membuat akun baru.' }, { status: 500 });
   }
 }

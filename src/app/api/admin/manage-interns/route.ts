@@ -4,12 +4,12 @@ import { db } from '@/lib/db';
 import { Role } from '@prisma/client';
 import { verify } from 'jsonwebtoken';
 import { hash } from 'bcrypt';
-import nodemailer from 'nodemailer'; // Kita akan butuh ini untuk kirim email
+import nodemailer from 'nodemailer';
 import { Prisma } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
-// Fungsi bantuan untuk verifikasi Superadmin
+// Fungsi bantuan untuk verifikasi Superadmin (tidak perlu diubah)
 async function verifySuperAdmin(req: NextRequest) {
   const token = req.cookies.get('adminAuthToken')?.value;
   if (!token) return { error: 'Tidak terautentikasi', status: 401 };
@@ -24,7 +24,7 @@ async function verifySuperAdmin(req: NextRequest) {
   }
 }
 
-// Fungsi bantuan untuk kirim email
+// Fungsi bantuan untuk kirim email (tidak perlu diubah)
 async function sendLoginDetailsByEmail(email: string, name: string, internCode: string, password: string) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -44,7 +44,6 @@ async function sendLoginDetailsByEmail(email: string, name: string, internCode: 
 
 // FUNGSI UNTUK MENGAMBIL DAFTAR SEMUA PESERTA (GET)
 export async function GET(req: NextRequest) {
-  // 1. Verifikasi token untuk mendapatkan role dan id
   const token = req.cookies.get('adminAuthToken')?.value;
   if (!token) return NextResponse.json({ error: 'Tidak terautentikasi' }, { status: 401 });
   const decoded = verify(token, JWT_SECRET) as { userId: number; role: Role };
@@ -54,7 +53,6 @@ export async function GET(req: NextRequest) {
     isActive: true,
   };
 
-  // 2. Tambahkan filter untuk Mentor dan Dosen
   if (decoded.role === Role.ADMIN) {
     whereClause.mentorId = decoded.userId;
   } else if (decoded.role === Role.LECTURER) {
@@ -72,22 +70,17 @@ export async function GET(req: NextRequest) {
         periodEndDate: true,
         isActive: true,
         division: { 
-          select: {
-            id: true,
-            name: true,
-          }
+          select: { id: true, name: true }
+        },
+        // PERBAIKAN 1: Tambahkan 'university' ke dalam select
+        university: {
+          select: { id: true, name: true }
         },
         mentor: {
-          select: {
-            id: true,
-            name: true,
-          },
+          select: { id: true, name: true }
         },
         lecturer: {
-          select: {
-            id: true,
-            name: true,
-          }
+          select: { id: true, name: true }
         }
       },
       orderBy: {
@@ -110,10 +103,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, divisionId, email, periodStartDate, periodEndDate, mentorId, lecturerId } = await req.json();
+    // PERBAIKAN 2: Ambil 'universityId' dari body request
+    const { name, divisionId, universityId, email, periodStartDate, periodEndDate, mentorId, lecturerId } = await req.json();
 
-    if (!name || !divisionId  || !periodStartDate || !periodEndDate) { // mentorId bisa opsional
-      return NextResponse.json({ error: 'Data tidak lengkap.' }, { status: 400 });
+    if (!name || !divisionId || !email || !periodStartDate || !periodEndDate) {
+      return NextResponse.json({ error: 'Nama, Divisi, Email, dan Periode wajib diisi.' }, { status: 400 });
     }
     
     const lastIntern = await db.user.findFirst({
@@ -134,6 +128,8 @@ export async function POST(req: NextRequest) {
         internCode: newInternCode, 
         name,
         divisionId: parseInt(divisionId),
+        // PERBAIKAN 3: Simpan 'universityId' (jika ada)
+        universityId: universityId ? parseInt(universityId) : null,
         email,
         password: hashedPassword,
         role: Role.INTERN,

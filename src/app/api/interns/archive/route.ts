@@ -56,6 +56,9 @@ export async function GET(req: NextRequest) {
         division: {
             select: { name: true }
         },
+        university: { // <-- TAMBAHKAN INI
+      select: { name: true }
+    },
         periodStartDate: true,
         periodEndDate: true,
       },

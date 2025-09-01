@@ -1,4 +1,3 @@
-// app/admindashboard/(main)/peserta/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -11,12 +10,16 @@ import ThreeDotMenu from '@/app/components/ThreeDotMenu';
 import { NotificationState } from '@/app/types';
 import { format } from 'date-fns';
 
-// Tipe data untuk peserta magang, sesuai dengan apa yang dikirim oleh API
+// PERBAIKAN 1: Perbarui tipe data 'Intern' untuk menyertakan 'university'
 interface Intern {
   id: number;
   internCode: string | null;
   name: string;
   division: { 
+    id: number;
+    name: string;
+  } | null;
+  university: { // <-- TAMBAHKAN INI
     id: number;
     name: string;
   } | null;
@@ -35,16 +38,15 @@ export default function ManageInternsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState<NotificationState | null>(null);
   
-  // State untuk mengontrol modal
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedIntern, setSelectedIntern] = useState<Intern | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fungsi untuk mengambil data peserta dari API
   const fetchInterns = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Pastikan API ini sudah diperbarui untuk mengirim data 'university'
       const response = await fetch('/api/admin/manage-interns');
       if (!response.ok) {
         const result = await response.json();
@@ -62,13 +64,11 @@ export default function ManageInternsPage() {
     fetchInterns();
   }, [fetchInterns]);
 
-  // Handler untuk membuka modal edit
   const handleOpenEditModal = (intern: Intern) => {
     setSelectedIntern(intern);
     setEditModalOpen(true);
   };
 
-  // Handler untuk konfirmasi arsip
   const handleArchiveConfirm = (intern: Intern) => {
     setNotification({
       isOpen: true,
@@ -79,14 +79,13 @@ export default function ManageInternsPage() {
     });
   };
 
-  // Fungsi untuk menjalankan proses arsip
   const performArchive = async (id: number) => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/admin/manage-interns/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: false }), // Kirim data untuk mengarsip
+        body: JSON.stringify({ isActive: false }),
       });
 
       if (!response.ok) {
@@ -95,7 +94,7 @@ export default function ManageInternsPage() {
       }
 
       setNotification({ isOpen: true, title: 'Berhasil', message: 'Peserta berhasil diarsipkan.', type: 'success' });
-      fetchInterns(); // Refresh data
+      fetchInterns();
     } catch (error: any) {
       setNotification({ isOpen: true, title: 'Gagal', message: error.message, type: 'error' });
     } finally {
@@ -103,17 +102,19 @@ export default function ManageInternsPage() {
     }
   };
 
+  // PERBAIKAN 2: Perbarui logika pencarian
   const filteredInterns = useMemo(() => {
-  if (!searchQuery) {
-    return interns;
-  }
-  const lowercasedQuery = searchQuery.toLowerCase();
-  return interns.filter(intern =>
-    intern.name.toLowerCase().includes(lowercasedQuery) ||
-    intern.internCode?.toLowerCase().includes(lowercasedQuery) ||
-    (intern.division && intern.division.name.toLowerCase().includes(lowercasedQuery))
-  );
-}, [interns, searchQuery]);
+    if (!searchQuery) {
+      return interns;
+    }
+    const lowercasedQuery = searchQuery.toLowerCase();
+    return interns.filter(intern =>
+      intern.name.toLowerCase().includes(lowercasedQuery) ||
+      intern.internCode?.toLowerCase().includes(lowercasedQuery) ||
+      (intern.division?.name.toLowerCase().includes(lowercasedQuery)) ||
+      (intern.university?.name.toLowerCase().includes(lowercasedQuery)) // <-- Tambahkan pencarian universitas
+    );
+  }, [interns, searchQuery]);
 
   return (
     <>
@@ -129,61 +130,63 @@ export default function ManageInternsPage() {
           <FiPlus /> Tambah Peserta Baru
         </button>
       </div>
-        <div className="mb-4">
+      <div className="mb-4">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Cari berdasarkan nama atau kode atau divisi..."
+          placeholder="Cari nama, kode, divisi, atau universitas..."
           className="w-full md:w-1/3 p-2 border border-gray-300 rounded-md text-black"
         />
       </div>
       <div className="bg-white rounded-lg shadow-sm border">
         <table className="min-w-full divide-y divide-gray-200">
-         <thead className="bg-gray-50">
-          <tr>
-            {/* Kolom Nama dibuat lebih lebar */}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Nama</th>
-            
-            {/* Kolom lain diberi lebar yang lebih kecil */}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Divisi</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Mentor</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Dosen Pembimbing</th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Aksi</th>
-          </tr>
-        </thead>
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Nama</th>
+              {/* PERBAIKAN 3: Ubah header kolom */}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Divisi & Universitas</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Mentor</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Dosen Pembimbing</th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Aksi</th>
+            </tr>
+          </thead>
           <tbody className="bg-white divide-y divide-gray-200">
              {filteredInterns.length > 0 ? (
-              filteredInterns.map((intern) => {
-                const actions = [
-                  { label: 'Edit', onClick: () => handleOpenEditModal(intern) },
-                  { label: 'Arsipkan', onClick: () => handleArchiveConfirm(intern), className: 'text-orange-600 hover:bg-orange-50' },
-                ];
+               filteredInterns.map((intern) => {
+                 const actions = [
+                   { label: 'Edit', onClick: () => handleOpenEditModal(intern) },
+                   { label: 'Arsipkan', onClick: () => handleArchiveConfirm(intern), className: 'text-orange-600 hover:bg-orange-50' },
+                 ];
 
-                return (
-                  <tr key={intern.id}>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{intern.name}</div>
-                      <div className="text-sm text-gray-500">
-                        Kode: {intern.internCode}| Periode: {intern.periodStartDate && intern.periodEndDate ? `${format(new Date(intern.periodStartDate), 'd LLL yy')} - ${format(new Date(intern.periodEndDate), 'd LLL yy')}` : '-'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{intern.division?.name || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{intern.mentor?.name || '-'}</td>
+                 return (
+                   <tr key={intern.id}>
+                     <td className="px-6 py-4">
+                       <div className="font-medium text-gray-900">{intern.name}</div>
+                       <div className="text-sm text-gray-500">
+                         Kode: {intern.internCode} | Periode: {intern.periodStartDate && intern.periodEndDate ? `${format(new Date(intern.periodStartDate), 'd LLL yy')} - ${format(new Date(intern.periodEndDate), 'd LLL yy')}` : '-'}
+                       </div>
+                     </td>
+                     {/* PERBAIKAN 4: Tampilkan Divisi dan Universitas */}
+                     <td className="px-6 py-4 text-sm text-gray-500">
+                        <div><span className="font-semibold">Div:</span> {intern.division?.name || '-'}</div>
+                        <div><span className="font-semibold">Univ:</span> {intern.university?.name || '-'}</div>
+                     </td>
+                     <td className="px-6 py-4 text-sm text-gray-500">{intern.mentor?.name || '-'}</td>
                      <td className="px-6 py-4 text-sm text-gray-500">{intern.lecturer?.name || '-'}</td>
-                    <td className="px-6 py-4 text-center relative">
-                      <ThreeDotMenu actions={actions} />
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center p-8 text-gray-500">
-                  {isLoading ? 'Memuat data...' : 'Belum ada data peserta.'}
-                </td>
-              </tr>
-            )}
+                     <td className="px-6 py-4 text-center relative">
+                       <ThreeDotMenu actions={actions} />
+                     </td>
+                   </tr>
+                 );
+               })
+             ) : (
+               <tr>
+                 <td colSpan={5} className="text-center p-8 text-gray-500">
+                   {isLoading ? 'Memuat data...' : 'Belum ada data peserta.'}
+                 </td>
+               </tr>
+             )}
           </tbody>
         </table>
       </div>
